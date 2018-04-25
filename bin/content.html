@@ -1,0 +1,571 @@
+
+    <html>
+      <head>
+        <link href='http://fonts.googleapis.com/css?family=Titillium+Web' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <style>
+          html {
+  font-family: 'Roboto';
+  font-size: 18pt;
+  margin: 0px;
+}
+
+a {
+  text-decoration: none;
+  color: #6699cc;
+}
+
+h1 {
+  padding-top: 0px;
+  margin-top: 0px;
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+.chapter {
+  page-break-before: always;
+  line-height: 1.5em;
+  width: 1042px;
+}
+
+.chapter img {
+  width: 1042px;
+}
+
+.page-break {
+  page-break-before: always;
+}
+
+pre {
+  border: 1px solid #dfdfdf;
+  padding: 15px;
+}
+
+code {
+  font-family: 'Droid Sans Mono';
+}
+
+p code {
+  color: #232323;
+  font-size: 0.9em;
+  padding: 1px 2px 2px 2px;
+  color: #c7254e;
+  background-color: #f6f6f6;
+}
+
+.example-header-wrap {
+  position: relative;
+  height: 0px;
+}
+
+.example-header {
+  border: 1px solid #dfdfdf;
+  top: -15px;
+  padding-top: 0px;
+  height: 1em;
+  padding: 1px;
+  position: absolute;
+  width: 7em;
+  text-align: center;
+  color: #666;
+  font-size: 0.5em;
+  line-height: 1em;
+}
+
+/*
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #333;
+  background: #f8f8f8;
+  -webkit-text-size-adjust: none;
+}
+
+.hljs-comment,
+.diff .hljs-header,
+.hljs-javadoc {
+  color: #998;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.css .rule .hljs-keyword,
+.hljs-winutils,
+.nginx .hljs-title,
+.hljs-subst,
+.hljs-request,
+.hljs-status {
+  color: #333;
+  font-weight: bold;
+}
+
+.hljs-number,
+.hljs-hexcolor,
+.ruby .hljs-constant {
+  color: #008080;
+}
+
+.hljs-string,
+.hljs-tag .hljs-value,
+.hljs-phpdoc,
+.hljs-dartdoc,
+.tex .hljs-formula {
+  color: #d14;
+}
+
+.hljs-title,
+.hljs-id,
+.scss .hljs-preprocessor {
+  color: #900;
+  font-weight: bold;
+}
+
+.hljs-list .hljs-keyword,
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-class .hljs-title,
+.hljs-type,
+.vhdl .hljs-literal,
+.tex .hljs-command {
+  color: #458;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-tag .hljs-title,
+.hljs-rules .hljs-property,
+.django .hljs-tag .hljs-keyword {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-attribute,
+.hljs-variable,
+.lisp .hljs-body {
+  color: #008080;
+}
+
+.hljs-regexp {
+  color: #009926;
+}
+
+.hljs-symbol,
+.ruby .hljs-symbol .hljs-string,
+.lisp .hljs-keyword,
+.clojure .hljs-keyword,
+.scheme .hljs-keyword,
+.tex .hljs-special,
+.hljs-prompt {
+  color: #990073;
+}
+
+.hljs-built_in {
+  color: #0086b3;
+}
+
+.hljs-preprocessor,
+.hljs-pragma,
+.hljs-pi,
+.hljs-doctype,
+.hljs-shebang,
+.hljs-cdata {
+  color: #999;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.diff .hljs-change {
+  background: #0086b3;
+}
+
+.hljs-chunk {
+  color: #aaa;
+}
+
+        </style>
+      </head>
+      <body>
+        <h1 id="table-of-contents">Table of Contents</h1>
+<h2 id="0-how-to-use-this-book-1-page-2-">0. How To Use This Book <a href="#page=2">1</a></h2>
+<h2 id="1-async-await-the-good-parts-4-page-5-">1. Async/Await: The Good Parts <a href="#page=5">4</a></h2>
+<h4 id="1-return-values-6-page-7-">1. Return Values <a href="#page=7">6</a></h4>
+<h4 id="2-error-handling-7-page-8-">2. Error Handling <a href="#page=8">7</a></h4>
+<h4 id="3-retrying-failed-requests-11-page-10-">3. Retrying Failed Requests <a href="#page=10">11</a></h4>
+<h2 id="2-promises-from-the-ground-up">2. Promises From The Ground Up</h2>
+<h2 id="3-async-await-internals">3. Async/Await Internals</h2>
+<h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
+
+        <div class="chapter">
+          <h1 id="how-to-use-this-book">How To Use This Book</h1>
+<p><a href="http://thecodebarbarian.com/80-20-guide-to-async-await-in-node.js.html">Async/await</a>
+is the single most valuable feature to land in the JavaScript language spec in the last 15 years. The event loop and asynchronous programming in general are exceptional for
+building GUIs and servers, but callbacks make error handling tedious and code hard to
+read. For example, when <a href="https://risingstack.com/">RisingStack</a> asked Node.js developers
+what they struggled with in 2017, asynchronous programming topped the list.</p>
+<p><img src="https://i.imgur.com/YQ58zIl.png"></p>
+<p>Async/await promises to make asynchronous code as clean and easy to
+read as synchronous code in most use cases. Tangled promise chains and complex
+user-land libraries like
+<a href="https://www.npmjs.com/package/async">async</a> can be replaced with <code>for</code> loops,
+<code>if</code> statements, and <code>try/catch</code> blocks that even the most junior of engineers can
+make sense of.</p>
+<p>The following <a href="https://www.hacksparrow.com/node-js-async-programming.html">JavaScript from a 2012 blog post</a> is a typical
+example of where code goes wrong with callbacks. This code works,
+but it has a lot of error handling boilerplate and deeply nested <code>if</code> statements
+that obfuscate the actual logic. Wrapping your mind around it takes a while,
+and proper error handling means copy/pasting <code>if (err != null)</code> into every
+callback.</p>
+<div class="page-break"></div>
+
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWikipediaHeaders</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// i. check if headers.txt exists</span>
+  fs.stat(<span class="hljs-string">'./headers.txt'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, stats</span>) </span>{
+    <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">null</span>) { <span class="hljs-keyword">throw</span> err; }
+    <span class="hljs-keyword">if</span> (stats == <span class="hljs-literal">undefined</span>) {
+      <span class="hljs-comment">// ii. fetch the HTTP headers</span>
+      <span class="hljs-keyword">var</span> options = { <span class="hljs-attr">host</span>: <span class="hljs-string">'www.wikipedia.org'</span>, <span class="hljs-attr">port</span>: <span class="hljs-number">80</span> };
+      http.get(options, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, res</span>) </span>{
+        <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">null</span>) { <span class="hljs-keyword">throw</span> err; }
+        <span class="hljs-keyword">var</span> headers = <span class="hljs-built_in">JSON</span>.stringify(res.headers);
+        <span class="hljs-comment">// iii. write the headers to headers.txt</span>
+        fs.writeFile(<span class="hljs-string">'./headers.txt'</span>, headers, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>) </span>{
+          <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">null</span>) { <span class="hljs-keyword">throw</span> err; }
+          <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Great Success!'</span>);
+        });
+      });    
+    } <span class="hljs-keyword">else</span> { <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'headers already collected'</span>); }
+  });
+}
+</code></pre>
+<p>Below is the same code using async/await, assuming that <code>stat()</code>, <code>get()</code>, and
+<code>writeFile()</code> are properly promisified.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWikipediaHeaders</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">await</span> stat(<span class="hljs-string">'./headers.txt'</span>) != <span class="hljs-literal">null</span>) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'headers already collected'</span>);
+  }
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> get({ <span class="hljs-attr">host</span>: <span class="hljs-string">'www.wikipedia.org'</span>, <span class="hljs-attr">port</span>: <span class="hljs-number">80</span> });
+  <span class="hljs-keyword">await</span> writeFile(<span class="hljs-string">'./headers.txt'</span>, <span class="hljs-built_in">JSON</span>.stringify(res.headers));
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Great success!'</span>);
+}
+</code></pre>
+<p>You might not think async/await is a big deal. You might even think async/await
+is a bad idea. I&#39;ve been in your shoes: when I first learned about async/await in
+2013, I thought it was unnecessary at best. But when I
+started working with generator-based coroutines (the 2015 predecessor to async/await),
+I was shocked at how quickly server crashes due to
+<code>TypeError: Cannot read property &#39;x&#39; of undefined</code> vanished. By the time async/await
+became part of the JavaScript language spec in 2017, async/await was an
+indispensable part of my dev practice.</p>
+<p>Just because async/await is now officially part of JavaScript doesn&#39;t mean
+the world is all sunshine and rainbows. Async/await is a new pattern that
+promises to make day-to-day development work easier, but, like any pattern, you
+need to understand it or you&#39;ll do more harm than good. If your async/await
+code is a patchwork of copy/pasted StackOverflow answers, you&#39;re just trading
+callback hell for the newly minted <a href="https://medium.freecodecamp.org/avoiding-the-async-await-hell-c77a0fb71c4c">async/await hell</a>.</p>
+<p>The purpose of this book is to take you from someone who is casually acquainted
+with promises and async/await to someone who is comfortable building and debugging
+a complex app whose core logic is built on async/await. This book is only
+50 pages and is meant to be read in about 2 hours total. You may read it all in
+one sitting, but you would be better served reading one chapter at a time,
+studying the exercises at the end, and getting a good night&#39;s sleep to really
+internalize the information.</p>
+<p>This book is broken up into 4 chapters. Each chapter is 12 pages, including
+exercises at the end of each chapter that highlight key lessons from the chapter.
+The exercises require more thought than
+code and should be easy to answer within a few minutes.</p>
+<p>The first 3 chapters are focused on promise and async/await fundamentals, and strive
+to avoid frameworks and outside dependencies. In particular, the first 3 chapters&#39;
+code samples and exercises are meant to run in Node.js 8.x and the first 3 chapters
+will <strong>not</strong> cover transpilers. In the interest of providing realistic examples,
+the code samples will use the <code>superagent</code> module for making HTTP requests. The
+4th chapter will discuss transpilers and integrating async/await with some common
+npm modules.</p>
+<p>If you find any issues with the code samples or exercises,
+please report them at <a href="https://github.com/vkarpov15/mastering-async-await-issues">github.com/vkarpov15/mastering-async-await-issues</a>.</p>
+<p>Are you ready to master async/await? Let&#39;s get started!</p>
+
+        </div>
+        <div class="chapter">
+          <h1 id="async-await-the-good-parts">Async/Await: The Good Parts</h1>
+<p>The <code>async</code> and <code>await</code> keywords are new additions to JavaScript as part of the
+2017 edition of the language specification. The <code>async</code> keyword modifies a function,
+either a normal <code>function() {}</code> or an arrow function <code>() =&gt; {}</code>, to mark it as an
+<em>async function</em>. In an async function, you can use the <code>await</code> keyword to pause
+the function&#39;s execution until a promise settles. In the below function, the <code>await</code>
+keyword pauses the function&#39;s execution for approximately 1 second.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.1</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// This function will print "Hello, World!" after 1 second.</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
+}
+
+test();
+</code></pre>
+<p>You can use the <code>await</code> keyword anywhere in the body of an async function. This means
+you can use <code>await</code> in <code>if</code> statements, <code>for</code> loops, and <code>try/catch</code> blocks. Below
+is another way to pause an async function&#39;s execution for about 1 second.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.2</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Wait for 100ms 10 times. This function also prints after 1 second.</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">100</span>));
+  }
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
+}
+
+test();
+</code></pre>
+<p>There is one major restriction for using <code>await</code>: you can only use <code>await</code>
+within the body of a function that&#39;s marked <code>async</code>. The following code throws a
+<code>SyntaxError</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.3</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
+  <span class="hljs-comment">// SyntaxError: Unexpected identifier</span>
+  <span class="hljs-keyword">await</span> p;
+}
+</code></pre>
+<p>In particular, you can&#39;t use <code>await</code> in a closure embedded in an async function, unless
+the closure is also an async function. The below code also throws a <code>SyntaxError</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.4</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>);
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'test'</span>);
+  assert.doesNotThrow(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// "SyntaxError: Unexpected identifier" because the above function</span>
+    <span class="hljs-comment">// is **not** marked async. "Closure" = function inside a function</span>
+    <span class="hljs-keyword">await</span> p;
+  });
+}
+</code></pre>
+<p>As long as you don&#39;t create a new function, you can use <code>await</code> underneath any
+number of <code>for</code> loops and <code>if</code> statements.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.5</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-comment">// Convoluted way to print out "Hello, World!" once per second by</span>
+    <span class="hljs-comment">// pausing execution for 200ms 5 times</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
+      <span class="hljs-keyword">if</span> (i % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">200</span>));
+      }
+    }
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
+  }
+}
+</code></pre>
+<div class="page-break"></div>
+
+<h2 id="return-values">Return Values</h2>
+<p>You can use <code>async/await</code> for more than just pausing execution. The return
+value of <code>await</code> is the value the promise is fulfilled with. This means you can
+assign a variable to an asynchronously-computed value in code that looks
+synchronous.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.6</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// You can `await` on a non-promise without getting an error.</span>
+  <span class="hljs-keyword">let</span> res = <span class="hljs-keyword">await</span> <span class="hljs-string">'Hello World!'</span>;
+  <span class="hljs-built_in">console</span>.log(res); <span class="hljs-comment">// "Hello, World!"</span>
+
+  <span class="hljs-keyword">const</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
+    <span class="hljs-comment">// This promise resolves to "Hello, World!" after 1s</span>
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-string">'Hello, World!'</span>), <span class="hljs-number">1000</span>);
+  });
+  res = <span class="hljs-keyword">await</span> promise;
+  <span class="hljs-comment">// Prints "Hello, World!". `res` is equal to the value the</span>
+  <span class="hljs-comment">// promise resolved to.</span>
+  <span class="hljs-built_in">console</span>.log(res);
+
+  <span class="hljs-comment">// Prints "Hello, World!". You can use `await` in function params!</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> promise);
+}
+</code></pre>
+<p>An async function <strong>always</strong> returns a promise. When you <code>return</code> from an async
+function, JavaScript resolves the promise to the value you returned. This means
+calling async functions from other async functions is very natural. You can
+<code>await</code> on the async function call and get the async function&#39;s &quot;return value&quot;.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.7</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
+  <span class="hljs-comment">// "Hello, World" is the _resolved value_ for this function call</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'Hello, World!'</span>;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Prints "Hello, World!" after 1s. `computeValue` returns a promise!</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> computeValue());
+}
+</code></pre>
+<p>This book will refer to the value you <code>return</code> from an async function as the
+<em>resolved value</em>. In <code>computeValue</code> above, &quot;Hello, World!&quot; is the resolved
+value, <code>computeValue()</code> still returns a promise. This is a subtle but important
+distinction that you will learn more about in Chapter 3.</p>
+<h2 id="error-handling">Error Handling</h2>
+<p>One of the most important properties of async/await is that you can use <code>try/catch</code>
+to handle asynchronous errors. Remember that a promise may be either fulfilled
+or rejected. When a promise <code>p</code> is fulfilled, JavaScript evaluates <code>await p</code>
+to the promise&#39;s value. What about if <code>p</code> is rejected?</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.8</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+    <span class="hljs-comment">// The below `await` throws</span>
+    <span class="hljs-keyword">await</span> p;
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-built_in">console</span>.log(err.message); <span class="hljs-comment">// "Oops!"</span>
+  }
+}
+</code></pre>
+<p>If <code>p</code> is rejected, <code>await p</code> throws an error that you can catch with a
+normal JavaScript <code>try/catch</code>. Note that the <code>await</code> statement is what throws
+an error, <strong>not</strong> the promise instantiation.</p>
+<p>This <code>try/catch</code> behavior is a powerful tool for consolidating error handling.
+The <code>try/catch</code> block above can catch synchronous errors as well as asynchronous
+ones. Suppose you have code that throws a <code>TypeError: cannot read property &#39;x&#39; of undefined</code> error:</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.9</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> bad = <span class="hljs-literal">undefined</span>;
+    bad.x;
+    <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+    <span class="hljs-keyword">await</span> p;
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-comment">// "cannot read property 'x' of undefined"</span>
+    <span class="hljs-built_in">console</span>.log(err.message);
+  }
+}
+</code></pre>
+<p>In callback-based code, you had to watch out for synchronous errors like <code>TypeError</code>
+separately from asynchronous errors. This lead to a lot of server crashes and
+red text in Chrome consoles, because discipline doesn&#39;t scale.</p>
+<p>Consider using a callback-based approach instead of async/await. Suppose you have
+a black-box function <code>test()</code> that takes a single parameter, a <code>callback</code>.
+If you want to ensure you catch every possible error, you need 2 <code>try/catch</code>
+calls: one around <code>test()</code> and one around <code>callback()</code>. You also need to check
+whether <code>test()</code> called your callback with an error. In other words, every
+single async operation needs 3 distinct error handling patterns!</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.10</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWrapper</span>(<span class="hljs-params">callback</span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// There might be a sync error in `test()`</span>
+    test(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error, res</span>) </span>{
+      <span class="hljs-comment">// `test()` might also call the callback with an error</span>
+      <span class="hljs-keyword">if</span> (error) {
+        <span class="hljs-keyword">return</span> callback(error);
+      }
+      <span class="hljs-comment">// And you also need to be careful that accessing `res.x` doesn't</span>
+      <span class="hljs-comment">// throw **and** calling `callback()` doesn't throw.</span>
+      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, res.x);
+      } <span class="hljs-keyword">catch</span> (error) {
+        <span class="hljs-keyword">return</span> callback(error);
+      }
+    });
+  }
+}
+</code></pre>
+<p>When there&#39;s this much boilerplate for error handling, even the most rigorous
+and disciplined developers end up missing a spot. The result is uncaught errors,
+server downtime, and buggy user interfaces. Below is an equivalent example with
+async/await. You can handle the 3 distinct error cases from example 1.10 with
+a single pattern.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.11</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWrapper</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// `try/catch` will catch sync errors in `test()`, async promise</span>
+    <span class="hljs-comment">// rejections, and errors with accessing `res.x`.</span>
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> test();
+    <span class="hljs-keyword">return</span> res.x;
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-keyword">throw</span> error;
+  }
+}
+</code></pre>
+<p>Let&#39;s take a look at how the <code>throw</code> keyword works with async functions now that
+you&#39;ve seen how <code>try/catch</code> works. When you <code>throw</code> in an async function,
+JavaScript will reject the returned promise.
+Remember that the value you <code>return</code> from an async function is called the
+resolved value. Similarly, this book will refer to the value you <code>throw</code> in
+an async function as the <em>rejected value</em>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.12</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// `err` is the "rejected value"</span>
+  <span class="hljs-keyword">const</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>);
+  <span class="hljs-keyword">throw</span> err;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> computeValue();
+    <span class="hljs-comment">// Never runs</span>
+    <span class="hljs-built_in">console</span>.log(res);
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-built_in">console</span>.log(error.message); <span class="hljs-comment">// "Oops!"</span>
+  }
+}
+</code></pre>
+<p>Remember that the <code>computeValue()</code> function call itself does <strong>not</strong> throw an
+error in the <code>test()</code> function. The <code>await</code> keyword is what throws an error that
+you can handle with <code>try/catch</code>. The below code will print &quot;No Error&quot; unless you
+uncomment the <code>await</code> block.</p>
+<div class="example-header-wrap"><div class="example-header">Example 1.13</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>);
+};
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> promise = computeValue();
+    <span class="hljs-comment">// With the below line commented out, no error will be thrown</span>
+    <span class="hljs-comment">// await promise;</span>
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"No Error"</span>);
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-built_in">console</span>.log(error.message); <span class="hljs-comment">// Won't run</span>
+  }
+}
+</code></pre>
+<div class="page-break"></div>
+
+<h2 id="retrying-failed-requests">Retrying Failed Requests</h2>
+<p>Let&#39;s tie together loops, return values, and error handling to handle a challenge
+that&#39;s particularly nasty with callbacks: retrying failed requests.</p>
+
+        </div>
+      </body>
+  

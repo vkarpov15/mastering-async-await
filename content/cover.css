@@ -1,0 +1,69 @@
+html {
+  font-family: 'Roboto';
+  font-size: 18pt;
+  margin: 0px;
+}
+
+a {
+  text-decoration: none;
+  color: #6699cc;
+}
+
+h1 {
+  padding-top: 0px;
+  margin-top: 0px;
+  page-break-before: always;
+}
+
+/* Cover */
+
+@page {
+  size: A4 portrait;
+  margin: 0px;
+}
+
+.cover {
+  page: cover;
+}
+
+.cover img {
+  position: relative;
+  top: -10px;
+  left: -200px;
+  height: 1300px;
+}
+
+.cover .fade {
+  position: relative;
+  top: -305px;
+  left: -17px;
+  padding: 20px;
+  background: linear-gradient(transparent, #232323);
+  height: 250px;
+  width: 100%;
+}
+
+.title-details {
+  position: relative;
+  top: -11px;
+  left: -10px;
+  padding: 20px;
+  background-color: #232323;
+  color: white;
+  width: 100%;
+  height: 345px;
+}
+
+.cover .title {
+  position: relative;
+  top: -270px;
+  left: 25px;
+  font-size: 48pt;
+}
+
+.cover .author {
+  position: relative;
+  top: -270px;
+  left: 25px;
+  font-size: 30pt;
+}
