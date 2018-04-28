@@ -142,8 +142,72 @@ async function test() {
 
 This book will refer to the value you `return` from an async function as the
 _resolved value_. In `computeValue` above, "Hello, World!" is the resolved
-value, `computeValue()` still returns a promise. This is a subtle but important
-distinction that you will learn more about in Chapter 3.
+value, `computeValue()` still returns a promise. This distinction is subtle
+but important: the value you `return` from an async function body is **not**
+the value that an async function call like `computeValue()` without `await`
+returns.
+
+You can also return a promise from an async function. In that case, the
+promise the async function returns will be fulfilled or rejected whenever the
+resolved value promise is fulfilled or rejected. Below is an equivalent
+implementation of an async function that fulfills to the string 'Hello, World!'
+after 1 second:
+
+<div class="example-header-wrap"><div class="example-header">Example 1.8</div></div>
+
+```javascript
+async function computeValue() {
+  // The resolved value is a promise. JavaScript will fulfill the promise
+  // the `computeValue()` function call returns with the same value
+  // that the resolved value is fulfilled with, in this case
+  // 'Hello, World!'.
+  return new Promise(resolve => {
+    setTimeout(() => resolve('Hello, World!'));
+  }, 1000);
+}
+```
+
+If you `return` a promise from an async function, the resolved value will
+still not equal the return value. The below example demonstrates that the
+`resolvedValue` promise that the function body returns is not the same as
+the return value from `computeValue()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 1.9</div></div>
+
+```javascript
+let resolvedValue;
+
+async function computeValue() {
+  resolvedValue = new Promise(resolve => {
+    setTimeout(() => resolve('Hello, World!'), 1000);
+  });
+  return resolvedValue;
+}
+
+async function test() {
+  const returnValue = computeValue();
+  // This will print `false`. The return value of an async function
+  // never equals the resolved value!
+  console.log(returnValue === resolvedValue);
+  console.log(await returnValue);
+}
+```
+
+A common mistake async/await novices make is always converting a value to
+a promise before returning it. They likely read somewhere that async functions
+always return a promise, and misinterpreted this fact to mean that you must
+always `return` a promise from an async function. You can `return` any value
+in an async function body.
+
+```javascript
+async function computeValue() {
+  // Adding `Promise.resolve()` below is unnecessary. It adds
+  // perf overhead because you're creating an unnecessary promise.
+  // "Unnecessary code is not as harmless as I used to think. It
+  // sends the misleading signal that it's necessary." - Paul Graham
+  return Promise.resolve('Hello, World!');
+}
+```
 
 ## Error Handling
 
@@ -152,7 +216,7 @@ to handle asynchronous errors. Remember that a promise may be either fulfilled
 or rejected. When a promise `p` is fulfilled, JavaScript evaluates `await p`
 to the promise's value. What about if `p` is rejected?
 
-<div class="example-header-wrap"><div class="example-header">Example 1.8</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.10</div></div>
 
 ```javascript
 async function test() {
@@ -174,7 +238,7 @@ This `try/catch` behavior is a powerful tool for consolidating error handling.
 The `try/catch` block above can catch synchronous errors as well as asynchronous
 ones. Suppose you have code that throws a `TypeError: cannot read property 'x' of undefined` error:
 
-<div class="example-header-wrap"><div class="example-header">Example 1.9</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.11</div></div>
 
 ```javascript
 async function test() {
@@ -201,7 +265,7 @@ calls: one around `test()` and one around `callback()`. You also need to check
 whether `test()` called your callback with an error. In other words, every
 single async operation needs 3 distinct error handling patterns!
 
-<div class="example-header-wrap"><div class="example-header">Example 1.10</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.12</div></div>
 
 ```javascript
 function testWrapper(callback) {
@@ -227,10 +291,10 @@ function testWrapper(callback) {
 When there's this much boilerplate for error handling, even the most rigorous
 and disciplined developers end up missing a spot. The result is uncaught errors,
 server downtime, and buggy user interfaces. Below is an equivalent example with
-async/await. You can handle the 3 distinct error cases from example 1.10 with
+async/await. You can handle the 3 distinct error cases from example 1.12 with
 a single pattern.
 
-<div class="example-header-wrap"><div class="example-header">Example 1.11</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.13</div></div>
 
 ```javascript
 async function testWrapper() {
@@ -252,7 +316,7 @@ Remember that the value you `return` from an async function is called the
 resolved value. Similarly, this book will refer to the value you `throw` in
 an async function as the _rejected value_.
 
-<div class="example-header-wrap"><div class="example-header">Example 1.12</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.14</div></div>
 
 ```javascript
 async function computeValue() {
@@ -277,7 +341,7 @@ error in the `test()` function. The `await` keyword is what throws an error that
 you can handle with `try/catch`. The below code will print "No Error" unless you
 uncomment the `await` block.
 
-<div class="example-header-wrap"><div class="example-header">Example 1.13</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 1.15</div></div>
 
 ```javascript
 async function computeValue() {
@@ -301,4 +365,79 @@ async function test() {
 ## Retrying Failed Requests
 
 Let's tie together loops, return values, and error handling to handle a challenge
-that's particularly nasty with callbacks: retrying failed requests.
+that's particularly nasty with callbacks: retrying failed requests. Suppose you
+had logic that relied on a potentially unreliable HTTP request.
+
+With callbacks or promise chains, retrying failed requests requires recursion,
+and recursion is less readable than the synchronous alternative of writing
+a `for` loop. Below is a simplified implementation of a `getWithRetry()` function
+using callbacks and the [`superagent` HTTP client](https://www.npmjs.com/package/superagent).
+
+<div class="example-header-wrap"><div class="example-header">Example 1.16</div></div>
+
+```javascript
+function getWithRetry(url, numRetries, callback, retriedCount) {
+  retriedCount = retriedCount || 0;
+  superagent.get(url).end(function(error, res) {
+    if (error) {
+      if (retriedCount >= numRetries) { return callback(error); }
+      return getWithRetry(url, numRetries, callback, retriedCount + 1);
+    }
+    return callback(null, res.body);
+  });
+}
+```
+
+Recursion is subtle and tricky to understand relative to a loop.
+Plus, the above code ignores the possibility of sync errors, because the
+`try/catch` spaghetti highlighted in example 1.10 would make this example
+unreadable. In short, this pattern is both brittle and cumbersome.
+
+With async/await, you don't need recursion and you need one `try/catch` to
+handle sync and async errors. The async/await implementation is built on `for`
+loops, `try/catch`, and other constructs that should be familiar to even the
+most junior of engineers.
+
+<div class="example-header-wrap"><div class="example-header">Example 1.17</div></div>
+
+```javascript
+async function getWithRetry(url, numRetries) {
+  let lastError = null;
+  for (let i = 0; i < numRetries; ++i) {
+    try {
+      // Can also do `return (await superagent.get(url)).body`
+      // Note that `await superagent.get(url).body` does **not** work
+      const res = await superagent.get(url);
+      // Early return with async functions works as you'd expect
+      return res.body;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+```
+
+More generally, async/await makes executing async operations in series trivial.
+For example, let's say you had to load a list of blog posts from an HTTP API
+and then execute a separate HTTP request to load the comments for each blog
+post. This example uses the excellent [JSONPlaceholder API](https://jsonplaceholder.typicode.com/) that provides good test data.
+
+<div class="example-header-wrap"><div class="example-header">Example 1.18</div></div>
+
+```javascript
+async function run() {
+  const root = 'https://jsonplaceholder.typicode.com';
+  const posts = await getWithRetry(`${root}/posts`, 3);
+  for (const { id } of posts) {
+    const comments =
+      await getWithRetry(`${root}/comments?postId=${id}`, 3);
+    console.log(comments);
+  }
+}
+```
+
+If this example seems trivial, that's good, because that's how programming
+should be. The JavaScript community has created an incredible hodge-podge of
+tools for executing asynchronous tasks in series, from [`async.waterfall()`](https://caolan.github.io/async/docs.html#waterfall) to [Redux sagas](https://www.npmjs.com/package/redux-saga) to [zones](https://github.com/domenic/zones) to [co](https://www.npmjs.com/package/co). Async/await makes all of these libraries
+and more unnecessary. Do you even need [Redux middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud) anymore?
