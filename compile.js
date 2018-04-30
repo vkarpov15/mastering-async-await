@@ -19,7 +19,7 @@ async function run() {
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
 
-  const chapters = [1].
+  const chapters = [1, 2].
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8'));
 
   const css = {
@@ -60,6 +60,9 @@ async function run() {
         </div>
         <div class="chapter">
           ${marked(chapters[0])}
+        </div>
+        <div class="chapter">
+          ${marked(chapters[1])}
         </div>
       </body>
     </html>
