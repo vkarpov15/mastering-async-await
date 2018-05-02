@@ -69,6 +69,28 @@ p code {
   line-height: 1em;
 }
 
+.toc a {
+  font-size: 18pt;
+  color: #232323;
+  float: right;
+  font-weight: bold;
+}
+
+.toc ol {
+  padding-left: 2.5em;
+}
+
+.toc li {
+  margin-left: 0px;
+  line-height: 1.5em;
+}
+
+.toc a::after {
+  content: '';
+  clear: both;
+  display: table;
+}
+
 /*
 github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 */

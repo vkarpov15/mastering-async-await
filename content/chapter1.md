@@ -479,3 +479,16 @@ If this example seems trivial, that's good, because that's how programming
 should be. The JavaScript community has created an incredible hodge-podge of
 tools for executing asynchronous tasks in series, from [`async.waterfall()`](https://caolan.github.io/async/docs.html#waterfall) to [Redux sagas](https://www.npmjs.com/package/redux-saga) to [zones](https://github.com/domenic/zones) to [co](https://www.npmjs.com/package/co). Async/await makes all of these libraries
 and more unnecessary. Do you even need [Redux middleware](https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud) anymore?
+
+This isn't the whole story with async/await. This chapter glossed over numerous
+important details, including how promises integrate with async/await and
+what happens when two asynchronous functions run simultaneously. Chapter 2
+will focus on the internals of promises, including the difference between
+"resolved" and "fulfilled", and explain why promises are perfectly suited
+for async/await.
+
+<div class="page-break"></div>
+
+## Exercises
+
+1.

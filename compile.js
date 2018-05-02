@@ -54,7 +54,9 @@ async function run() {
         </style>
       </head>
       <body>
-        ${marked(toc)}
+        <div class="toc">
+          ${marked(toc)}
+        </div>
         <div class="chapter">
           ${marked(intro)}
         </div>

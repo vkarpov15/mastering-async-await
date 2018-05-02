@@ -80,6 +80,28 @@ p code {
   line-height: 1em;
 }
 
+.toc a {
+  font-size: 18pt;
+  color: #232323;
+  float: right;
+  font-weight: bold;
+}
+
+.toc ol {
+  padding-left: 2.5em;
+}
+
+.toc li {
+  margin-left: 0px;
+  line-height: 1.5em;
+}
+
+.toc a::after {
+  content: '';
+  clear: both;
+  display: table;
+}
+
 /*
 github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 */
@@ -206,17 +228,21 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
         </style>
       </head>
       <body>
-        <h1 id="table-of-contents">Table of Contents</h1>
+        <div class="toc">
+          <h1 id="table-of-contents">Table of Contents</h1>
 <h2 id="0-how-to-use-this-book-1-page-2-">0. How To Use This Book <a href="#page=2">1</a></h2>
 <h2 id="1-async-await-the-good-parts-4-page-5-">1. Async/Await: The Good Parts <a href="#page=5">4</a></h2>
-<h4 id="1-return-values-6-page-7-">1. Return Values <a href="#page=7">6</a></h4>
-<h4 id="2-error-handling-9-page-10-">2. Error Handling <a href="#page=10">9</a></h4>
-<h4 id="3-retrying-failed-requests-12-page-13-">3. Retrying Failed Requests <a href="#page=13">12</a></h4>
-<h4 id="4-exercises-14-page-15-">4. Exercises <a href="#page=15">14</a></h4>
+<ol>
+<li>Return Values <a href="#page=7">6</a></li>
+<li>Error Handling <a href="#page=10">9</a></li>
+<li>Retrying Failed Requests <a href="#page=13">12</a></li>
+<li>Exercises <a href="#page=15">14</a></li>
+</ol>
 <h2 id="2-promises-from-the-ground-up-14-page-15-">2. Promises From The Ground Up <a href="#page=15">14</a></h2>
 <h2 id="3-async-await-internals">3. Async/Await Internals</h2>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 
+        </div>
         <div class="chapter">
           <h1 id="how-to-use-this-book">How To Use This Book</h1>
 <p><a href="http://thecodebarbarian.com/80-20-guide-to-async-await-in-node.js.html">Async/await</a>
@@ -717,11 +743,53 @@ post. This example uses the excellent <a href="https://jsonplaceholder.typicode.
 should be. The JavaScript community has created an incredible hodge-podge of
 tools for executing asynchronous tasks in series, from <a href="https://caolan.github.io/async/docs.html#waterfall"><code>async.waterfall()</code></a> to <a href="https://www.npmjs.com/package/redux-saga">Redux sagas</a> to <a href="https://github.com/domenic/zones">zones</a> to <a href="https://www.npmjs.com/package/co">co</a>. Async/await makes all of these libraries
 and more unnecessary. Do you even need <a href="https://www.codementor.io/vkarpov/beginner-s-guide-to-redux-middleware-du107uyud">Redux middleware</a> anymore?</p>
+<p>This isn&#39;t the whole story with async/await. This chapter glossed over numerous
+important details, including how promises integrate with async/await and
+what happens when two asynchronous functions run simultaneously. Chapter 2
+will focus on the internals of promises, including the difference between
+&quot;resolved&quot; and &quot;fulfilled&quot;, and explain why promises are perfectly suited
+for async/await.</p>
+<div class="page-break"></div>
+
+<h2 id="exercises">Exercises</h2>
+<p>1.</p>
 
         </div>
         <div class="chapter">
           <h1 id="promises-from-the-ground-up">Promises From The Ground Up</h1>
-<p>Test</p>
+<p>Async/await is built on top of promises. Async functions return promises, and
+<code>await</code> only pauses execution of an async function when it operates on a promise.
+In order to grok the internals of async/await, you need to understand how
+promises work from base principles. JavaScript promises didn&#39;t become what they
+are today by accident, they were specifically designed to enable paradigms like
+async/await.</p>
+<p>In the ES6 spec, a <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor">promise is a class</a> whose
+constructor takes an <code>executor</code> function. Instances of the Promise class have a
+<a href="http://www.ecma-international.org/ecma-262/6.0/#sec-promise.prototype.then"><code>then()</code> function</a>. Promises in the ES6 spec have several other properties, but for now you can
+ignore them. Below is a skeleton of a simplified <code>Promise</code> class.</p>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Promise</span> </span>{
+  <span class="hljs-comment">// `executor` takes 2 parameters, `resolve()` and `reject()`.</span>
+  <span class="hljs-comment">// The executor function is responsible for calling `resolve()`</span>
+  <span class="hljs-comment">// or `reject()` when the async operation succeeded (resolved)</span>
+  <span class="hljs-comment">// or failed (rejected).</span>
+  <span class="hljs-keyword">constructor</span>(executor) {}
+
+  <span class="hljs-comment">// `onFulfilled` is called if the promise is fulfilled, and</span>
+  <span class="hljs-comment">// `onRejected` if the promise is rejected. For now, you can</span>
+  <span class="hljs-comment">// think of 'fulfilled' and 'resolved' as the same thing.</span>
+  then(onFulfilled, onRejected) {}
+}
+</code></pre>
+<p>A promise is a state machine with 3 states:</p>
+<ul>
+<li>pending: the initial state, means that the underlying operation is in progress</li>
+<li>fulfilled: the underlying operation succeeded and has an associated value</li>
+<li>rejected: the underlying operation failed and has an associated error</li>
+</ul>
+<p>A promise that is not pending is called <em>settled</em>. So settled is a shorthand that
+means a promise is either fulfilled or rejected.</p>
+<p>With this in mind, below is a first draft of a promise constructor that handles this state machine. Note that the property names <code>state</code>, <code>settled</code>, and <code>value</code>
+are non-standard. Actual ES6 promises do <em>not</em> expose these properties publicly,</p>
 
         </div>
       </body>
