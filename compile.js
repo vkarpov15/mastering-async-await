@@ -1,9 +1,13 @@
 'use strict';
 
+const acquit = require('acquit');
 const highlight = require('highlight.js');
 const fs = require('fs');
 const marked = require('marked');
 const nightmare = require('nightmare');
+const transform = require('acquit-require');
+
+require('acquit-ignore')();
 
 marked.setOptions({
   highlight: function(code) {
@@ -19,8 +23,12 @@ async function run() {
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
 
-  const chapters = [1, 2].
-    map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8'));
+  const examples = [1].
+    map(c => fs.readFileSync(`./examples/chapter${c}.test.js`, 'utf8').toString());
+
+  const chapters = [1].
+    map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
+    map((c, i) => transform(c, examples[i]));
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -62,9 +70,6 @@ async function run() {
         </div>
         <div class="chapter">
           ${marked(chapters[0])}
-        </div>
-        <div class="chapter">
-          ${marked(chapters[1])}
         </div>
       </body>
     </html>

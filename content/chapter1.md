@@ -10,13 +10,7 @@ keyword pauses the function's execution for approximately 1 second.
 <div class="example-header-wrap"><div class="example-header">Example 1.1</div></div>
 
 ```javascript
-async function test() {
-  // This function will print "Hello, World!" after 1 second.
-  await new Promise(resolve => setTimeout(() => resolve(), 1000));
-  console.log('Hello, World!');
-}
-
-test();
+[require:example 1.1$]
 ```
 
 You can use the `await` keyword anywhere in the body of an async function. This means
