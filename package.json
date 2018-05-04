@@ -2,7 +2,7 @@
   "name": "async-await-book",
   "version": "0.0.0",
   "devDependencies": {
-    "acquit": "0.6.2",
+    "acquit": "0.6.3",
     "acquit-ignore": "0.0.3",
     "acquit-markdown": "0.0.10",
     "acquit-require": "0.0.2",

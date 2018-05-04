@@ -33,8 +33,83 @@ A promise is a state machine with 3 states:
 * fulfilled: the underlying operation succeeded and has an associated value
 * rejected: the underlying operation failed and has an associated error
 
-A promise that is not pending is called _settled_. So settled is a shorthand that
-means a promise is either fulfilled or rejected.
+A promise that is not pending is called _settled_. In other words, a settled
+promise is either fulfilled or rejected. Once a promise is settled,
+it **cannot** change state.
+For example, the below promise will remain fulfilled despite the `reject()` call.
+Once you've called `resolve()` or `reject()` once, calling `resolve()` or `reject()`
+is a no-op.
+
+```javascript
+new Promise((resolve, reject) {
+  resolve('foo');
+  // The below `reject()` is a no-op, once a promise is fulfilled it
+  // stays fulfilled with the same value forever.
+  reject(new Error('bar'));
+});
+```
+
+Below is a diagram showing the promise state machine.
+
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewbox="0 0 400 260">
+  <line x1="100" y1="150" x2="300" y2="80" style="stroke:#000;stroke-width:5" />
+  <line x1="100" y1="150" x2="300" y2="220" style="stroke:#000;stroke-width:5" />
+
+  <line x1="245" y1="100" x2="220" y2="94" style="stroke:#000;stroke-width:5" />
+  <line x1="245" y1="100" x2="232" y2="119" style="stroke:#000;stroke-width:5" />
+
+  <line x1="245" y1="200" x2="230" y2="180" style="stroke:#000;stroke-width:5" />
+  <line x1="245" y1="200" x2="220" y2="206" style="stroke:#000;stroke-width:5" />
+
+  <!-- Pending -->
+  <ellipse rx="75" ry="30" cx="100" cy="150" fill="#000"/>
+  <ellipse rx="72" ry="27" cx="100" cy="150" fill="#fff"/>
+  <text x="49" y="158" font-family="Roboto" font-size="24">
+    PENDING
+  </text>
+
+  <!-- Fulfilled -->
+  <ellipse rx="75" ry="30" cx="300" cy="80" fill="#000"/>
+  <ellipse rx="72" ry="27" cx="300" cy="80" fill="#fff"/>
+  <text x="243" y="89" font-family="Roboto" font-size="24">
+    FULFILLED
+  </text>
+
+  <!-- Rejected -->
+  <ellipse rx="75" ry="30" cx="300" cy="220" fill="#000"/>
+  <ellipse rx="72" ry="27" cx="300" cy="220" fill="#fff"/>
+  <text x="245" y="228" font-family="Roboto" font-size="24">
+    REJECTED
+  </text>
+
+  <!-- Settled -->
+  <line x1="200" y1="250" x2="200" y2="50" style="stroke:#f00;stroke-width:5" />
+  <text x="250" y="30" font-family="Roboto" font-size="24" fill="red">
+    SETTLED
+  </text>
+</svg>
+
+Below is a skeleton of the promise class. The general idea is
+that the promise wraps an _executor function_, which runs an
+asynchronous operation and calls `resolve()` if the operation
+succeeded, or `reject()` if it failed. For this first example,
+you can think of _fulfilled_ and _resolved_ as the same thing.
+
+```javascript
+class Promise {
+  // `executor` takes 2 parameters, `resolve()` and `reject()`.
+  // The executor function is responsible for calling `resolve()`
+  // or `reject()` when the async operation succeeded (resolved)
+  // or failed (rejected).
+  constructor(executor) {}
+
+  // `onFulfilled` is called if the promise is fulfilled, and
+  // `onRejected` if the promise is rejected. For now, you can
+  // think of 'fulfilled' and 'resolved' as the same thing.
+  then(onFulfilled, onRejected) {}
+}
+```
+
 
 With this in mind, below is a first draft of a promise constructor that handles this state machine. Note that the property names `state`, `settled`, and `value`
 are non-standard. Actual ES6 promises do *not* expose these properties publicly,

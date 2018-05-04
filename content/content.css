@@ -91,6 +91,12 @@ p code {
   display: table;
 }
 
+svg {
+  width: 800px;
+  margin-left: 100px;
+  margin-bottom: 15px;
+}
+
 /*
 github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 */
