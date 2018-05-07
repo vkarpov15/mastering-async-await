@@ -20,6 +20,7 @@ h2 {
 }
 
 .chapter {
+  margin-top: 1px;
   page-break-before: always;
   line-height: 1.5em;
   width: 1042px;

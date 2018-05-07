@@ -113,3 +113,41 @@ class Promise {
 
 With this in mind, below is a first draft of a promise constructor that handles this state machine. Note that the property names `state`, `settled`, and `value`
 are non-standard. Actual ES6 promises do *not* expose these properties publicly,
+so don't try to use `p.value` to get the value of a promise. You need to use
+`p.then(value => {})` or `await p` to _unwrap_ a promise. This book will refer
+to the process of getting a promise's value as "unwrapping" the promise.
+
+```javascript
+constructor(executor) {
+  assert.ok(typeof executor === 'function', 'Executor not a function');
+
+  // Internal state.
+  this.state = 'PENDING';
+  this.settled = false;
+  this.value = undefined;
+
+  // Define `resolve()` and `reject()` to change the promise state
+  const resolve = value => {
+    // Call
+    if (this.settled) return;
+    this.state = 'FULFILLED';
+    this.settled = true;
+    this.value = value;
+  };
+  const reject = value => {
+    if (this.settled) return;
+    this.state = 'REJECTED';
+    this.settled = true;
+    this.value = value;
+  };
+
+  // Call the executor with the above `resolve` and `reject` functions
+  try {
+    // If the executor function throws a sync exception, that's a
+    // a rejection.
+    executor(resolve, reject);
+  } catch (err) {
+    reject(err);
+  }
+}
+```

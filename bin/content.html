@@ -31,6 +31,7 @@ h2 {
 }
 
 .chapter {
+  margin-top: 1px;
   page-break-before: always;
   line-height: 1.5em;
   width: 1042px;
@@ -242,9 +243,10 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>Return Values <a href="#page=7">6</a></li>
 <li>Error Handling <a href="#page=10">9</a></li>
 <li>Retrying Failed Requests <a href="#page=13">12</a></li>
-<li>Exercises <a href="#page=15">14</a></li>
+<li>Exercise 1: HTTP Request Loops <a href="#page=15">14</a></li>
+<li>Exercise 2: Retrying Failed Requests <a href="#page=16">15</a></li>
 </ol>
-<h2 id="2-promises-from-the-ground-up-14-page-15-">2. Promises From The Ground Up <a href="#page=15">14</a></h2>
+<h2 id="2-promises-from-the-ground-up-16-page-17-">2. Promises From The Ground Up <a href="#page=17">16</a></h2>
 <h2 id="3-async-await-internals">3. Async/Await Internals</h2>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 
@@ -757,8 +759,93 @@ will focus on the internals of promises, including the difference between
 for async/await.</p>
 <div class="page-break"></div>
 
-<h2 id="exercises">Exercises</h2>
-<p>1.</p>
+<h2 id="exercise-1-http-request-loops">Exercise 1: HTTP Request Loops</h2>
+<p>The purpose of this exercise is to get comfortable with using
+loops and <code>if</code> statements with async/await. You will need to use
+the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API"><code>fetch()</code> API</a>
+to get a list of blog posts on
+thecodebarbarian.com, and then
+execute a separate <code>fetch()</code> to get the raw markdown <code>content</code>
+for each blog post.</p>
+<p>Below are the API endpoints. The API endpoints are hosted on
+Google Cloud Functions at <code>https://us-central1-mastering-async-await.cloudfunctions.net</code>.</p>
+<ul>
+<li><code>/posts</code>
+gets a list of blog posts. Below is an example post:</li>
+</ul>
+<pre><code>{ <span class="hljs-string">"src"</span>:<span class="hljs-string">"./lib/posts/20160304_circle_ci.md"</span>,
+  <span class="hljs-string">"title"</span>:<span class="hljs-string">"Setting Up Circle CI With Node.js"</span>,
+  <span class="hljs-string">"date"</span>:<span class="hljs-string">"2016-03-04T00:00:00.000Z"</span>,
+  <span class="hljs-string">"tags"</span>:[<span class="hljs-string">"NodeJS"</span>],
+  <span class="hljs-string">"id"</span>:<span class="hljs-number">51</span>}
+</code></pre><ul>
+<li><code>/post?id=${id}</code>
+gets the markdown content of a blog post by its <code>id</code> property.
+The above blog post has <code>id</code> = 0, so you can get its content from
+this endpoint: <a href="https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0"><code>https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0</code></a>. Try opening this URL in your browser, the output looks
+like this:</li>
+</ul>
+<pre><code>{<span class="hljs-string">"content"</span>:<span class="hljs-string">"*This post was featured as a guest blog post..."</span>}
+</code></pre><p>Loop through the blog posts and find the id of the first post
+whose <code>content</code> contains the string &quot;async/await hell&quot;.</p>
+<p>Below is the starter code. You may copy this code and run it in Node.js using <a href="https://www.npmjs.com/package/node-fetch">the <code>node-fetch</code> npm module</a>, or you may complete this exercise in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-1"><code>http://bit.ly/async-await-exercise-1</code></a></p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
+  <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net'</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Example of using `fetch()` API</span>
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>);
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> res.json());
+}
+
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+</code></pre>
+<div class="page-break"></div>
+
+<h2 id="exercise-2-retrying-failed-requests">Exercise 2: Retrying Failed Requests</h2>
+<p>The purpose of this exercise is to implement a function that retries failed
+HTTP requests using async/await and <code>try/catch</code> to handle errors. This example
+builds on the correct answer to exercise 1.1, but with the added caveat that
+every other <code>fetch()</code> request fails.</p>
+<p>For this exercise, you need to implement the <code>getWithRetry()</code> function below.
+This function should <code>fetch()</code> the <code>url</code>, and if the request fails this
+function should retry the request up to <code>numRetries</code> times. If you see
+&quot;Correct answer: 76&quot;, congratulations, you completed this exercise.</p>
+<p>Like exercise 1.1, you can complete this exercise locally by copying the
+below code and using the <a href="https://www.npmjs.com/package/node-fetch"><code>node-fetch</code> npm module</a>.
+You can also complete this exercise in your browser on CodePen at the following
+url: <a href="http://bit.ly/async-await-exercise-2">http://bit.ly/async-await-exercise-2</a>.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries</span>) </span>{
+  <span class="hljs-keyword">return</span> fetch(url).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json());
+}
+
+<span class="hljs-comment">// Correct answer for exercise 1.1 below</span>
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
+    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net'</span>;
+  <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>, <span class="hljs-number">3</span>);
+
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> post <span class="hljs-keyword">of</span> posts) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${post.id}</span>`</span>);
+    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/post?id=<span class="hljs-subst">${post.id}</span>`</span>, <span class="hljs-number">3</span>);
+    <span class="hljs-keyword">if</span> (content.content.includes(<span class="hljs-string">'async/await hell'</span>)) {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${post.id}</span>`</span>);
+      <span class="hljs-keyword">break</span>;
+    }
+  }
+}
+
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+
+<span class="hljs-comment">// This makes every 2nd `fetch()` fail</span>
+<span class="hljs-keyword">const</span> _fetch = fetch;
+<span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+(<span class="hljs-built_in">window</span> || global).fetch = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">url</span>) </span>{
+  <span class="hljs-keyword">const</span> err = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Hard-coded fetch() error'</span>);
+  <span class="hljs-keyword">return</span> (++calls % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>) ? <span class="hljs-built_in">Promise</span>.reject(err) : _fetch(url);
+}
+</code></pre>
 
         </div>
         <div class="chapter">
@@ -863,7 +950,43 @@ you can think of <em>fulfilled</em> and <em>resolved</em> as the same thing.</p>
 }
 </code></pre>
 <p>With this in mind, below is a first draft of a promise constructor that handles this state machine. Note that the property names <code>state</code>, <code>settled</code>, and <code>value</code>
-are non-standard. Actual ES6 promises do <em>not</em> expose these properties publicly,</p>
+are non-standard. Actual ES6 promises do <em>not</em> expose these properties publicly,
+so don&#39;t try to use <code>p.value</code> to get the value of a promise. You need to use
+<code>p.then(value =&gt; {})</code> or <code>await p</code> to <em>unwrap</em> a promise. This book will refer
+to the process of getting a promise&#39;s value as &quot;unwrapping&quot; the promise.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">constructor</span>(executor) {
+  assert.ok(<span class="hljs-keyword">typeof</span> executor === <span class="hljs-string">'function'</span>, <span class="hljs-string">'Executor not a function'</span>);
+
+  <span class="hljs-comment">// Internal state.</span>
+  <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'PENDING'</span>;
+  <span class="hljs-keyword">this</span>.settled = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">this</span>.value = <span class="hljs-literal">undefined</span>;
+
+  <span class="hljs-comment">// Define `resolve()` and `reject()` to change the promise state</span>
+  <span class="hljs-keyword">const</span> resolve = <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> {
+    <span class="hljs-comment">// Call</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.settled) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
+    <span class="hljs-keyword">this</span>.settled = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">this</span>.value = value;
+  };
+  <span class="hljs-keyword">const</span> reject = <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.settled) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'REJECTED'</span>;
+    <span class="hljs-keyword">this</span>.settled = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">this</span>.value = value;
+  };
+
+  <span class="hljs-comment">// Call the executor with the above `resolve` and `reject` functions</span>
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// If the executor function throws a sync exception, that's a</span>
+    <span class="hljs-comment">// a rejection.</span>
+    executor(resolve, reject);
+  } <span class="hljs-keyword">catch</span> (err) {
+    reject(err);
+  }
+}
+</code></pre>
 
         </div>
       </body>

@@ -483,6 +483,105 @@ for async/await.
 
 <div class="page-break"></div>
 
-## Exercises
+## Exercise 1: HTTP Request Loops
 
-1.
+The purpose of this exercise is to get comfortable with using
+loops and `if` statements with async/await. You will need to use
+the [`fetch()` API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+to get a list of blog posts on
+thecodebarbarian.com, and then
+execute a separate `fetch()` to get the raw markdown `content`
+for each blog post.
+
+Below are the API endpoints. The API endpoints are hosted on
+Google Cloud Functions at `https://us-central1-mastering-async-await.cloudfunctions.net`.
+- `/posts`
+gets a list of blog posts. Below is an example post:
+
+```
+{ "src":"./lib/posts/20160304_circle_ci.md",
+  "title":"Setting Up Circle CI With Node.js",
+  "date":"2016-03-04T00:00:00.000Z",
+  "tags":["NodeJS"],
+  "id":51}
+```
+
+- `/post?id=${id}`
+gets the markdown content of a blog post by its `id` property.
+The above blog post has `id` = 0, so you can get its content from
+this endpoint: [`https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0`](https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0). Try opening this URL in your browser, the output looks
+like this:
+
+```
+{"content":"*This post was featured as a guest blog post..."}
+```
+
+Loop through the blog posts and find the id of the first post
+whose `content` contains the string "async/await hell".
+
+Below is the starter code. You may copy this code and run it in Node.js using [the `node-fetch` npm module](https://www.npmjs.com/package/node-fetch), or you may complete this exercise in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-1`](http://bit.ly/async-await-exercise-1)
+
+```javascript
+const root = 'https://' +
+  'us-central1-mastering-async-await.cloudfunctions.net';
+
+async function run() {
+  // Example of using `fetch()` API
+  const res = await fetch(`${root}/posts`);
+  console.log(await res.json());
+}
+
+run().catch(error => console.error(error.stack));
+```
+
+<div class="page-break"></div>
+
+## Exercise 2: Retrying Failed Requests
+
+The purpose of this exercise is to implement a function that retries failed
+HTTP requests using async/await and `try/catch` to handle errors. This example
+builds on the correct answer to exercise 1.1, but with the added caveat that
+every other `fetch()` request fails.
+
+For this exercise, you need to implement the `getWithRetry()` function below.
+This function should `fetch()` the `url`, and if the request fails this
+function should retry the request up to `numRetries` times. If you see
+"Correct answer: 76", congratulations, you completed this exercise.
+
+Like exercise 1.1, you can complete this exercise locally by copying the
+below code and using the [`node-fetch` npm module](https://www.npmjs.com/package/node-fetch).
+You can also complete this exercise in your browser on CodePen at the following
+url: [http://bit.ly/async-await-exercise-2](http://bit.ly/async-await-exercise-2).
+
+```javascript
+async function getWithRetry(url, numRetries) {
+  return fetch(url).then(res => res.json());
+}
+
+// Correct answer for exercise 1.1 below
+async function run() {
+  const root = 'https://' +
+    'us-central1-mastering-async-await.cloudfunctions.net';
+  const posts = await getWithRetry(`${root}/posts`, 3);
+
+  for (const post of posts) {
+    console.log(`Fetch post ${post.id}`);
+    const content = await getWithRetry(`${root}/post?id=${post.id}`, 3);
+    if (content.content.includes('async/await hell')) {
+      console.log(`Correct answer: ${post.id}`);
+      break;
+    }
+  }
+}
+
+run().catch(error => console.error(error.stack));
+
+// This makes every 2nd `fetch()` fail
+const _fetch = fetch;
+let calls = 0;
+(window || global).fetch = function(url) {
+  const err = new Error('Hard-coded fetch() error');
+  return (++calls % 2 === 0) ? Promise.reject(err) : _fetch(url);
+}
+```

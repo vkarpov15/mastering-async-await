@@ -7,9 +7,10 @@
 1. Return Values [6](#page=7)
 2. Error Handling [9](#page=10)
 3. Retrying Failed Requests [12](#page=13)
-4. Exercises [14](#page=15)
+4. Exercise 1: HTTP Request Loops [14](#page=15)
+5. Exercise 2: Retrying Failed Requests [15](#page=16)
 
-## 2. Promises From The Ground Up [14](#page=15)
+## 2. Promises From The Ground Up [16](#page=17)
 
 ## 3. Async/Await Internals
 
