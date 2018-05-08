@@ -12,6 +12,8 @@ constructor takes an `executor` function. Instances of the Promise class have a
 [`then()` function](http://www.ecma-international.org/ecma-262/6.0/#sec-promise.prototype.then). Promises in the ES6 spec have several other properties, but for now you can
 ignore them. Below is a skeleton of a simplified `Promise` class.
 
+<div class="example-header-wrap"><div class="example-header">Example 2.1</div></div>
+
 ```javascript
 class Promise {
   // `executor` takes 2 parameters, `resolve()` and `reject()`.
@@ -40,13 +42,10 @@ For example, the below promise will remain fulfilled despite the `reject()` call
 Once you've called `resolve()` or `reject()` once, calling `resolve()` or `reject()`
 is a no-op.
 
+<div class="example-header-wrap"><div class="example-header">Example 2.2</div></div>
+
 ```javascript
-new Promise((resolve, reject) {
-  resolve('foo');
-  // The below `reject()` is a no-op, once a promise is fulfilled it
-  // stays fulfilled with the same value forever.
-  reject(new Error('bar'));
-});
+[require:example 2.2$]
 ```
 
 Below is a diagram showing the promise state machine.
@@ -95,6 +94,8 @@ asynchronous operation and calls `resolve()` if the operation
 succeeded, or `reject()` if it failed. For this first example,
 you can think of _fulfilled_ and _resolved_ as the same thing.
 
+<div class="example-header-wrap"><div class="example-header">Example 2.3</div></div>
+
 ```javascript
 class Promise {
   // `executor` takes 2 parameters, `resolve()` and `reject()`.
@@ -111,43 +112,50 @@ class Promise {
 ```
 
 
-With this in mind, below is a first draft of a promise constructor that handles this state machine. Note that the property names `state`, `settled`, and `value`
-are non-standard. Actual ES6 promises do *not* expose these properties publicly,
-so don't try to use `p.value` to get the value of a promise. You need to use
-`p.then(value => {})` or `await p` to _unwrap_ a promise. This book will refer
-to the process of getting a promise's value as "unwrapping" the promise.
+With this in mind, below is a first draft of a promise constructor that implements
+the state transitions. Note that the property names `state`, `resolve`,
+`reject`, and `value` used below are non-standard. Actual ES6 promises do *not*
+expose these properties publicly, so don't try to use `p.value` to get the value of a
+promise or call `p.resolve()` to resolve a real promise. This promise
+implementation is meant to be a didactic example, and is not meant to be a
+rigorous implementation of the promise spec.
+
+<div class="page-break"></div>
+
+<br>
+
+<div class="example-header-wrap"><div class="example-header">Example 2.4</div></div>
 
 ```javascript
-constructor(executor) {
-  assert.ok(typeof executor === 'function', 'Executor not a function');
+[require:example 2.4$]
+```
 
-  // Internal state.
-  this.state = 'PENDING';
-  this.settled = false;
-  this.value = undefined;
+The promise constructor manages the promise's state and calls the executor
+function. However, you still need to implement the `then()` function, which
+lets you define handlers that run when a promise is settled. The `then()`
+function takes 2 function parameters, `onFulfilled()` and `onRejected()`.
+A promise must call the `onFulfilled()` callback if the promise is fulfilled,
+and `onRejected()` if the promise is rejected.
 
-  // Define `resolve()` and `reject()` to change the promise state
-  const resolve = value => {
-    // Call
-    if (this.settled) return;
-    this.state = 'FULFILLED';
-    this.settled = true;
-    this.value = value;
-  };
-  const reject = value => {
-    if (this.settled) return;
-    this.state = 'REJECTED';
-    this.settled = true;
-    this.value = value;
-  };
+For now, `then()` is simple, its job will be to track `onFulfilled()` and
+`onRejected()` in the `chained` array so `resolve()` and `reject()` can call
+them when the promise is fulfilled or rejected. If the promise is already
+settled, the `then()` function will call `onFulfilled()` or `onRejected()`
+immediately.
 
-  // Call the executor with the above `resolve` and `reject` functions
-  try {
-    // If the executor function throws a sync exception, that's a
-    // a rejection.
-    executor(resolve, reject);
-  } catch (err) {
-    reject(err);
-  }
-}
+<div class="example-header-wrap"><div class="example-header">Example 2.5</div></div>
+
+```javascript
+[require:example 2.5$]
+```
+
+This `Promise` class, while simple, represents most of the work necessary
+to integrate with async/await. The `await` keyword doesn't explicitly check
+if the value it operates on is `instanceof Promise`, it only checks for the
+presence of a `then()` function. In general, any object that has a `then()`
+function is called a _thenable_ in JavaScript. Below is an example of using the
+custom `Promise` class with async/await.
+
+```javascript
+[require:example 2.6$]
 ```
