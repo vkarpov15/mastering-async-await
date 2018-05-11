@@ -6,13 +6,14 @@
     "acquit-ignore": "0.0.3",
     "acquit-markdown": "0.0.10",
     "acquit-require": "0.0.2",
-    "es6-promise": "4.2.4",
     "highlight.js": "9.12.0",
     "mocha": "5.1.0",
-    "nightmare": "3.0.1"
+    "nightmare": "3.0.1",
+    "promises-aplus-tests": "2.1.2"
   },
   "scripts": {
     "compile": "node compile.js",
-    "test": "mocha ./examples/*.test.js"
+    "test": "mocha ./examples/*.test.js",
+    "test-promise": "promises-aplus-tests content/promise.js"
   }
 }

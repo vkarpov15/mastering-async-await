@@ -88,8 +88,12 @@ describe('Chapter 2 Examples', function() {
       }
 
       then(onFulfilled, onRejected) {
-        if (this.state === 'FULFILLED') return onFulfilled(this.value);
-        if (this.state === 'REJECTED') return onRejected(this.value);
+        if (this.state === 'FULFILLED') {
+          return setImmediate(() => onFulfilled(this.value));
+        }
+        if (this.state === 'REJECTED') {
+          return setImmediate(() => onRejected(this.value));
+        }
         this.chained.push({ onFulfilled, onRejected });
       }
 
@@ -102,7 +106,12 @@ describe('Chapter 2 Examples', function() {
         // so `onFulfilled` may be `null`.
         this.chained.
           filter(({ onFulfilled }) => typeof onFulfilled === 'function').
-          forEach(({ onFulfilled }) => onFulfilled(value));
+          forEach(({ onFulfilled }) => {
+            // The ECMAScript 2017 spec section 25.4 states that
+            // `onFulfilled` and `onRejected` must be called on
+            // a separate iteration of the event loop
+            setImmediate(() => onFulfilled(value));
+          });
       }
 
       reject(value) {
@@ -111,7 +120,9 @@ describe('Chapter 2 Examples', function() {
         this.value = value;
         this.chained.
           filter(({ onRejected }) => typeof onRejected === 'function').
-          forEach(({ onRejected }) => onRejected(value));
+          forEach(({ onFulfilled }) => {
+            setImmediate(() => onFulfilled(value));
+          });
       }
     }
     // acquit:ignore:start
@@ -126,11 +137,32 @@ describe('Chapter 2 Examples', function() {
     assert.equal(p1.value, 'good');
     assert.equal(p2.value.message, 'bad');
 
-    let called = 0;
-    p1.then(res => { ++called; assert.equal(res, 'good'); });
-    p2.then(null, err => { ++called; assert.equal(err.message, 'bad'); });
-    assert.equal(called, 2);
     Promise25 = Promise;
+    return test();
+
+    async function test() {
+      let called = 0;
+      p1.then(res => {
+        assert.equal(res, 'good');
+        ++called;
+      });
+      p2.then(null, err => {
+        assert.equal(err.message, 'bad');
+        ++called;
+      });
+
+      await p1;
+      let threw = false;
+      try {
+        await p2;
+      } catch (err) {
+        threw = true;
+        assert.equal(err.message, 'bad');
+      }
+
+      assert.ok(threw);
+      assert.equal(called, 2);
+    }
     // acquit:ignore:end
   });
 

@@ -11,7 +11,7 @@ class Promise {
 
     // Internal state.
     this.state = 'PENDING';
-    this.chained = []; // Not used yet
+    this.chained = [];
     this.value = undefined;
 
     // Call the executor with the above `resolve` and `reject` functions
@@ -29,20 +29,20 @@ class Promise {
     _onRejected = _onRejected || (err => { throw err; });
     const _Promise = this.constructor;
     return new _Promise((resolve, reject) => {
-      const onFulfilled = res => {
+      const onFulfilled = res => setImmediate(() => {
         try {
           resolve(_onFulfilled(res));
         } catch (err) {
           reject(err);
         }
-      };
-      const onRejected = err => {
+      });
+      const onRejected = err => setImmediate(() => {
         try {
           resolve(_onRejected(err));
         } catch (err) {
           reject(err);
         }
-      };
+      });
 
       if (this.state === 'FULFILLED') return onFulfilled(this.value);
       if (this.state === 'REJECTED') return onRejected(this.value);
@@ -52,26 +52,12 @@ class Promise {
 
   resolve(value) {
     if (this.state !== 'PENDING') return;
-    if (value === this) {
-      return this.reject(new TypeError('You cannot resolve a promise with itself'));
-    }
-    const then = value != null ? value.then : null;
+    const then = typeof value === 'object' && value != null ? value.then : null;
     if (typeof then === 'function') {
-      if (then === this.then) {
-        // Weird but https://github.com/getify/native-promise-only/issues/5#issuecomment-42750346
-        try {
-          return then.call(value, this.resolve.bind(this), this.reject.bind(this));
-        } catch (error) {
-          return this.reject(error);
-        }
-      } else {
-        return setImmediate(() => {
-          try {
-            then.call(value, this.resolve.bind(this), this.reject.bind(this));
-          } catch (error) {
-            this.reject(error);
-          }
-        });
+      try {
+        return then.call(value, this.resolve.bind(this), this.reject.bind(this));
+      } catch (error) {
+        return this.reject(error);
       }
     }
     this.state = 'FULFILLED';
@@ -88,28 +74,6 @@ class Promise {
 
   reject(value) {
     if (this.state !== 'PENDING') return;
-    if (value === this) {
-      return this.reject(new TypeError('You cannot reject a promise with itself'));
-    }
-    const then = value != null ? value.then : null;
-    if (typeof then === 'function') {
-      if (then === this.then) {
-        // Weird but https://github.com/getify/native-promise-only/issues/5#issuecomment-42750346
-        try {
-          return then.call(value, this.resolve.bind(this), this.reject.bind(this));
-        } catch (error) {
-          return this.reject(error);
-        }
-      } else {
-        return setImmediate(() => {
-          try {
-            then.call(value, this.resolve.bind(this), this.reject.bind(this));
-          } catch (error) {
-            this.reject(error);
-          }
-        });
-      }
-    }
     this.state = 'REJECTED';
     this.value = value;
     this.chained.
@@ -182,9 +146,16 @@ class Promise {
   }
 }
 
-Promise.Promise = Promise;
-
-module.exports = Promise;
-
-global.Promise = Promise;
-global.adapter = { Promise };
+module.exports = {
+  resolved: v => Promise.resolve(v),
+  rejected: err => Promise.reject(err),
+  deferred: () => {
+    let resolve;
+    let reject;
+    const promise = new Promise((_resolve, _reject) => {
+      resolve = _resolve;
+      reject = _reject;
+    });
+    return { resolve, reject, promise };
+  }
+};

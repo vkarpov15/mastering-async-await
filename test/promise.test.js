@@ -113,7 +113,7 @@ describe('tampering', function() {
         return one.then(function() {
           return two;
         }).then(function(value) {
-
+          console.log('FF', invokedAlternativeConstructor, thenCalled, resolveCalled, value)
           assert.equal(invokedAlternativeConstructor, 1, 'expected AlternativeConstructor to be invoked once');
           assert.equal(thenCalled, 1, 'expected then to be called once');
           assert.equal(resolveCalled, 0, 'expected resolve to be called once');
