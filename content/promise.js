@@ -4,6 +4,8 @@ const assert = (v, err) => {
   }
 };
 
+let counter = 0;
+
 class Promise {
   constructor(executor) {
     assert(typeof executor === 'function',
@@ -13,22 +15,30 @@ class Promise {
     this.state = 'PENDING';
     this.chained = [];
     this.value = undefined;
+    this.id = ++counter;
+    this.executor = executor;
 
-    // Call the executor with the above `resolve` and `reject` functions
     try {
-      // If the executor function throws a sync exception, that's a
-      // a rejection. Need to `bind()` for correct value of `this`
-      executor(this.resolve.bind(this), this.reject.bind(this));
+      // Reject if the executor function throws a sync error
+      executor(v => this.resolve(v), err => this.reject(err));
     } catch (err) {
       this.reject(err);
     }
   }
 
   then(_onFulfilled, _onRejected) {
-    _onFulfilled = _onFulfilled || (v => v);
-    _onRejected = _onRejected || (err => { throw err; });
-    const _Promise = this.constructor;
-    return new _Promise((resolve, reject) => {
+    // Ensure `onFulfilled` and `onRejected` are always functions. If
+    // `null` or some other value, `onFulfilled` is a noop...
+    if (typeof _onFulfilled !== 'function') {
+      _onFulfilled = (v => v);
+    }
+    // and `onRejected` just rethrows the error
+    if (typeof _onRejected !== 'function') {
+      _onRejected = err => { throw err; };
+    }
+    return new Promise((resolve, reject) => {
+      // Wrap `onFulfilled` and `onRejected` for two reasons:
+      // consistent async and `try/catch`
       const onFulfilled = res => setImmediate(() => {
         try {
           resolve(_onFulfilled(res));
@@ -52,35 +62,53 @@ class Promise {
 
   resolve(value) {
     if (this.state !== 'PENDING') return;
-    const then = typeof value === 'object' && value != null ? value.then : null;
-    if (typeof then === 'function') {
+    if (value === this) {
+      return this.reject(new TypeError('Cannot resolve promise with itself'));
+    }
+    let then = null;
+    if (['object', 'function'].includes(typeof value) && value != null) {
       try {
-        return then.call(value, this.resolve.bind(this), this.reject.bind(this));
+        then = value.then;
       } catch (error) {
         return this.reject(error);
       }
     }
+    if (typeof then === 'function') {
+      // Important detail: `resolve()` and `reject()` cannot be called
+      // more than once. This means if `then()` calls `resolve()` with
+      // a promise that later fulfills and then throws, the promise
+      // that `then()` returns will be fulfilled.
+      let called = false;
+      const resolve = v => {
+        if (called) return;
+        called = true;
+        this.resolve(v);
+      };
+      const reject = err => {
+        if (called) return;
+        called = true;
+        this.reject(err);
+      };
+      try {
+        return then.call(value, resolve, reject);
+      } catch (error) {
+        return reject(error);
+      }
+    }
     this.state = 'FULFILLED';
     this.value = value;
-    // Loop through the `chained` array and find all `onFulfilled()`
-    // functions. Keep in mind `.then(null, onRejected)` is valid,
-    // so `onFulfilled` may be `null`.
-    this.chained.
-      filter(({ onFulfilled }) => typeof onFulfilled === 'function').
-      forEach(({ onFulfilled }) => {
-        setImmediate(() => onFulfilled(value));
-      });
+    this.chained.forEach(({ onFulfilled }) => {
+      setImmediate(() => onFulfilled(value));
+    });
   }
 
   reject(value) {
     if (this.state !== 'PENDING') return;
     this.state = 'REJECTED';
     this.value = value;
-    this.chained.
-      filter(({ onRejected }) => typeof onRejected === 'function').
-      forEach(({ onRejected }) => {
-        setImmediate(() => onRejected(value));
-      });
+    this.chained.forEach(({ onRejected }) => {
+      setImmediate(() => onRejected(value));
+    });
   }
 
   catch(onRejected) {
@@ -102,7 +130,6 @@ class Promise {
   }
 
   static all(arr) {
-    const _Promise = this;
     if (!Array.isArray(arr)) {
       return _Promise.reject(new TypeError('all() only accepts an array'));
     }
