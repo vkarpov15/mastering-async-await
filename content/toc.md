@@ -12,7 +12,7 @@
 
 ## 2. Promises From The Ground Up [16](#page=17)
 
-1. Promise Chaining [20](#page=21)
+1. Promise Chaining [19](#page=20)
 
 ## 3. Async/Await Internals
 

@@ -8,8 +8,8 @@ describe('Chapter 2 Examples', function() {
   it('example 2.2', function() {
     const p = new Promise((resolve, reject) => {
       resolve('foo');
-      // The below `reject()` is a no-op, once a promise is fulfilled it
-      // stays fulfilled with the same value forever.
+      // The below `reject()` is a no-op. A fulfilled promise stays
+      // fulfilled with the same value forever.
       reject(new Error('bar'));
     });
     // acquit:ignore:start
@@ -20,31 +20,23 @@ describe('Chapter 2 Examples', function() {
   it('example 2.4', function() {
     class Promise {
       constructor(executor) {
-        assert(typeof executor === 'function', 'Executor not a function');
-
-        // Internal state.
         this.state = 'PENDING';
         this.chained = []; // Not used yet
         this.value = undefined;
 
-        // Call the executor with the above `resolve` and `reject` functions
         try {
-          // If the executor function throws a sync exception, that's a
-          // a rejection. Need to `bind()` for correct value of `this`
-          executor(this.resolve.bind(this), this.reject.bind(this));
+          // Reject if the executor throws a sync error
+          executor(v => this.resolve(v), err => this.reject(err));
         } catch (err) {
           this.reject(err);
         }
       }
-
       // Define `resolve()` and `reject()` to change the promise state
       resolve(value) {
-        // Calling `resolve()` twice is a no-op
         if (this.state !== 'PENDING') return;
         this.state = 'FULFILLED';
         this.value = value;
       }
-
       reject(value) {
         if (this.state !== 'PENDING') return;
         this.state = 'REJECTED';
@@ -67,62 +59,51 @@ describe('Chapter 2 Examples', function() {
 
   it('example 2.5', function() {
     class Promise {
-      constructor(executor) { // same as before, omitted for brevity
-        // acquit:ignore:start
+      // Constructor is the same as before, omitted for brevity
+      // acquit:ignore:start
+      constructor(executor) {
         assert(typeof executor === 'function', 'Executor not a function');
 
         // Internal state.
         this.state = 'PENDING';
-        this.chained = []; // Not used yet
+        this.chained = [];
         this.value = undefined;
 
-        // Call the executor with the above `resolve` and `reject` functions
         try {
-          // If the executor function throws a sync exception, that's a
-          // a rejection. Need to `bind()` for correct value of `this`
-          executor(this.resolve.bind(this), this.reject.bind(this));
+          // Reject if the executor throws a sync error
+          executor(v => this.resolve(v), err => this.reject(err));
         } catch (err) {
           this.reject(err);
         }
-        // acquit:ignore:end
       }
-
+      // acquit:ignore:end
       then(onFulfilled, onRejected) {
-        if (this.state === 'FULFILLED') {
-          return setImmediate(() => onFulfilled(this.value));
-        }
-        if (this.state === 'REJECTED') {
-          return setImmediate(() => onRejected(this.value));
-        }
+        const { value, state } = this;
+        // If promise is already settled, enqueue the right handler
+        if (state === 'FULFILLED') return setImmediate(onFulfilled, value);
+        if (state === 'REJECTED') return setImmediate(onRejected, value);
+        // Otherwise, track `onFulfilled` and `onRejected` for later
         this.chained.push({ onFulfilled, onRejected });
       }
-
       resolve(value) {
         if (this.state !== 'PENDING') return;
         this.state = 'FULFILLED';
         this.value = value;
         // Loop through the `chained` array and find all `onFulfilled()`
-        // functions. Keep in mind `.then(null, onRejected)` is valid,
-        // so `onFulfilled` may be `null`.
+        // functions. Remember that `.then(null, onRejected)` is valid.
         this.chained.
           filter(({ onFulfilled }) => typeof onFulfilled === 'function').
-          forEach(({ onFulfilled }) => {
-            // The ECMAScript 2017 spec section 25.4 states that
-            // `onFulfilled` and `onRejected` must be called on
-            // a separate iteration of the event loop
-            setImmediate(() => onFulfilled(value));
-          });
+          // The ES6 spec section 25.4 says `onFulfilled` and
+          // `onRejected` must be called on a separate event loop tick
+          forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
       }
-
       reject(value) {
         if (this.state !== 'PENDING') return;
         this.state = 'REJECTED';
         this.value = value;
         this.chained.
           filter(({ onRejected }) => typeof onRejected === 'function').
-          forEach(({ onFulfilled }) => {
-            setImmediate(() => onFulfilled(value));
-          });
+          forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
       }
     }
     // acquit:ignore:start

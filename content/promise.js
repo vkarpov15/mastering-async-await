@@ -18,12 +18,33 @@ class Promise {
     this.id = ++counter;
     this.executor = executor;
 
+    const { resolve, reject } = this._wrapResolveReject();
+
     try {
       // Reject if the executor function throws a sync error
-      executor(v => this.resolve(v), err => this.reject(err));
+      executor(resolve, reject);
     } catch (err) {
-      this.reject(err);
+      reject(err);
     }
+  }
+
+  // In addition to enforcing that a promise cannot change state once
+  // it is settled, a promise also cannot change state once you call
+  // `resolve()` with a promise. Easiest way to enforce this is to
+  // ensure `resolve()` and `reject()` can only be called once.
+  _wrapResolveReject() {
+    let called = false;
+    const resolve = v => {
+      if (called) return;
+      called = true;
+      this.resolve(v);
+    };
+    const reject = err => {
+      if (called) return;
+      called = true;
+      this.reject(err);
+    };
+    return { resolve, reject };
   }
 
   then(_onFulfilled, _onRejected) {
@@ -60,55 +81,53 @@ class Promise {
     });
   }
 
-  resolve(value) {
+  resolve(v) {
     if (this.state !== 'PENDING') return;
-    if (value === this) {
+    if (v === this) {
       return this.reject(new TypeError('Cannot resolve promise with itself'));
     }
-    let then = null;
-    if (['object', 'function'].includes(typeof value) && value != null) {
-      try {
-        then = value.then;
-      } catch (error) {
-        return this.reject(error);
-      }
-    }
+
+    // Is `value` a thenable? If so, fulfill/reject this promise when
+    // `value` fulfills or rejects. The Promises/A+ spec calls this
+    // process "assimilating" the other promise (resistance is futile).
+    const then = this._getThenProperty(v);
     if (typeof then === 'function') {
       // Important detail: `resolve()` and `reject()` cannot be called
       // more than once. This means if `then()` calls `resolve()` with
       // a promise that later fulfills and then throws, the promise
       // that `then()` returns will be fulfilled.
-      let called = false;
-      const resolve = v => {
-        if (called) return;
-        called = true;
-        this.resolve(v);
-      };
-      const reject = err => {
-        if (called) return;
-        called = true;
-        this.reject(err);
-      };
+      const { resolve, reject } = this._wrapResolveReject();
       try {
-        return then.call(value, resolve, reject);
+        return then.call(v, resolve, reject);
       } catch (error) {
         return reject(error);
       }
     }
+
+    // If `value` is **not** a thenable, transition to fulfilled
     this.state = 'FULFILLED';
-    this.value = value;
-    this.chained.forEach(({ onFulfilled }) => {
-      setImmediate(() => onFulfilled(value));
-    });
+    this.value = v;
+    this.chained.forEach(({ onFulfilled }) => setImmediate(onFulfilled, v));
   }
 
-  reject(value) {
+  reject(v) {
     if (this.state !== 'PENDING') return;
     this.state = 'REJECTED';
-    this.value = value;
-    this.chained.forEach(({ onRejected }) => {
-      setImmediate(() => onRejected(value));
-    });
+    this.value = v;
+    this.chained.forEach(({ onRejected }) => setImmediate(onRejected, v));
+  }
+
+  _getThenProperty(value) {
+    if (['object', 'function'].includes(typeof value) && value != null) {
+      try {
+        return value.then;
+      } catch (error) {
+        // Unlikely edge case that is enforced by Promise/A+ spec
+        // section 2.3.3.2: if getting `value.then` throws, reject
+        // immediately.
+        this.reject(error);
+      }
+    }
   }
 
   catch(onRejected) {

@@ -18,8 +18,7 @@ ignore them. Below is a skeleton of a simplified `Promise` class.
 class Promise {
   // `executor` takes 2 parameters, `resolve()` and `reject()`.
   // The executor function is responsible for calling `resolve()`
-  // or `reject()` when the async operation succeeded (resolved)
-  // or failed (rejected).
+  // or `reject()` when the async operation succeeded or failed
   constructor(executor) {}
 
   // `onFulfilled` is called if the promise is fulfilled, and
@@ -50,7 +49,7 @@ is a no-op.
 
 Below is a diagram showing the promise state machine.
 
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewbox="0 0 400 260">
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="390" viewbox="0 0 400 260">
   <line x1="100" y1="150" x2="300" y2="80" style="stroke:#000;stroke-width:5" />
   <line x1="100" y1="150" x2="300" y2="220" style="stroke:#000;stroke-width:5" />
 
@@ -88,41 +87,11 @@ Below is a diagram showing the promise state machine.
   </text>
 </svg>
 
-Below is a skeleton of the promise class. The general idea is
-that the promise wraps an _executor function_, which runs an
-asynchronous operation and calls `resolve()` if the operation
-succeeded, or `reject()` if it failed. For this first example,
-you can think of _fulfilled_ and _resolved_ as the same thing.
-
-<div class="example-header-wrap"><div class="example-header">Example 2.3</div></div>
-
-```javascript
-class Promise {
-  // `executor` takes 2 parameters, `resolve()` and `reject()`.
-  // The executor function is responsible for calling `resolve()`
-  // or `reject()` when the async operation succeeded (resolved)
-  // or failed (rejected).
-  constructor(executor) {}
-
-  // `onFulfilled` is called if the promise is fulfilled, and
-  // `onRejected` if the promise is rejected. For now, you can
-  // think of 'fulfilled' and 'resolved' as the same thing.
-  then(onFulfilled, onRejected) {}
-}
-```
-
-
 With this in mind, below is a first draft of a promise constructor that implements
 the state transitions. Note that the property names `state`, `resolve`,
-`reject`, and `value` used below are non-standard. Actual ES6 promises do *not*
-expose these properties publicly, so don't try to use `p.value` to get the value of a
-promise or call `p.resolve()` to resolve a real promise. This promise
-implementation is meant to be a didactic example, and is not meant to be a
-rigorous implementation of the promise spec.
-
-<div class="page-break"></div>
-
-<br>
+`reject`, and `value` used below are non-standard. Actual ES6 promises do **not**
+expose these properties publicly, so don't try to use `p.value` or `p.resolve()`
+with a native JavaScript promise.
 
 <div class="example-header-wrap"><div class="example-header">Example 2.4</div></div>
 
@@ -131,17 +100,17 @@ rigorous implementation of the promise spec.
 ```
 
 The promise constructor manages the promise's state and calls the executor
-function. However, you still need to implement the `then()` function, which
-lets you define handlers that run when a promise is settled. The `then()`
+function. You also need to implement the `then()` function that
+let clients define handlers that run when a promise is settled. The `then()`
 function takes 2 function parameters, `onFulfilled()` and `onRejected()`.
 A promise must call the `onFulfilled()` callback if the promise is fulfilled,
 and `onRejected()` if the promise is rejected.
 
-For now, `then()` is simple, its job will be to track `onFulfilled()` and
-`onRejected()` in the `chained` array so `resolve()` and `reject()` can call
+For now, `then()` is simple, it push `onFulfilled()` and
+`onRejected()` onto an array `chained`. Then, `resolve()` and `reject()` will call
 them when the promise is fulfilled or rejected. If the promise is already
-settled, the `then()` function will call `onFulfilled()` or `onRejected()`
-immediately.
+settled, the `then()` function will queue up `onFulfilled()` or `onRejected()`
+to run on the next tick of the event loop using `setImmediate()`.
 
 <div class="example-header-wrap"><div class="example-header">Example 2.5</div></div>
 
@@ -159,3 +128,7 @@ custom `Promise` class with async/await.
 ```javascript
 [require:example 2.6$]
 ```
+
+## Promise Chaining
+
+Promises have a 
