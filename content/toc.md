@@ -13,6 +13,7 @@
 ## 2. Promises From The Ground Up [16](#page=17)
 
 1. Promise Chaining [19](#page=20)
+2. `catch()` and Other Helpers [23](#page=24)
 
 ## 3. Async/Await Internals
 

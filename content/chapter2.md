@@ -125,10 +125,212 @@ presence of a `then()` function. In general, any object that has a `then()`
 function is called a _thenable_ in JavaScript. Below is an example of using the
 custom `Promise` class with async/await.
 
+<div class="example-header-wrap"><div class="example-header">Example 2.6</div></div>
+
 ```javascript
 [require:example 2.6$]
 ```
 
 ## Promise Chaining
 
-Promises have a 
+One key feature that the promise implementation thus far does not support is
+promise chaining. Promise chaining is a common pattern for keeping async code
+flat, although it has become far less useful now that generators and async/await
+have widespread support. Here's how the `getWikipediaHeaders()` function
+from the introduction looks with promise chaining:
+
+<div class="example-header-wrap"><div class="example-header">Example 2.7</div></div>
+
+```javascript
+function getWikipediaHeaders() {
+  return stat('./headers.txt').
+    then(res => {
+      if (res == null) {
+        // If you return a promise from `onFulfilled()`, the next
+        // `then()` call's `onFulfilled()` will get called when
+        // the returned promise is fulfilled...
+        return get({ host: 'www.wikipedia.org', port: 80 });
+      }
+      return res;
+    }).
+    then(res => {
+      // So whether the above `onFulfilled()` returns a primitive or a
+      // promise, this `onFulfilled()` gets the headers object
+      return writeFile('./headers.txt', JSON.stringify(res.headers));
+    }).
+    then(() => console.log('Great success!')).
+    catch(err => console.err(err.stack));
+}
+```
+
+While async/await is a superior pattern, promise chaining is still useful,
+and still necessary to complete a robust promise implementation. In order
+to implement promise chaining, you need to make 3 changes to the promise
+implementation from example 2.5:
+
+1. The `then()` function needs to return a promise. The promise returned from `then()` should be resolved with the value returned from `onFulfilled()`
+2. The `resolve()` function needs to check if `value` is a thenable, and, if so, transition to fulfilled or rejected only when `value` transitions to fulfilled or rejected.
+3. If `resolve()` is called with a thenable, the promise needs to stay 'PENDING', but future calls to `resolve()` and `reject()` must be ignored.
+
+The first change, improving the `then()` function, is shown below. There are
+two other changes: `onFulfilled()` and `onRejected()` now have default
+values, and are wrapped in a try/catch.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.8</div></div>
+
+```javascript
+then(_onFulfilled, _onRejected) {
+  // `onFulfilled` is a no-op by default...
+  if (typeof _onFulfilled !== 'function') _onFulfilled = (v => v);
+  // and `onRejected` just rethrows the error by default
+  if (typeof _onRejected !== 'function') {
+    _onRejected = err => { throw err; };
+  }
+  return new Promise((resolve, reject) => {
+    // Wrap `onFulfilled` and `onRejected` for two reasons:
+    // consistent async and `try/catch`
+    const onFulfilled = res => setImmediate(() => {
+      try {
+        resolve(_onFulfilled(res));
+      } catch (err) { reject(err); }
+    });
+    const onRejected = err => setImmediate(() => {
+      try {
+        // Note this is `resolve()`, **not** `reject()`. The `then()`
+        // promise will be fulfilled if `onRejected` doesn't rethrow
+        resolve(_onRejected(err));
+      } catch (err) { reject(err); }
+    });
+
+    if (this.state === 'FULFILLED') return onFulfilled(this.value);
+    if (this.state === 'REJECTED') return onRejected(this.value);
+    this.chained.push({ onFulfilled, onRejected });
+  });
+}
+```
+
+Now `then()` returns a promise. However, there's still work to be done: if
+`onFulfilled()` returns a promise, `resolve()` needs to be able to handle it.
+In order to support this, the `resolve()` function will need to use `then()`
+in a two-step recursive dance. Below is the expanded `resolve()` function
+that shows the 2nd necessary change.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.9</div></div>
+
+```javascript
+resolve(value) {
+  if (this.state !== 'PENDING') return;
+  if (value === this) {
+    return this.reject(TypeError(`Can't resolve promise with itself`);
+  }
+  // Is `value` a thenable? If so, fulfill/reject this promise when
+  // `value` fulfills or rejects. The Promises/A+ spec calls this
+  // process "assimilating" the other promise (resistance is futile).
+  const then = this._getThenProperty(v);
+  if (typeof then === 'function') {
+    try {
+      return then.call(value, v => this.resolve(v),
+        err => this.reject(err));
+    } catch (error) {
+      return reject(error);
+    }
+  }
+
+  // If `value` is **not** a thenable, transition to fulfilled
+  this.state = 'FULFILLED';
+  this.value = value;
+  this.chained.
+    forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
+}
+// Helper to wrap getting the `then()` property because the Promises/A+
+// spec has 2 tricky details: you can only access the `then` property
+// once, and if getting `value.then` throws the promise should reject
+_getThenProperty(value) {
+  if (value == null) return null;
+  if (!['object', 'function'].includes(typeof value)) return null;
+  try {
+    return value.then;
+  } catch (error) {
+    // Unlikely edge case, Promises/A+ section 2.3.3.2 enforces this
+    this.reject(error);
+  }
+}
+```
+
+Finally, the third change, ensuring that a promise doesn't change state
+once `resolve()` is called with a thenable, requires changes to both
+`resolve()` and the promise constructor. The motivation for this change
+is to ensure that `p2` in the below example is fulfilled, **not** rejected.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.10</div></div>
+
+```javascript
+const p1 = new Promise(resolve => setTimeout(resolve, 50));
+const p2 = new Promise(resolve => {
+  resolve(p1);
+  throw new Error('Oops!'); // Ignored because `resolve()` was called
+});
+```
+
+One way to achieve this is to create a helper function that wraps
+`this.resolve()` and `this.reject()` that ensures `resolve()` and `reject()`
+can only be called once.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
+
+```javascript
+// After you call `resolve()` with a promise, extra `resolve()` and
+// `reject()` calls will be ignored despite the 'PENDING' state
+_wrapResolveReject() {
+  let called = false;
+  const resolve = v => {
+    if (called) return;
+    called = true;
+    this.resolve(v);
+  };
+  const reject = err => {
+    if (called) return;
+    called = true;
+    this.reject(err);
+  };
+  return { resolve, reject };
+}
+```
+
+Once you have this `_wrapResolveReject()` helper, you need to use it in
+`resolve()`:
+
+<div class="example-header-wrap"><div class="example-header">Example 2.12</div></div>
+
+```javascript
+resolve(value) { // Beginning omitted for brevity
+  if (typeof then === 'function') {
+    // If `then()` calls `resolve()` with a 'PENDING' promise and then
+    // throws, the `then()` promise will be fulfilled like example 2.10
+    const { resolve, reject } = this._wrapResolveReject();
+    try {
+      return then.call(value, resolve, reject);
+    } catch (error) { return reject(error); }
+  }
+} // End omitted for brevity
+```
+
+Also, you need to use `_wrapResolveReject()` in the constructor itself:
+
+<div class="example-header-wrap"><div class="example-header">Example 2.13</div></div>
+
+```javascript
+constructor(executor) { // Beginning omitted for brevity
+  // This makes the promise class handle example 2.10 correctly...
+  const { resolve, reject } = this._wrapResolveReject();
+  try {
+    executor(resolve, reject);
+  } catch (err) {
+    // Because if `executor` calls `resolve()` and then throws,
+    // this `reject()` will do nothing.
+    reject(err);
+  }
+}
+```
+
+## `catch()` and Other Helpers

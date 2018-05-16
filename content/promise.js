@@ -19,7 +19,6 @@ class Promise {
     this.executor = executor;
 
     const { resolve, reject } = this._wrapResolveReject();
-
     try {
       // Reject if the executor function throws a sync error
       executor(resolve, reject);
@@ -48,12 +47,12 @@ class Promise {
   }
 
   then(_onFulfilled, _onRejected) {
-    // Ensure `onFulfilled` and `onRejected` are always functions. If
-    // `null` or some other value, `onFulfilled` is a noop...
+    // Defaults to ensure `onFulfilled` and `onRejected` are always
+    // functions. `onFulfilled` is a no-op by default...
     if (typeof _onFulfilled !== 'function') {
       _onFulfilled = (v => v);
     }
-    // and `onRejected` just rethrows the error
+    // and `onRejected` just rethrows the error by default
     if (typeof _onRejected !== 'function') {
       _onRejected = err => { throw err; };
     }
@@ -81,12 +80,11 @@ class Promise {
     });
   }
 
-  resolve(v) {
+  resolve(value) {
     if (this.state !== 'PENDING') return;
-    if (v === this) {
-      return this.reject(new TypeError('Cannot resolve promise with itself'));
+    if (value === this) {
+      return this.reject(TypeError(`Can't resolve promise with itself`));
     }
-
     // Is `value` a thenable? If so, fulfill/reject this promise when
     // `value` fulfills or rejects. The Promises/A+ spec calls this
     // process "assimilating" the other promise (resistance is futile).
@@ -98,7 +96,7 @@ class Promise {
       // that `then()` returns will be fulfilled.
       const { resolve, reject } = this._wrapResolveReject();
       try {
-        return then.call(v, resolve, reject);
+        return then.call(value, resolve, reject);
       } catch (error) {
         return reject(error);
       }
@@ -106,8 +104,9 @@ class Promise {
 
     // If `value` is **not** a thenable, transition to fulfilled
     this.state = 'FULFILLED';
-    this.value = v;
-    this.chained.forEach(({ onFulfilled }) => setImmediate(onFulfilled, v));
+    this.value = value;
+    this.chained.
+      forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
   }
 
   reject(v) {
