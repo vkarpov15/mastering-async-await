@@ -5,6 +5,18 @@ const assert = require('assert');
 describe('Chapter 2 Examples', function() {
   let Promise25;
 
+  let logged = [];
+  const _console = {
+    logged: [],
+    log: function() {
+      _console.logged.push(Array.prototype.slice.call(arguments));
+    }
+  };
+
+  beforeEach(function() {
+    _console.logged = [];
+  });
+
   it('example 2.2', function() {
     const p = new Promise((resolve, reject) => {
       resolve('foo');
@@ -27,9 +39,7 @@ describe('Chapter 2 Examples', function() {
         try {
           // Reject if the executor throws a sync error
           executor(v => this.resolve(v), err => this.reject(err));
-        } catch (err) {
-          this.reject(err);
-        }
+        } catch (err) { this.reject(err); }
       }
       // Define `resolve()` and `reject()` to change the promise state
       resolve(value) {
@@ -159,6 +169,67 @@ describe('Chapter 2 Examples', function() {
     // acquit:ignore:start
     const Promise = Promise25;
     return test();
+    // acquit:ignore:end
+  });
+
+  it('example 2.15', function() {
+    const originalError = new Error('Oops!');
+    const p = new Promise((_, reject) => reject(originalError)).
+      then(() => console.log('This will not print')).
+      then(() => console.log('Nor will this')).
+      // The `onFulfilled()` handlers above get skipped. Each of the
+      // `then()` promises above reject with the original error
+      catch(err => assert.ok(err === originalError));
+    // acquit:ignore:start
+    return p;
+    // acquit:ignore:end
+  });
+
+  it('example 2.16', function() {
+    // Yes, this is actually a thenable. When it comes to promises, the
+    // letter of the law overrules the spirit of the law.
+    const thenable = { then: () => { throw new Error('Oops!'); } };
+    // acquit:ignore:start
+    const console = _console;
+    // acquit:ignore:end
+    // But `thenable` doesn't have `catch()`, so use `Promise.resolve()`
+    // to convert it to a promise and use `catch()`
+    const p = Promise.resolve(thenable).
+      catch(err => console.log(err.message)); // Prints "Oops!"
+    // acquit:ignore:start
+    return p.then(() => assert.deepEqual(console.logged, [['Oops!']]));
+    // acquit:ignore:end
+  });
+
+  it('example 2.18', async function() {
+    async function run() {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      console.log('run(): running');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      console.log('run(): done');
+    }
+    // acquit:ignore:start
+    const console = _console;
+    // acquit:ignore:end
+
+    console.log('Start running');
+    await Promise.all([run(), run()]);
+    console.log('Done');
+    // Start running
+    // run(): running
+    // run(): running
+    // run(): done
+    // run(): done
+    // Done
+    // acquit:ignore:start
+    assert.deepEqual(console.logged, [
+      ['Start running'],
+      ['run(): running'],
+      ['run(): running'],
+      ['run(): done'],
+      ['run(): done'],
+      ['Done']
+    ]);
     // acquit:ignore:end
   });
 });

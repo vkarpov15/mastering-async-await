@@ -88,7 +88,7 @@ class Promise {
     // Is `value` a thenable? If so, fulfill/reject this promise when
     // `value` fulfills or rejects. The Promises/A+ spec calls this
     // process "assimilating" the other promise (resistance is futile).
-    const then = this._getThenProperty(v);
+    const then = this._getThenProperty(value);
     if (typeof then === 'function') {
       // Important detail: `resolve()` and `reject()` cannot be called
       // more than once. This means if `then()` calls `resolve()` with
@@ -133,11 +133,6 @@ class Promise {
     return this.then(null, onRejected);
   }
 
-  // ------------------------------------
-  // The below functionality is **not** covered in the book, but is necessary
-  // for the es6 promise test suite
-  // ------------------------------------
-
   finally(onFinally) {
     return this.then(
       /* onFulfilled */
@@ -148,25 +143,20 @@ class Promise {
   }
 
   static all(arr) {
-    if (!Array.isArray(arr)) {
-      return _Promise.reject(new TypeError('all() only accepts an array'));
-    }
     let remaining = arr.length;
-    if (arr.length === 0) {
-      return _Promise.resolve([]);
-    }
+    if (remaining === 0) return Promise.resolve([]);
+    // `result` stores the value that each promise is fulfilled with
     let result = [];
-    return new _Promise((resolve, reject) => {
-      arr.forEach((p, i) => {
-        _Promise.resolve(p).then(
-          res => {
-            result[i] = res;
-            --remaining || resolve(result);
-          },
-          err => {
-            reject(err);
-          });
-      });
+    return new Promise((resolve, reject) => {
+      // Loop through every promise in the array and call `then()`. If
+      // the promise fulfills, store the fulfilled value in `result`.
+      // If any promise rejects, the `all()` promise rejects immediately.
+      arr.forEach((p, i) => p.then(
+        res => {
+          result[i] = res;
+          --remaining || resolve(result);
+        },
+        err => reject(err)));
     });
   }
 
@@ -183,11 +173,11 @@ class Promise {
   }
 
   static resolve(v) {
-    return new this(resolve => resolve(v));
+    return new Promise(resolve => resolve(v));
   }
 
   static reject(err) {
-    return new this((resolve, reject) => reject(err));
+    return new Promise((resolve, reject) => reject(err));
   }
 }
 

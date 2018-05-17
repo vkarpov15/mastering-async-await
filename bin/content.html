@@ -327,8 +327,8 @@ with promises and async/await to someone who is comfortable building and debuggi
 a complex app whose core logic is built on async/await. This book is only
 50 pages and is meant to be read in about 2 hours total. You may read it all in
 one sitting, but you would be better served reading one chapter at a time,
-studying the exercises at the end, and getting a good night&#39;s sleep to really
-internalize the information.</p>
+studying the exercises at the end, and getting a good night&#39;s sleep in between
+chapters to really internalize the information.</p>
 <p>This book is broken up into 4 chapters. Each chapter is 12 pages, including
 exercises at the end of each chapter that highlight key lessons from the chapter.
 The exercises require more thought than
@@ -855,10 +855,10 @@ run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =
         <div class="chapter">
           <h1 id="promises-from-the-ground-up">Promises From The Ground Up</h1>
 <p>Async/await is built on top of promises. Async functions return promises, and
-<code>await</code> only pauses execution of an async function when it operates on a promise.
+<code>await</code> only pauses an async function when it operates on a promise.
 In order to grok the internals of async/await, you need to understand how
 promises work from base principles. JavaScript promises didn&#39;t become what they
-are today by accident, they were specifically designed to enable paradigms like
+are by accident, they were carefully designed to enable paradigms like
 async/await.</p>
 <p>In the ES6 spec, a <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor">promise is a class</a> whose
 constructor takes an <code>executor</code> function. Instances of the Promise class have a
@@ -889,7 +889,8 @@ promise is either fulfilled or rejected. Once a promise is settled,
 it <strong>cannot</strong> change state.
 For example, the below promise will remain fulfilled despite the <code>reject()</code> call.
 Once you&#39;ve called <code>resolve()</code> or <code>reject()</code> once, calling <code>resolve()</code> or <code>reject()</code>
-is a no-op.</p>
+is a no-op. This detail is pivotal for async/await, because how would <code>await</code> work
+if a promise changed state from &#39;FULFILLED&#39; to &#39;REJECTED&#39; after an async function was done?</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.2</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
@@ -954,9 +955,7 @@ with a native JavaScript promise.</p>
     <span class="hljs-keyword">try</span> {
       <span class="hljs-comment">// Reject if the executor throws a sync error</span>
       executor(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> <span class="hljs-keyword">this</span>.resolve(v), err =&gt; <span class="hljs-keyword">this</span>.reject(err));
-    } <span class="hljs-keyword">catch</span> (err) {
-      <span class="hljs-keyword">this</span>.reject(err);
-    }
+    } <span class="hljs-keyword">catch</span> (err) { <span class="hljs-keyword">this</span>.reject(err); }
   }
   <span class="hljs-comment">// Define `resolve()` and `reject()` to change the promise state</span>
   resolve(value) {
@@ -1119,7 +1118,7 @@ that shows the 2nd necessary change.</p>
   <span class="hljs-comment">// Is `value` a thenable? If so, fulfill/reject this promise when</span>
   <span class="hljs-comment">// `value` fulfills or rejects. The Promises/A+ spec calls this</span>
   <span class="hljs-comment">// process "assimilating" the other promise (resistance is futile).</span>
-  <span class="hljs-keyword">const</span> then = <span class="hljs-keyword">this</span>._getThenProperty(v);
+  <span class="hljs-keyword">const</span> then = <span class="hljs-keyword">this</span>._getThenProperty(value);
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> then === <span class="hljs-string">'function'</span>) {
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">return</span> then.call(value, v =&gt; <span class="hljs-keyword">this</span>.resolve(v),
@@ -1206,14 +1205,130 @@ _wrapResolveReject() {
   <span class="hljs-keyword">const</span> { resolve, reject } = <span class="hljs-keyword">this</span>._wrapResolveReject();
   <span class="hljs-keyword">try</span> {
     executor(resolve, reject);
-  } <span class="hljs-keyword">catch</span> (err) {
-    <span class="hljs-comment">// Because if `executor` calls `resolve()` and then throws,</span>
-    <span class="hljs-comment">// this `reject()` will do nothing.</span>
-    reject(err);
-  }
+    <span class="hljs-comment">// because if `executor` calls `resolve()` and then throws,</span>
+    <span class="hljs-comment">// the below `reject()` is a no-op</span>
+  } <span class="hljs-keyword">catch</span> (err) { reject(err); }
 }
 </code></pre>
+<p>With all these changes, the complete promise implementation, which you can
+find at <a href="http://bit.ly/simple-promise">bit.ly/simple-promise</a>, now passes
+all 872 test cases in the <a href="https://promisesaplus.com/">Promises/A+ spec</a>.
+The Promises/A+ spec is <a href="https://promisesaplus.com/implementations#the-ecmascript-specification">a subset of the ES6 promise spec</a> that focuses on <code>then()</code> and the promise constructor.</p>
 <h2 id="-catch-and-other-helpers"><code>catch()</code> and Other Helpers</h2>
+<p>The ES6 promise spec is a superset of the Promises/A+ spec that adds several
+convenient helper methods on top of the <code>then()</code> function. The most commonly
+used helper is the <code>catch()</code> function. Like the synchronous <code>catch</code> keyword, the
+<code>catch()</code> function typically appears at the end of a promise chain to handle
+any errors that occurred.</p>
+<p>The <code>catch()</code> function may sound complex, but it is just a thin layer of syntactic
+sugar on top of <code>then()</code>. The <code>catch()</code> is so sticky because
+the name <code>catch()</code> is a powerful metaphor for explaining what this helper is used for.
+Below is the full implementation of <code>catch()</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.14</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">catch</span>(onRejected) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.then(<span class="hljs-literal">null</span>, onRejected);
+}
+</code></pre>
+<p>Why does this work? Recall from example 2.8 that <code>then()</code> has a default <code>onRejected()</code>
+argument that rethrows the error. So when a promise is rejected, subsequent <code>then()</code>
+calls that only specify an <code>onFulfilled()</code> handler are skipped.</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.15</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> originalError = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>);
+<span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_, reject</span>) =&gt;</span> reject(originalError)).
+  then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'This will not print'</span>)).
+  then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Nor will this'</span>)).
+  <span class="hljs-comment">// The `onFulfilled()` handlers above get skipped. Each of the</span>
+  <span class="hljs-comment">// `then()` promises above reject with the original error</span>
+  <span class="hljs-keyword">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> assert.ok(err === originalError));
+</code></pre>
+<p>There are several other helpers in the ES6 promise spec. The <code>Promise.resolve()</code>
+and <code>Promise.reject()</code> helpers are both commonly used for testing and examples,
+as well as to convert a thenable into a fully fledged promise.</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.16</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-comment">// Yes, this is actually a thenable. When it comes to promises, the</span>
+<span class="hljs-comment">// letter of the law overrules the spirit of the law.</span>
+<span class="hljs-keyword">const</span> thenable = { <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); } };
+<span class="hljs-comment">// But `thenable` doesn't have `catch()`, so use `Promise.resolve()`</span>
+<span class="hljs-comment">// to convert it to a promise and use `catch()`</span>
+<span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(thenable).
+  catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(err.message)); <span class="hljs-comment">// Prints "Oops!"</span>
+</code></pre>
+<p>Below is the implementation of <code>resolve()</code> and <code>reject()</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.17</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">static</span> resolve(v) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> resolve(v));
+}
+<span class="hljs-keyword">static</span> reject(err) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> reject(err));
+}
+</code></pre>
+<p>The <code>Promise.all()</code> function is another important helper, because it lets you execute multiple promises in
+parallel and <code>await</code> on the result. <code>Promise.all()</code> is the preferred mechanism
+for executing async functions in parallel. To execute async functions in series,
+you would use a <code>for</code> loop and <code>await</code> on each function call.</p>
+<p>The below code will run two instances of
+the <code>run()</code> function in parallel, and pause execution until they&#39;re both done.</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.18</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">50</span>));
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'run(): running'</span>);
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">50</span>));
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'run(): done'</span>);
+}
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Start running'</span>);
+<span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.all([run(), run()]);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done'</span>);
+<span class="hljs-comment">// Start running</span>
+<span class="hljs-comment">// run(): running</span>
+<span class="hljs-comment">// run(): running</span>
+<span class="hljs-comment">// run(): done</span>
+<span class="hljs-comment">// run(): done</span>
+<span class="hljs-comment">// Done</span>
+</code></pre>
+<p><code>Promise.all()</code> is just a convenient wrapper around calling <code>then()</code> on an array
+of promises and waiting for the result. Below is a simplified implementation of
+<code>Promise.all()</code>:</p>
+<div class="example-header-wrap"><div class="example-header">Example 2.19</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">static</span> all(arr) {
+  <span class="hljs-keyword">let</span> remaining = arr.length;
+  <span class="hljs-keyword">if</span> (remaining === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve([]);
+  <span class="hljs-comment">// `result` stores the value that each promise is fulfilled with</span>
+  <span class="hljs-keyword">let</span> result = [];
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+    <span class="hljs-comment">// Loop through every promise in the array and call `then()`. If</span>
+    <span class="hljs-comment">// the promise fulfills, store the fulfilled value in `result`.</span>
+    <span class="hljs-comment">// If any promise rejects, the `all()` promise rejects immediately.</span>
+    arr.forEach(<span class="hljs-function">(<span class="hljs-params">p, i</span>) =&gt;</span> p.then(
+      <span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> {
+        result[i] = res;
+        --remaining || resolve(result);
+      },
+      err =&gt; reject(err)));
+  });
+}
+</code></pre>
+<p>There is one more helper function defined in the ES6 spec, <code>Promise.race()</code>,
+that will be an exercise. Other than <code>race()</code> and some minor details like
+support for subclassing, the promise implementation in this chapter is
+compliant with the ES6 spec. In the next chapter, you&#39;ll use your
+understanding of promises to monkey-patch async/await and figure out what&#39;s
+happening under the hood.</p>
+<p>The key takeaways from this journey
+of building a promise library from scratch are:</p>
+<ul>
+<li>A promise can be in one of 3 states: pending, fulfilled, or rejected. It can also be locked in to match the state of another promise if you call <code>resolve(promise)</code>.</li>
+<li>Once a promise is settled, it stays settled with the same value forever</li>
+<li>The <code>then()</code> function and the promise constructor are the basis for all other promise functions. The <code>catch()</code>, <code>all()</code>, <code>resolve()</code>, and <code>reject()</code> helpers are all syntactic sugar on top of <code>then()</code> and the constructor.</li>
+</ul>
+<p>But before you start tinkering with the internals of async/await, here&#39;s 3 exercises
+to expand your understanding of promises.</p>
 
         </div>
       </body>

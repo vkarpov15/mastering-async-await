@@ -1,10 +1,10 @@
 # Promises From The Ground Up
 
 Async/await is built on top of promises. Async functions return promises, and
-`await` only pauses execution of an async function when it operates on a promise.
+`await` only pauses an async function when it operates on a promise.
 In order to grok the internals of async/await, you need to understand how
 promises work from base principles. JavaScript promises didn't become what they
-are today by accident, they were specifically designed to enable paradigms like
+are by accident, they were carefully designed to enable paradigms like
 async/await.
 
 In the ES6 spec, a [promise is a class](http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor) whose
@@ -39,7 +39,8 @@ promise is either fulfilled or rejected. Once a promise is settled,
 it **cannot** change state.
 For example, the below promise will remain fulfilled despite the `reject()` call.
 Once you've called `resolve()` or `reject()` once, calling `resolve()` or `reject()`
-is a no-op.
+is a no-op. This detail is pivotal for async/await, because how would `await` work
+if a promise changed state from 'FULFILLED' to 'REJECTED' after an async function was done?
 
 <div class="example-header-wrap"><div class="example-header">Example 2.2</div></div>
 
@@ -226,7 +227,7 @@ resolve(value) {
   // Is `value` a thenable? If so, fulfill/reject this promise when
   // `value` fulfills or rejects. The Promises/A+ spec calls this
   // process "assimilating" the other promise (resistance is futile).
-  const then = this._getThenProperty(v);
+  const then = this._getThenProperty(value);
   if (typeof then === 'function') {
     try {
       return then.call(value, v => this.resolve(v),
@@ -325,12 +326,124 @@ constructor(executor) { // Beginning omitted for brevity
   const { resolve, reject } = this._wrapResolveReject();
   try {
     executor(resolve, reject);
-  } catch (err) {
-    // Because if `executor` calls `resolve()` and then throws,
-    // this `reject()` will do nothing.
-    reject(err);
-  }
+    // because if `executor` calls `resolve()` and then throws,
+    // the below `reject()` is a no-op
+  } catch (err) { reject(err); }
 }
 ```
 
+With all these changes, the complete promise implementation, which you can
+find at [bit.ly/simple-promise](http://bit.ly/simple-promise), now passes
+all 872 test cases in the [Promises/A+ spec](https://promisesaplus.com/).
+The Promises/A+ spec is [a subset of the ES6 promise spec](https://promisesaplus.com/implementations#the-ecmascript-specification) that focuses on `then()` and the promise constructor.
+
 ## `catch()` and Other Helpers
+
+The ES6 promise spec is a superset of the Promises/A+ spec that adds several
+convenient helper methods on top of the `then()` function. The most commonly
+used helper is the `catch()` function. Like the synchronous `catch` keyword, the
+`catch()` function typically appears at the end of a promise chain to handle
+any errors that occurred.
+
+The `catch()` function may sound complex, but it is just a thin layer of syntactic
+sugar on top of `then()`. The `catch()` is so sticky because
+the name `catch()` is a powerful metaphor for explaining what this helper is used for.
+Below is the full implementation of `catch()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.14</div></div>
+
+```javascript
+catch(onRejected) {
+  return this.then(null, onRejected);
+}
+```
+
+Why does this work? Recall from example 2.8 that `then()` has a default `onRejected()`
+argument that rethrows the error. So when a promise is rejected, subsequent `then()`
+calls that only specify an `onFulfilled()` handler are skipped.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.15</div></div>
+
+```javascript
+[require: example 2.15$]
+```
+
+There are several other helpers in the ES6 promise spec. The `Promise.resolve()`
+and `Promise.reject()` helpers are both commonly used for testing and examples,
+as well as to convert a thenable into a fully fledged promise.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.16</div></div>
+
+```javascript
+[require: example 2.16$]
+```
+
+Below is the implementation of `resolve()` and `reject()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.17</div></div>
+
+```javascript
+static resolve(v) {
+  return new Promise(resolve => resolve(v));
+}
+static reject(err) {
+  return new Promise((resolve, reject) => reject(err));
+}
+```
+
+The `Promise.all()` function is another important helper, because it lets you execute multiple promises in
+parallel and `await` on the result. `Promise.all()` is the preferred mechanism
+for executing async functions in parallel. To execute async functions in series,
+you would use a `for` loop and `await` on each function call.
+
+The below code will run two instances of
+the `run()` function in parallel, and pause execution until they're both done.
+
+<div class="example-header-wrap"><div class="example-header">Example 2.18</div></div>
+
+```javascript
+[require: example 2.18$]
+```
+
+`Promise.all()` is just a convenient wrapper around calling `then()` on an array
+of promises and waiting for the result. Below is a simplified implementation of
+`Promise.all()`:
+
+<div class="example-header-wrap"><div class="example-header">Example 2.19</div></div>
+
+```javascript
+static all(arr) {
+  let remaining = arr.length;
+  if (remaining === 0) return Promise.resolve([]);
+  // `result` stores the value that each promise is fulfilled with
+  let result = [];
+  return new Promise((resolve, reject) => {
+    // Loop through every promise in the array and call `then()`. If
+    // the promise fulfills, store the fulfilled value in `result`.
+    // If any promise rejects, the `all()` promise rejects immediately.
+    arr.forEach((p, i) => p.then(
+      res => {
+        result[i] = res;
+        --remaining || resolve(result);
+      },
+      err => reject(err)));
+  });
+}
+```
+
+There is one more helper function defined in the ES6 spec, `Promise.race()`,
+that will be an exercise. Other than `race()` and some minor details like
+support for subclassing, the promise implementation in this chapter is
+compliant with the ES6 spec. In the next chapter, you'll use your
+understanding of promises to monkey-patch async/await and figure out what's
+happening under the hood.
+
+The key takeaways from this journey
+of building a promise library from scratch are:
+
+* A promise can be in one of 3 states: pending, fulfilled, or rejected. It can also be locked in to match the state of another promise if you call `resolve(promise)`.
+* Once a promise is settled, it stays settled with the same value forever
+* The `then()` function and the promise constructor are the basis for all other promise functions. The `catch()`, `all()`, `resolve()`, and `reject()` helpers are all syntactic sugar on top of `then()` and the constructor.
+
+But before you start tinkering with the internals of async/await, here's 3 exercises
+to expand your understanding of promises.
