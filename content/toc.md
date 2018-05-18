@@ -17,6 +17,12 @@
 3. Exercise 1: Promise Chains in Action [26](#page=27)
 4. Exercise 2: `Promise.race()`
 
-## 3. Async/Await Internals
+## 3. Async/Await Internals [28](#page=29)
+
+1. Concurrency
 
 ## 4. Async/Await in the Wild
+
+1. With Express
+2. With MongoDB
+3. With React and Redux

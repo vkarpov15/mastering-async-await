@@ -262,6 +262,9 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>Exercise 2: <code>Promise.race()</code></li>
 </ol>
 <h2 id="3-async-await-internals">3. Async/Await Internals</h2>
+<ol>
+<li>Concurrency</li>
+</ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 
         </div>
@@ -1419,6 +1422,15 @@ test1().then(test2).then(<span class="hljs-function"><span class="hljs-params">(
     e =&gt; { <span class="hljs-keyword">if</span> (e !== error) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: wrong error'</span>); });
 }
 </code></pre>
+
+        </div>
+        <div class="chapter">
+          <h1 id="async-await-internals">Async/Await Internals</h1>
+<p>Promises are the fundamental tool for integrating with async/await. Now
+that you&#39;ve seen how promises work from the ground up, it&#39;s time to go from
+the micro to the macro and see what happens when you <code>await</code> on a promise.
+Even though async functions are flat like synchronous functions, they&#39;re
+as asynchronous as the most callback-laden banana code under the hood.</p>
 
         </div>
       </body>
