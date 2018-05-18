@@ -1123,7 +1123,7 @@ that shows the 2nd necessary change.</p>
 <pre><code class="lang-javascript">resolve(value) {
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
   <span class="hljs-keyword">if</span> (value === <span class="hljs-keyword">this</span>) {
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.reject(<span class="hljs-built_in">TypeError</span>(<span class="hljs-string">`Can't resolve promise with itself`</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.reject(<span class="hljs-built_in">TypeError</span>(<span class="hljs-string">`Can't resolve promise with itself`</span>));
   }
   <span class="hljs-comment">// Is `value` a thenable? If so, fulfill/reject this promise when</span>
   <span class="hljs-comment">// `value` fulfills or rejects. The Promises/A+ spec calls this</span>
@@ -1337,7 +1337,7 @@ of building a promise library from scratch are:</p>
 <li>Once a promise is settled, it stays settled with the same value forever</li>
 <li>The <code>then()</code> function and the promise constructor are the basis for all other promise functions. The <code>catch()</code>, <code>all()</code>, <code>resolve()</code>, and <code>reject()</code> helpers are all syntactic sugar on top of <code>then()</code> and the constructor.</li>
 </ul>
-<p>But before you start tinkering with the internals of async/await, here&#39;s 3 exercises
+<p>But before you start tinkering with the internals of async/await, here&#39;s 2 exercises
 to expand your understanding of promises.</p>
 <div class="page-break"></div>
 
@@ -1380,7 +1380,45 @@ run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =
 <h1 id="exercise-2-promise-race-">Exercise 2: <code>Promise.race()</code></h1>
 <p>The <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">ES6 promise spec</a> has one more helper method that this book hasn&#39;t covered yet:
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race"><code>Promise.race()</code></a>.
-The </p>
+Like <code>Promise.all()</code>, <code>Promise.race()</code> takes in an array of promises, but
+<code>Promise.race()</code> returns a promise that resolves or rejects to the same value
+that the first promise to settle resolves or rejects to. For example:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">50</span>));
+<span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">250</span>));
+<span class="hljs-comment">// Prints "1", because `p1` resolves first</span>
+<span class="hljs-built_in">Promise</span>.race([p1, p2]).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(res));
+</code></pre>
+<p>Implement a function <code>race()</code>, that, given an array of promises, returns a
+promise that resolves or rejects as soon as one of the promises in the array
+settles, with the same value.</p>
+<p>Hint: remember, once a promise is settled, calling <code>resolve()</code> or <code>reject()</code> is a
+no-op.</p>
+<p>Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-22"><code>http://bit.ly/async-await-exercise-22</code></a>.</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">race</span>(<span class="hljs-params">arr</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Implement this function'</span>));
+}
+
+<span class="hljs-comment">// The below are tests to help you check your `race()` implementation</span>
+test1().then(test2).then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done!'</span>)).
+  catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test1</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">10</span>));
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> f = <span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> { <span class="hljs-keyword">if</span> (v !== <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test1 failed!'</span>); };
+  <span class="hljs-keyword">return</span> race([p1, p2]).then(f);
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test2</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> error = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Expected error'</span>);
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> p3 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> reject(error));
+  <span class="hljs-keyword">return</span> race([p1, p2, p3]).then(
+    <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: `race()` promise must reject'</span>); },
+    e =&gt; { <span class="hljs-keyword">if</span> (e !== error) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: wrong error'</span>); });
+}
+</code></pre>
 
         </div>
       </body>

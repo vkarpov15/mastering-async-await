@@ -222,7 +222,7 @@ that shows the 2nd necessary change.
 resolve(value) {
   if (this.state !== 'PENDING') return;
   if (value === this) {
-    return this.reject(TypeError(`Can't resolve promise with itself`);
+    return this.reject(TypeError(`Can't resolve promise with itself`));
   }
   // Is `value` a thenable? If so, fulfill/reject this promise when
   // `value` fulfills or rejects. The Promises/A+ spec calls this
@@ -445,7 +445,7 @@ of building a promise library from scratch are:
 * Once a promise is settled, it stays settled with the same value forever
 * The `then()` function and the promise constructor are the basis for all other promise functions. The `catch()`, `all()`, `resolve()`, and `reject()` helpers are all syntactic sugar on top of `then()` and the constructor.
 
-But before you start tinkering with the internals of async/await, here's 3 exercises
+But before you start tinkering with the internals of async/await, here's 2 exercises
 to expand your understanding of promises.
 
 <div class="page-break"></div>
@@ -501,4 +501,49 @@ run().catch(error => console.error(error.stack));
 
 The [ES6 promise spec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) has one more helper method that this book hasn't covered yet:
 [`Promise.race()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
-The 
+Like `Promise.all()`, `Promise.race()` takes in an array of promises, but
+`Promise.race()` returns a promise that resolves or rejects to the same value
+that the first promise to settle resolves or rejects to. For example:
+
+```javascript
+const p1 = new Promise(resolve => setTimeout(() => resolve(1), 50));
+const p2 = new Promise(resolve => setTimeout(() => resolve(2), 250));
+// Prints "1", because `p1` resolves first
+Promise.race([p1, p2]).then(res => console.log(res));
+```
+
+Implement a function `race()`, that, given an array of promises, returns a
+promise that resolves or rejects as soon as one of the promises in the array
+settles, with the same value.
+
+Hint: remember, once a promise is settled, calling `resolve()` or `reject()` is a
+no-op.
+
+Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-22`](http://bit.ly/async-await-exercise-22).
+
+```javascript
+function race(arr) {
+  return Promise.reject(new Error('Implement this function'));
+}
+
+// The below are tests to help you check your `race()` implementation
+test1().then(test2).then(() => console.log('Done!')).
+  catch(error => console.error(error.stack));
+function test1() {
+  const p1 = new Promise(resolve => setTimeout(() => resolve(1), 10));
+  const p2 = new Promise(resolve => setTimeout(() => resolve(2), 100));
+  const f = v => { if (v !== 1) throw Error('test1 failed!'); };
+  return race([p1, p2]).then(f);
+}
+function test2() {
+  const error = new Error('Expected error');
+  const p1 = new Promise(resolve => setTimeout(() => resolve(1), 100));
+  const p2 = new Promise(resolve => setTimeout(() => resolve(2), 100));
+  const p3 = new Promise((resolve, reject) => reject(error));
+  return race([p1, p2, p3]).then(
+    () => { throw Error('test2: `race()` promise must reject'); },
+    e => { if (e !== error) throw Error('test2: wrong error'); });
+}
+```
