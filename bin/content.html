@@ -62,6 +62,14 @@ p code {
   background-color: #f6f6f6;
 }
 
+li code {
+  color: #232323;
+  font-size: 0.9em;
+  padding: 1px 2px 2px 2px;
+  color: #c7254e;
+  background-color: #f6f6f6;
+}
+
 .example-header-wrap {
   position: relative;
   height: 0px;
@@ -250,6 +258,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <ol>
 <li>Promise Chaining <a href="#page=20">19</a></li>
 <li><code>catch()</code> and Other Helpers <a href="#page=24">23</a></li>
+<li>Exercise 1: Promise Chains in Action <a href="#page=27">26</a></li>
+<li>Exercise 2: <code>Promise.race()</code></li>
 </ol>
 <h2 id="3-async-await-internals">3. Async/Await Internals</h2>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
@@ -781,7 +791,7 @@ gets a list of blog posts. Below is an example post:</li>
   <span class="hljs-string">"title"</span>:<span class="hljs-string">"Setting Up Circle CI With Node.js"</span>,
   <span class="hljs-string">"date"</span>:<span class="hljs-string">"2016-03-04T00:00:00.000Z"</span>,
   <span class="hljs-string">"tags"</span>:[<span class="hljs-string">"NodeJS"</span>],
-  <span class="hljs-string">"id"</span>:<span class="hljs-number">51</span>}
+  <span class="hljs-string">"id"</span>:<span class="hljs-number">51</span> }
 </code></pre><ul>
 <li><code>/post?id=${id}</code>
 gets the markdown content of a blog post by its <code>id</code> property.
@@ -1267,10 +1277,7 @@ as well as to convert a thenable into a fully fledged promise.</p>
 }
 </code></pre>
 <p>The <code>Promise.all()</code> function is another important helper, because it lets you execute multiple promises in
-parallel and <code>await</code> on the result. <code>Promise.all()</code> is the preferred mechanism
-for executing async functions in parallel. To execute async functions in series,
-you would use a <code>for</code> loop and <code>await</code> on each function call.</p>
-<p>The below code will run two instances of
+parallel and <code>await</code> on the result. The below code will run two instances of
 the <code>run()</code> function in parallel, and pause execution until they&#39;re both done.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.18</div></div>
 
@@ -1291,6 +1298,9 @@ the <code>run()</code> function in parallel, and pause execution until they&#39;
 <span class="hljs-comment">// run(): done</span>
 <span class="hljs-comment">// Done</span>
 </code></pre>
+<p><code>Promise.all()</code> is the preferred mechanism for executing async functions in parallel.
+To execute async functions in series, you would use a <code>for</code> loop and <code>await</code> on
+each function call.</p>
 <p><code>Promise.all()</code> is just a convenient wrapper around calling <code>then()</code> on an array
 of promises and waiting for the result. Below is a simplified implementation of
 <code>Promise.all()</code>:</p>
@@ -1329,6 +1339,48 @@ of building a promise library from scratch are:</p>
 </ul>
 <p>But before you start tinkering with the internals of async/await, here&#39;s 3 exercises
 to expand your understanding of promises.</p>
+<div class="page-break"></div>
+
+<h1 id="exercise-1-promise-chains-in-action">Exercise 1: Promise Chains in Action</h1>
+<p>The purpose of this exercise is to get comfortable with using promise chaining.
+While promise chaining is less useful now that async/await exists, promise
+chaining is a useful complement to async/await in much the same way that
+<code>forEach()</code> and <code>filter()</code> are useful for chaining array transformations.</p>
+<p>Using the same endpoints as Exercise 1.1, which are explained below, find the blog
+post entitled &quot;Unhandled Promise Rejections in Node.js&quot;, load its content, and find the number of times the phrase &quot;async/await&quot; appears in the <code>content</code>.</p>
+<p>Below are the API endpoints. The API endpoints are hosted on Google Cloud Functions
+at <code>https://us-central1-mastering-async-await.cloudfunctions.net</code></p>
+<ul>
+<li><code>/posts</code> gets a list of blog posts. Below is an example post:</li>
+</ul>
+<pre><code>{ <span class="hljs-string">"src"</span>:<span class="hljs-string">"./lib/posts/20160304_circle_ci.md"</span>,
+  <span class="hljs-string">"title"</span>:<span class="hljs-string">"Setting Up Circle CI With Node.js"</span>,
+  <span class="hljs-string">"date"</span>:<span class="hljs-string">"2016-03-04T00:00:00.000Z"</span>,
+  <span class="hljs-string">"tags"</span>:[<span class="hljs-string">"NodeJS"</span>],
+  <span class="hljs-string">"id"</span>:<span class="hljs-number">51</span> }
+</code></pre><ul>
+<li><code>/post?id=${id}</code> gets the markdown content of a blog post by its <code>id</code> property. The above blog post has <code>id</code> = 0, so you can get its content from this endpoint: <a href="https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0"><code>https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0</code></a>. Try opening this URL in your browser, the output looks like this:</li>
+</ul>
+<pre><code>{<span class="hljs-string">"content"</span>:<span class="hljs-string">"*This post was featured as a guest blog post..."</span>}
+</code></pre><p>Below is the starter code. You may copy this code and run it in Node.js using <a href="https://www.npmjs.com/package/node-fetch">the <code>node-fetch</code> npm module</a>, or you may complete this exercise in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-21"><code>http://bit.ly/async-await-exercise-21</code></a></p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
+  <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net'</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Example of using `fetch()` API</span>
+  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>).
+    then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json()).
+    then(<span class="hljs-function"><span class="hljs-params">posts</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(posts[<span class="hljs-number">0</span>]));
+}
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+</code></pre>
+<div class="page-break"></div>
+
+<h1 id="exercise-2-promise-race-">Exercise 2: <code>Promise.race()</code></h1>
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">ES6 promise spec</a> has one more helper method that this book hasn&#39;t covered yet:
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race"><code>Promise.race()</code></a>.
+The </p>
 
         </div>
       </body>

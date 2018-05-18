@@ -503,7 +503,7 @@ gets a list of blog posts. Below is an example post:
   "title":"Setting Up Circle CI With Node.js",
   "date":"2016-03-04T00:00:00.000Z",
   "tags":["NodeJS"],
-  "id":51}
+  "id":51 }
 ```
 
 - `/post?id=${id}`

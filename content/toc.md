@@ -14,6 +14,8 @@
 
 1. Promise Chaining [19](#page=20)
 2. `catch()` and Other Helpers [23](#page=24)
+3. Exercise 1: Promise Chains in Action [26](#page=27)
+4. Exercise 2: `Promise.race()`
 
 ## 3. Async/Await Internals
 

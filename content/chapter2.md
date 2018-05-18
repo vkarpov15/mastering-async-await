@@ -392,11 +392,7 @@ static reject(err) {
 ```
 
 The `Promise.all()` function is another important helper, because it lets you execute multiple promises in
-parallel and `await` on the result. `Promise.all()` is the preferred mechanism
-for executing async functions in parallel. To execute async functions in series,
-you would use a `for` loop and `await` on each function call.
-
-The below code will run two instances of
+parallel and `await` on the result. The below code will run two instances of
 the `run()` function in parallel, and pause execution until they're both done.
 
 <div class="example-header-wrap"><div class="example-header">Example 2.18</div></div>
@@ -404,6 +400,10 @@ the `run()` function in parallel, and pause execution until they're both done.
 ```javascript
 [require: example 2.18$]
 ```
+
+`Promise.all()` is the preferred mechanism for executing async functions in parallel.
+To execute async functions in series, you would use a `for` loop and `await` on
+each function call.
 
 `Promise.all()` is just a convenient wrapper around calling `then()` on an array
 of promises and waiting for the result. Below is a simplified implementation of
@@ -447,3 +447,58 @@ of building a promise library from scratch are:
 
 But before you start tinkering with the internals of async/await, here's 3 exercises
 to expand your understanding of promises.
+
+<div class="page-break"></div>
+
+# Exercise 1: Promise Chains in Action
+
+The purpose of this exercise is to get comfortable with using promise chaining.
+While promise chaining is less useful now that async/await exists, promise
+chaining is a useful complement to async/await in much the same way that
+`forEach()` and `filter()` are useful for chaining array transformations.
+
+Using the same endpoints as Exercise 1.1, which are explained below, find the blog
+post entitled "Unhandled Promise Rejections in Node.js", load its content, and find the number of times the phrase "async/await" appears in the `content`.
+
+Below are the API endpoints. The API endpoints are hosted on Google Cloud Functions
+at `https://us-central1-mastering-async-await.cloudfunctions.net`
+
+- `/posts` gets a list of blog posts. Below is an example post:
+
+```
+{ "src":"./lib/posts/20160304_circle_ci.md",
+  "title":"Setting Up Circle CI With Node.js",
+  "date":"2016-03-04T00:00:00.000Z",
+  "tags":["NodeJS"],
+  "id":51 }
+```
+
+- `/post?id=${id}` gets the markdown content of a blog post by its `id` property. The above blog post has `id` = 0, so you can get its content from this endpoint: [`https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0`](https://us-central1-mastering-async-await.cloudfunctions.net/post?id=0). Try opening this URL in your browser, the output looks like this:
+
+```
+{"content":"*This post was featured as a guest blog post..."}
+```
+
+Below is the starter code. You may copy this code and run it in Node.js using [the `node-fetch` npm module](https://www.npmjs.com/package/node-fetch), or you may complete this exercise in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-21`](http://bit.ly/async-await-exercise-21)
+
+```javascript
+const root = 'https://' +
+  'us-central1-mastering-async-await.cloudfunctions.net';
+
+function run() {
+  // Example of using `fetch()` API
+  return fetch(`${root}/posts`).
+    then(res => res.json()).
+    then(posts => console.log(posts[0]));
+}
+run().catch(error => console.error(error.stack));
+```
+
+<div class="page-break"></div>
+
+# Exercise 2: `Promise.race()`
+
+The [ES6 promise spec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) has one more helper method that this book hasn't covered yet:
+[`Promise.race()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race).
+The 
