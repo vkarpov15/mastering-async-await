@@ -19,7 +19,8 @@
 
 ## 3. Async/Await Internals [28](#page=29)
 
-1. Concurrency
+1. `await` vs `return`
+2. Concurrency
 
 ## 4. Async/Await in the Wild
 

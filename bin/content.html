@@ -261,11 +261,17 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>Exercise 1: Promise Chains in Action <a href="#page=27">26</a></li>
 <li>Exercise 2: <code>Promise.race()</code></li>
 </ol>
-<h2 id="3-async-await-internals">3. Async/Await Internals</h2>
+<h2 id="3-async-await-internals-28-page-29-">3. Async/Await Internals <a href="#page=29">28</a></h2>
 <ol>
+<li><code>await</code> vs <code>return</code></li>
 <li>Concurrency</li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
+<ol>
+<li>With Express</li>
+<li>With MongoDB</li>
+<li>With React and Redux</li>
+</ol>
 
         </div>
         <div class="chapter">
@@ -1431,6 +1437,24 @@ that you&#39;ve seen how promises work from the ground up, it&#39;s time to go f
 the micro to the macro and see what happens when you <code>await</code> on a promise.
 Even though async functions are flat like synchronous functions, they&#39;re
 as asynchronous as the most callback-laden banana code under the hood.</p>
+<p>As you might have already guessed, <code>await</code> makes JavaScript call <code>then()</code>
+under the hood.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.1</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p = {
+  <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">onFulfilled</span> =&gt;</span> {
+    <span class="hljs-comment">// Prints "then(): function () { [native code] }"</span>
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'then():'</span>, onFulfilled.toString());
+    <span class="hljs-comment">// Only one entry in the stack:</span>
+    <span class="hljs-comment">// Error</span>
+    <span class="hljs-comment">//     at Object.then (/examples/chapter3.test.js:8:21)</span>
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>().stack);
+    onFulfilled(<span class="hljs-string">'Hello, World!'</span>);
+  }
+};
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p); <span class="hljs-comment">// Prints "Hello, World!"</span>
+</code></pre>
 
         </div>
       </body>
