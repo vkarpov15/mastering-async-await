@@ -259,15 +259,17 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>Promise Chaining <a href="#page=20">19</a></li>
 <li><code>catch()</code> and Other Helpers <a href="#page=24">23</a></li>
 <li>Exercise 1: Promise Chains in Action <a href="#page=27">26</a></li>
-<li>Exercise 2: <code>Promise.race()</code></li>
+<li>Exercise 2: <code>Promise.race()</code> <a href="#page=28">27</a></li>
 </ol>
 <h2 id="3-async-await-internals-28-page-29-">3. Async/Await Internals <a href="#page=29">28</a></h2>
 <ol>
-<li><code>await</code> vs <code>return</code></li>
+<li><code>await</code> vs <code>return</code> <a href="#page=30">29</a></li>
 <li>Concurrency</li>
+<li>Best Practices</li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 <ol>
+<li>With Mocha</li>
 <li>With Express</li>
 <li>With MongoDB</li>
 <li>With React and Redux</li>
@@ -1465,7 +1467,6 @@ and then resume later.</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> startId = <span class="hljs-number">0</span>;
 <span class="hljs-keyword">let</span> currentId = <span class="hljs-number">0</span>;
 process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ++currentId);
-
 <span class="hljs-keyword">const</span> p = {
   <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">onFulfilled</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'then():'</span>, currentId - startId); <span class="hljs-comment">// "then(): 1"</span>
@@ -1477,9 +1478,61 @@ process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span>
 <span class="hljs-keyword">await</span> p;
 <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'After:'</span>, currentId - startId); <span class="hljs-comment">// "After: 1"</span>
 </code></pre>
-<p>Notice that the <code>then()</code> function runs on the next tick, even though it is fully
-synchronous. This means that <code>await</code> always pauses execution until at least
-the next tick, even if the thenable is not async. </p>
+<p>Notice that the <code>then()</code> function runs on the next tick, even though it is
+fully synchronous. This means that <code>await</code> always pauses execution until at
+least the next tick, even if the thenable is not async.The same thing happens
+when the awaited promise is rejected. If you call
+<code>onRejected(err)</code>, the <code>await</code> keyword throws <code>err</code> in your function body.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.3</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> startId = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> currentId = <span class="hljs-number">0</span>;
+process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ++currentId);
+<span class="hljs-keyword">const</span> p = {
+  <span class="hljs-attr">then</span>: <span class="hljs-function">(<span class="hljs-params">onFulfilled, onRejected</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'then():'</span>, currentId - startId); <span class="hljs-comment">// "then(): 1</span>
+    <span class="hljs-keyword">return</span> onRejected(<span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+  }
+};
+
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Before:'</span>, currentId - startId); <span class="hljs-comment">// "Before: 0"</span>
+  <span class="hljs-keyword">await</span> p;
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'This does not print'</span>);
+} <span class="hljs-keyword">catch</span> (error) {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'After:'</span>, currentId - startId); <span class="hljs-comment">// "After: 1"</span>
+}
+</code></pre>
+<h2 id="-await-vs-return-"><code>await</code> vs <code>return</code></h2>
+<p>Recall that <code>return</code> in an async function resolves the promise that the async
+function returns. This means you can <code>return</code> a promise. What&#39;s the difference
+between <code>await</code> and <code>return</code>? The obvious answer is that, when you <code>await</code> on
+a promise, JavaScript pauses execution of the async function and resumes later,
+but when you <code>return</code> a promise, JavaScript finishes executing the async
+function. JavaScript doesn&#39;t &quot;resume&quot; executing the function after you <code>return</code>.</p>
+<p>The obvious answer is correct, but has some non-obvious implications
+that tease out how <code>await</code> works. If you wrap <code>await p</code> in a <code>try/catch</code>
+and <code>p</code> is rejected, you can catch the error. What happens if you
+instead <code>return p</code>?</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.4</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+  } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+}
+<span class="hljs-comment">// Prints "Oops!"</span>
+test().then(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(v), err =&gt; <span class="hljs-built_in">console</span>.log(err.message));
+</code></pre>
+<p>Notice that <code>try/catch</code> does <strong>not</strong> catch the rejected promise that you
+returned. Why does only <code>await</code> give you a catchable error when the promise
+is rejected? Because <code>await</code> throws the error when it <em>resumes</em> execution.
+When you <code>return</code> a promise, JavaScript stops executing your async function
+body and kicks off the <code>resolve()</code> process on the async function promise.</p>
+<p>On the other hand, when you <code>await</code> on a promise, JavaScript pauses executing
+your async function and resumes once the promise is settled. When JavaScript
+resumes your async function after <code>await</code>, it throws an error if the awaited
+promise rejected.</p>
 
         </div>
       </body>

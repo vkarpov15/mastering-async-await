@@ -15,15 +15,17 @@
 1. Promise Chaining [19](#page=20)
 2. `catch()` and Other Helpers [23](#page=24)
 3. Exercise 1: Promise Chains in Action [26](#page=27)
-4. Exercise 2: `Promise.race()`
+4. Exercise 2: `Promise.race()` [27](#page=28)
 
 ## 3. Async/Await Internals [28](#page=29)
 
-1. `await` vs `return`
+1. `await` vs `return` [29](#page=30)
 2. Concurrency
+3. Core Principles
 
 ## 4. Async/Await in the Wild
 
-1. With Express
-2. With MongoDB
-3. With React and Redux
+1. With Mocha
+2. With Express
+3. With MongoDB
+4. With React and Redux

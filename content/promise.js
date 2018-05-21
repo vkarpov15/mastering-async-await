@@ -182,6 +182,7 @@ class Promise {
 }
 
 module.exports = {
+  Promise: Promise,
   resolved: v => Promise.resolve(v),
   rejected: err => Promise.reject(err),
   deferred: () => {
