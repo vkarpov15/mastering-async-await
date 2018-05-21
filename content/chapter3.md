@@ -14,3 +14,19 @@ under the hood.
 ```javascript
 [require:example 3.1$]
 ```
+
+The `await` keyword causes JavaScript to pause execution until the next
+iteration of the event loop. In the below code, the `console.log()` after
+the `await` runs **after** the `++currentId` code, even though the increment
+is in a callback. The `await` keyword causes the async function to pause
+and then resume later.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.2</div></div>
+
+```javascript
+[require:example 3.2$]
+```
+
+Notice that the `then()` function runs on the next tick, even though it is fully
+synchronous. This means that `await` always pauses execution until at least
+the next tick, even if the thenable is not async. 

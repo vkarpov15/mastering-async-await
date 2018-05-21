@@ -1455,6 +1455,31 @@ under the hood.</p>
 
 <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p); <span class="hljs-comment">// Prints "Hello, World!"</span>
 </code></pre>
+<p>The <code>await</code> keyword causes JavaScript to pause execution until the next
+iteration of the event loop. In the below code, the <code>console.log()</code> after
+the <code>await</code> runs <strong>after</strong> the <code>++currentId</code> code, even though the increment
+is in a callback. The <code>await</code> keyword causes the async function to pause
+and then resume later.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.2</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> startId = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> currentId = <span class="hljs-number">0</span>;
+process.nextTick(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ++currentId);
+
+<span class="hljs-keyword">const</span> p = {
+  <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">onFulfilled</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'then():'</span>, currentId - startId); <span class="hljs-comment">// "then(): 1"</span>
+    onFulfilled(<span class="hljs-string">'Hello, World!'</span>);
+  }
+};
+
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Before:'</span>, currentId - startId); <span class="hljs-comment">// "Before: 0"</span>
+<span class="hljs-keyword">await</span> p;
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'After:'</span>, currentId - startId); <span class="hljs-comment">// "After: 1"</span>
+</code></pre>
+<p>Notice that the <code>then()</code> function runs on the next tick, even though it is fully
+synchronous. This means that <code>await</code> always pauses execution until at least
+the next tick, even if the thenable is not async. </p>
 
         </div>
       </body>
