@@ -20,7 +20,7 @@
 ## 3. Async/Await Internals [28](#page=29)
 
 1. `await` vs `return` [29](#page=30)
-2. Concurrency
+2. Concurrency [31](#page=32)
 3. Core Principles
 
 ## 4. Async/Await in the Wild
@@ -29,3 +29,4 @@
 2. With Express
 3. With MongoDB
 4. With React and Redux
+5. Exercise 1: Does X Support Async/Await?

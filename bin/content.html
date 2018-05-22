@@ -264,8 +264,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <h2 id="3-async-await-internals-28-page-29-">3. Async/Await Internals <a href="#page=29">28</a></h2>
 <ol>
 <li><code>await</code> vs <code>return</code> <a href="#page=30">29</a></li>
-<li>Concurrency</li>
-<li>Best Practices</li>
+<li>Concurrency <a href="#page=32">31</a></li>
+<li>Core Principles</li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 <ol>
@@ -273,6 +273,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>With Express</li>
 <li>With MongoDB</li>
 <li>With React and Redux</li>
+<li>Exercise 1: Does X Support Async/Await?</li>
 </ol>
 
         </div>
@@ -1519,7 +1520,7 @@ instead <code>return p</code>?</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">try</span> {
     <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
-  } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+  } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> <span class="hljs-string">'ok'</span>; }
 }
 <span class="hljs-comment">// Prints "Oops!"</span>
 test().then(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(v), err =&gt; <span class="hljs-built_in">console</span>.log(err.message));
@@ -1532,7 +1533,40 @@ body and kicks off the <code>resolve()</code> process on the async function prom
 <p>On the other hand, when you <code>await</code> on a promise, JavaScript pauses executing
 your async function and resumes once the promise is settled. When JavaScript
 resumes your async function after <code>await</code>, it throws an error if the awaited
-promise rejected.</p>
+promise rejected. Below is a flow chart showing what happens when you await
+on a promise.</p>
+<p><img src="../images/flow.png"></p>
+<p>On the other hand, when you <code>return</code> a promise from an async function, your
+promise goes into the JavaScript runtime and never goes back into your code,
+so <code>try/catch</code> won&#39;t handle the error in example 3.4. Below are a couple
+alternatives that <code>catch</code> the error: example 3.5 assigns <code>await p</code> to a
+variable <code>v</code> and then returns the variable, and example 3.6 uses <code>return await</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.5</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> v = <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+    <span class="hljs-keyword">return</span> v;
+  } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> <span class="hljs-string">'ok'</span>; }
+}
+<span class="hljs-comment">// Prints "ok"</span>
+test().then(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(v), err =&gt; <span class="hljs-built_in">console</span>.log(err.message));
+</code></pre>
+<div class="example-header-wrap"><div class="example-header">Example 3.6</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>));
+  } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> <span class="hljs-string">'ok'</span>; }
+}
+<span class="hljs-comment">// Prints "ok"</span>
+test().then(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(v), err =&gt; <span class="hljs-built_in">console</span>.log(err.message));
+</code></pre>
+<p>Both approaches work, but example 3.5 is simpler and less confusing. Seeing
+<code>return await</code> is a head-scratcher for engineers that aren&#39;t JavaScript experts,
+and that&#39;s antithetical to the goal of making asynchronous code easy for
+average developers.</p>
+<h2 id="concurrency">Concurrency</h2>
 
         </div>
       </body>

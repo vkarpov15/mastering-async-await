@@ -86,7 +86,7 @@ describe('Chapter 3 Examples', function() {
     async function test() {
       try {
         return Promise.reject(new Error('Oops!'));
-      } catch (error) { return 42; }
+      } catch (error) { return 'ok'; }
     }
     // Prints "Oops!"
     test().then(v => console.log(v), err => console.log(err.message));
@@ -94,6 +94,41 @@ describe('Chapter 3 Examples', function() {
     setTimeout(() => {
       assert.equal(console.logged.length, 1);
       assert.deepEqual(console.logged[0], ['Oops!']);
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
+
+  it('example 3.5', function(done) {
+    async function test() {
+      try {
+        const v = await Promise.reject(new Error('Oops!'));
+        return v;
+      } catch (error) { return 'ok'; }
+    }
+    // Prints "ok"
+    test().then(v => console.log(v), err => console.log(err.message));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      assert.deepEqual(console.logged[0], ['ok']);
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
+
+  it('example 3.6', function(done) {
+    async function test() {
+      try {
+        return await Promise.reject(new Error('Oops!'));
+      } catch (error) { return 'ok'; }
+    }
+    // Prints "ok"
+    test().then(v => console.log(v), err => console.log(err.message));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      assert.deepEqual(console.logged[0], ['ok']);
       done();
     }, 50);
     // acquit:ignore:end

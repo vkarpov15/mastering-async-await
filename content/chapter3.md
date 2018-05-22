@@ -68,4 +68,32 @@ body and kicks off the `resolve()` process on the async function promise.
 On the other hand, when you `await` on a promise, JavaScript pauses executing
 your async function and resumes once the promise is settled. When JavaScript
 resumes your async function after `await`, it throws an error if the awaited
-promise rejected.
+promise rejected. Below is a flow chart showing what happens when you await
+on a promise.
+
+<img src="../images/flow.png">
+
+On the other hand, when you `return` a promise from an async function, your
+promise goes into the JavaScript runtime and never goes back into your code,
+so `try/catch` won't handle the error in example 3.4. Below are a couple
+alternatives that `catch` the error: example 3.5 assigns `await p` to a
+variable `v` and then returns the variable, and example 3.6 uses `return await`.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.5</div></div>
+
+```javascript
+[require:example 3.5$]
+```
+
+<div class="example-header-wrap"><div class="example-header">Example 3.6</div></div>
+
+```javascript
+[require:example 3.6$]
+```
+
+Both approaches work, but example 3.5 is simpler and less confusing. Seeing
+`return await` is a head-scratcher for engineers that aren't JavaScript experts,
+and that's antithetical to the goal of making asynchronous code easy for
+average developers.
+
+## Concurrency
