@@ -133,4 +133,37 @@ describe('Chapter 3 Examples', function() {
     }, 50);
     // acquit:ignore:end
   });
+
+  it('example 3.10', async function() {
+    await Promise.all([fibonacci(50000), fibonacci(50000)]);
+    async function fibonacci(n) {
+      let prev2 = 1;
+      let prev1 = 1;
+      let cur = 1;
+      for (let i = 2; i < n; ++i) {
+        // Pause this instance of `fibonacci()` so the other `fibonacci()`
+        // function call can make progress.
+        await new Promise(resolve => setImmediate(resolve));
+        // "Fib: 10000"
+        // "Fib: 10000"
+        // "Fib: 20000" ...
+        if (i % 10000 === 0) console.log('Fib:', i);
+        cur = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = cur;
+      }
+      return cur;
+    }
+    // acquit:ignore:start
+    assert.deepEqual(console.logged.map(v => v[1]),
+      [10000, 10000, 20000, 20000, 30000, 30000, 40000, 40000]);
+    assert.equal(await fibonacci(1), 1);
+    assert.equal(await fibonacci(2), 1);
+    assert.equal(await fibonacci(3), 2);
+    assert.equal(await fibonacci(4), 3);
+    assert.equal(await fibonacci(5), 5);
+    assert.equal(await fibonacci(6), 8);
+    assert.equal(await fibonacci(7), 13);
+    // acquit:ignore:end
+  });
 });

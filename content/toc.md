@@ -21,7 +21,8 @@
 
 1. `await` vs `return` [29](#page=30)
 2. Concurrency [31](#page=32)
-3. Core Principles
+3. Async/await vs Generators
+4. Core Principles
 
 ## 4. Async/Await in the Wild
 

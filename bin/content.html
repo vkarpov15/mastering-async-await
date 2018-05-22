@@ -265,6 +265,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <ol>
 <li><code>await</code> vs <code>return</code> <a href="#page=30">29</a></li>
 <li>Concurrency <a href="#page=32">31</a></li>
+<li>Async/await vs Generators</li>
 <li>Core Principles</li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
@@ -1567,6 +1568,101 @@ test().then(<span class="hljs-function"><span class="hljs-params">v</span> =&gt;
 and that&#39;s antithetical to the goal of making asynchronous code easy for
 average developers.</p>
 <h2 id="concurrency">Concurrency</h2>
+<p>So far, you&#39;ve seen that <code>await p</code> makes JavaScript pause your async function,
+call <code>p.then()</code>, and resume once the promise is settled. What does this mean
+for running multiple async functions in parallel, especially given that
+JavaScript is single threaded?</p>
+<p>The &quot;JavaScript is single threaded&quot; concept means that, when a normal JavaScript
+function is running, no other JavaScript can run. For example, the below code
+will never print anything. In other languages, a construct like <code>setImmediate()</code>
+may run logic in a separate thread and print even while an infinite loop is
+spinning, but JavaScript does not allow that.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.7</div></div>
+
+<pre><code class="lang-javascript">setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>));
+<span class="hljs-comment">// This loop will spin forever, and so you'll never get back into</span>
+<span class="hljs-comment">// the event loop and the above `console.log()` will never run.</span>
+<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {}
+</code></pre>
+<p>JavaScript functions are like the <a href="https://www.britannica.com/science/Pauli-exclusion-principle">Pauli Exclusion Principle</a> in physics:
+no two normal JavaScript functions can be running in the same memory space at
+the same time. Closures (callbacks) are separate functions, so in the below
+example, <code>foo()</code>, <code>bar()</code>, and <code>baz()</code> all run separately.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.8</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">foo</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> x = <span class="hljs-number">0</span>;
+
+  <span class="hljs-comment">// When `foo()` is done, `bar()` will run later but still have</span>
+  <span class="hljs-comment">// access to `x`</span>
+  setImmediate(bar);
+  <span class="hljs-comment">// Stop running `foo()` until `baz()` is done</span>
+  baz();
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bar</span>(<span class="hljs-params"></span>) </span>{
+    ++x;
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">baz</span>(<span class="hljs-params"></span>) </span>{
+    ++x;
+  }
+}
+</code></pre>
+<p>Async functions follow the same rule: no two functions can be running at the
+same time. But, any number of async functions can be <em>paused</em> at the same time
+as long as you don&#39;t run out of memory, and other functions can run when an
+async function is paused.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.9</div></div>
+
+<pre><code class="lang-javascript">run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// This will print, because `run()` is paused when you `await`</span>
+  setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>));
+  <span class="hljs-comment">// Each iteration of the loop pauses the function</span>
+  <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) { <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve)); }
+}
+</code></pre>
+<p>This makes async functions useful for breaking up long-running synchronous
+code in JavaScript, similar to how you might use threads in another language.
+For the sake of an example, let&#39;s say you wanted to run two functions in
+parallel that each compute a large <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci number</a>. Without async/await,
+this would be tricky and require subtle recursion. Async/await makes this
+task trivial.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.10</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.all([fibonacci(<span class="hljs-number">50000</span>), fibonacci(<span class="hljs-number">50000</span>)]);
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fibonacci</span>(<span class="hljs-params">n</span>) </span>{
+  <span class="hljs-keyword">let</span> prev2 = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">let</span> prev1 = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">let</span> cur = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">2</span>; i &lt; n; ++i) {
+    <span class="hljs-comment">// Pause this instance of `fibonacci()` so the other `fibonacci()`</span>
+    <span class="hljs-comment">// function call can make progress.</span>
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
+    <span class="hljs-comment">// "Fib: 10000"</span>
+    <span class="hljs-comment">// "Fib: 10000"</span>
+    <span class="hljs-comment">// "Fib: 20000" ...</span>
+    <span class="hljs-keyword">if</span> (i % <span class="hljs-number">10000</span> === <span class="hljs-number">0</span>) <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Fib:'</span>, i);
+    cur = prev1 + prev2;
+    prev2 = prev1;
+    prev1 = cur;
+  }
+  <span class="hljs-keyword">return</span> cur;
+}
+</code></pre>
+<p>This example may
+seem contrived: a more realistic example would be an Express API endpoint
+that runs a potentially expensive algorithm like <a href="http://thecodebarbarian.com/single-link-clustering-with-node-js.html">clustering</a>.
+I have used this pattern in a production Express API specifically to run an
+<code>O(n^5)</code> clustering algorithm in an Express route handler without bogging down
+the entire server.</p>
+<p>The key takeaway here is that an async function will run with no interruptions
+unless you pause it with <code>await</code> or exit the function with <code>return</code> or <code>throw</code>.
+JavaScript is still single threaded in the conventional sense, so two async
+functions can&#39;t be running at the same time, but you can pause your async
+function using <code>await</code> to give the event loop and other functions a chance to
+run.</p>
 
         </div>
       </body>

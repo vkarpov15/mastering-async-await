@@ -97,3 +97,95 @@ and that's antithetical to the goal of making asynchronous code easy for
 average developers.
 
 ## Concurrency
+
+So far, you've seen that `await p` makes JavaScript pause your async function,
+call `p.then()`, and resume once the promise is settled. What does this mean
+for running multiple async functions in parallel, especially given that
+JavaScript is single threaded?
+
+The "JavaScript is single threaded" concept means that, when a normal JavaScript
+function is running, no other JavaScript can run. For example, the below code
+will never print anything. In other languages, a construct like `setImmediate()`
+may run logic in a separate thread and print even while an infinite loop is
+spinning, but JavaScript does not allow that.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.7</div></div>
+
+```javascript
+setImmediate(() => console.log('Hello, World!'));
+// This loop will spin forever, and so you'll never get back into
+// the event loop and the above `console.log()` will never run.
+while (true) {}
+```
+
+JavaScript functions are like the [Pauli Exclusion Principle](https://www.britannica.com/science/Pauli-exclusion-principle) in physics:
+no two normal JavaScript functions can be running in the same memory space at
+the same time. Closures (callbacks) are separate functions, so in the below
+example, `foo()`, `bar()`, and `baz()` all run separately.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.8</div></div>
+
+```javascript
+function foo() {
+  let x = 0;
+
+  // When `foo()` is done, `bar()` will run later but still have
+  // access to `x`
+  setImmediate(bar);
+  // Stop running `foo()` until `baz()` is done
+  baz();
+
+  function bar() {
+    ++x;
+  }
+
+  function baz() {
+    ++x;
+  }
+}
+```
+
+Async functions follow the same rule: no two functions can be running at the
+same time. But, any number of async functions can be _paused_ at the same time
+as long as you don't run out of memory, and other functions can run when an
+async function is paused.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.9</div></div>
+
+```javascript
+run().catch(error => console.error(error.stack));
+
+async function run() {
+  // This will print, because `run()` is paused when you `await`
+  setImmediate(() => console.log('Hello, World!'));
+  // Each iteration of the loop pauses the function
+  while (true) { await new Promise(resolve => setImmediate(resolve)); }
+}
+```
+
+This makes async functions useful for breaking up long-running synchronous
+code in JavaScript, similar to how you might use threads in another language.
+For the sake of an example, let's say you wanted to run two functions in
+parallel that each compute a large [Fibonacci number](https://en.wikipedia.org/wiki/Fibonacci_number). Without async/await,
+this would be tricky and require subtle recursion. Async/await makes this
+task trivial.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.10</div></div>
+
+```javascript
+[require:example 3.10$]
+```
+
+This example may
+seem contrived: a more realistic example would be an Express API endpoint
+that runs a potentially expensive algorithm like [clustering](http://thecodebarbarian.com/single-link-clustering-with-node-js.html).
+I have used this pattern in a production Express API specifically to run an
+`O(n^5)` clustering algorithm in an Express route handler without bogging down
+the entire server.
+
+The key takeaway here is that an async function will run with no interruptions
+unless you pause it with `await` or exit the function with `return` or `throw`.
+JavaScript is still single threaded in the conventional sense, so two async
+functions can't be running at the same time, but you can pause your async
+function using `await` to give the event loop and other functions a chance to
+run.
