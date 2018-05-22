@@ -1,5 +1,6 @@
 const Promise = require('../content/promise').Promise;
 const assert = require('assert');
+const co = require('co');
 const tickId = require('tick-id');
 
 const _console = console;
@@ -164,6 +165,76 @@ describe('Chapter 3 Examples', function() {
     assert.equal(await fibonacci(5), 5);
     assert.equal(await fibonacci(6), 8);
     assert.equal(await fibonacci(7), 13);
+    // acquit:ignore:end
+  });
+
+  it('example 3.11', function() {
+    // The `function*` syntax makes this function a generator function
+    const generatorFunction = function*() {
+      console.log('Step 1');
+      yield 1;
+      console.log('Step 2');
+      yield 2;
+      console.log('Done');
+    };
+
+    // The return value of a generator function is a generator object.
+    // The generator function doesn't start until you call `next()`.
+    const generatorObject = generatorFunction();
+
+    let yielded = generatorObject.next(); // Prints "Step 1"
+    console.log(yielded.value); // Prints "1"
+
+    yielded = generatorObject.next(); // Prints "Step 2"
+    console.log(yielded.value); // Prints "2"
+
+    generatorObject.next(); // Prints "Done"
+    // acquit:ignore:start
+    assert.deepEqual(console.logged.map(v => v[0]),
+      ['Step 1', 1, 'Step 2', 2, 'Done']);
+    // acquit:ignore:end
+  });
+
+  it('example 3.12', function(done) {
+    const co = require('co');
+    // `co.wrap()` wraps the generator function, and returns a function
+    // that behaves a lot like an async function.
+    const runCo = co.wrap(function*() {
+      // This function will print "Hello, World!" after 1 second.
+      yield new Promise(resolve => setTimeout(() => resolve(), 1000));
+      console.log('Hello, World!');
+    });
+
+    // In particular, wrapped functions return a promise
+    runCo().catch(error => console.log(error.stack));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      assert.deepEqual(console.logged[0], ['Hello, World!']);
+      done();
+    }, 1500);
+    // acquit:ignore:end
+  });
+
+  it('example 3.13', function(done) {
+    const runCo = co.wrap(function*() {
+      const p1 = Promise.resolve('Hello');
+      const p2 = Promise.resolve('World');
+
+      // Co can convert arrays of promises and objects with promise
+      // properties for you. With async/await, you'd have to use
+      // `Promise.all()` on your own to `await` on an array of promises
+      console.log(yield [p1, p2]); // [ 'Hello', 'World' ]
+      console.log(yield { p1, p2 }); // { p1: 'Hello', p2: 'World' }
+    });
+    // acquit:ignore:start
+    runCo().catch(error => console.log(error.stack));
+    setTimeout(() => {
+      assert.equal(console.logged.length, 2);
+      assert.deepEqual(console.logged[0][0], ['Hello', 'World']);
+      assert.deepEqual(console.logged[1][0], { p1: 'Hello', p2: 'World' });
+      done();
+    }, 50);
     // acquit:ignore:end
   });
 });

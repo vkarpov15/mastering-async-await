@@ -15,7 +15,7 @@ under the hood.
 [require:example 3.1$]
 ```
 
-The `await` keyword causes JavaScript to pause execution until the next
+The `await` keyword causes JavaScript to _pause_ execution until the next
 iteration of the event loop. In the below code, the `console.log()` after
 the `await` runs **after** the `++currentId` code, even though the increment
 is in a callback. The `await` keyword causes the async function to pause
@@ -189,3 +189,40 @@ JavaScript is still single threaded in the conventional sense, so two async
 functions can't be running at the same time, but you can pause your async
 function using `await` to give the event loop and other functions a chance to
 run.
+
+## Async/Await vs Generators
+
+Async/await has a lot in common with [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator), a feature that JavaScript introduced in the 2015 edition of the
+language spec. Like async functions, generator functions can be paused. There
+are two major differences between generator functions and async functions:
+
+1. The keyword you use to pause a generator function is `yield`, not `await`.
+2. When you pause a generator function, control goes back to your JavaScript code, rather than to the underlying JavaScript runtime. You resume the generator function by calling `next()` on a generator object.
+
+Below is an example of a generator function, using `yield` to pause the function and `next()` to resume it.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.11</div></div>
+
+```javascript
+[require:example 3.11$]
+```
+
+You can use generators to support syntax that is virtually identical to async/await.
+There are numerous packages on npm for this. The most popular one is called [co](https://www.npmjs.com/package/co), originally written by TJ Holowaychuk, the author of Express and Mocha. [Co design patterns](http://thecodebarbarian.com/3-common-co-design-patterns) are virtually identical to async/await design patterns. Below is example 1.1, using co instead of async/await.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.12</div></div>
+
+```javascript
+[require:example 3.12$]
+```
+
+Co offers several neat features that async/await does not natively support. By
+virtue of being a userland library, co can iterate faster and be more extensible.
+For example, co can natively handle when you `yield` an array of promises or a
+map of promises.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.13</div></div>
+
+```javascript
+[require:example 3.13$]
+```
