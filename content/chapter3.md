@@ -226,3 +226,81 @@ map of promises.
 ```javascript
 [require:example 3.13$]
 ```
+
+The flip-side of co's implicit promise conversion is that co throws an error if
+you `yield` something that it can't convert to a promise.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.14</div></div>
+
+```javascript
+[require:example 3.14$]
+```
+
+In practice, co treating `yield 1` as an error helps catch a lot of errors, but
+also causes a lot of unnecessary errors. With async/await, `await 1` is
+valid and evaluates to `1`, which is more robust.
+
+Async/await has a few other advantages over co and generators. The biggest advantage
+is that async/await is built-in to Node.js and modern browsers, so you don't
+need an external library like co. The other advantage is cleaner stack traces.
+Co stack traces often have a lot of `generator.next()` and `onFulfilled` lines
+that obscure the actual error.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.15</div></div>
+
+```javascript
+[require:example 3.15$]
+```
+
+The equivalent async/await stack trace has the actual function name and doesn't
+have `generator.next()` or `onFulfilled`, because async/await's `onFulfilled`
+runs in the JavaScript interpreter rather than userland.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.16</div></div>
+
+```javascript
+[require:example 3.16$]
+```
+
+In general, async/await is the better paradigm because it is built in to
+JavaScript, throws fewer unnecessary errors, and has most of the functionality
+you need. Co has some neat syntactic sugar and works in older browsers, but
+that is not enough to justify including an external library.
+
+## Core Principles
+
+So far, this chapter has been about the technical details of what it means for
+an async function to be paused. What does all this mean for a developer looking
+to use async/await for their core business logic? Here's some core principles
+to remember based on the behaviors this chapter covered.
+
+<div class="page-break"></div>
+
+### Don't `await` on a value that can't be a promise
+
+Just because you can `await 1` doesn't mean you should. A lot of async/await
+beginners abuse `await` and `await` on everything.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.17</div></div>
+
+```javascript
+async function findSubstr(arr, str) {
+  // Don't do this! There's no reason for this function to be async
+  for (let i = await 0; i < arr.length; ++i) {
+    if (await arr[i].includes(str)) {
+      return arr[i];
+    }
+  }
+  return null;
+}
+```
+
+In general, `await` means there's some 
+
+The only reason to make this function async would be to pause execution and
+let other functions run like in example 3.10. In that case, you should use
+`await new Promise(setImmediate)` in order to make sure all other tasks
+have a chance to run, because of nuances with how the JavaScript event loop
+schedules tasks that are beyond the scope of this book.
+
+###

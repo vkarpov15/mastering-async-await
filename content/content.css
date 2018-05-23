@@ -59,6 +59,14 @@ li code {
   background-color: #f6f6f6;
 }
 
+h3 code {
+  color: #232323;
+  font-size: 0.9em;
+  padding: 1px 2px 2px 2px;
+  color: #c7254e;
+  background-color: #f6f6f6;
+}
+
 .example-header-wrap {
   position: relative;
   height: 0px;

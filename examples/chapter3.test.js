@@ -237,4 +237,82 @@ describe('Chapter 3 Examples', function() {
     }, 50);
     // acquit:ignore:end
   });
+
+  it('example 3.14', function(done) {
+    const runCo = co.wrap(function*() {
+      // Throws 'TypeError: You may only yield a function, promise,
+      // generator, array, or object but the following object was
+      // passed: "1"'
+      yield 1;
+    });
+    // acquit:ignore:start
+    runCo().catch(error => console.log(error.stack));
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      const expected = 'You may only yield a function, promise, generator, ' +
+        'array, or object';
+      assert.ok(console.logged[0][0].includes(expected));
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
+
+  it('example 3.15', function(done) {
+    const runCo = co.wrap(function*() {
+      yield new Promise(resolve => setImmediate(resolve));
+      throw new Error('Oops!');
+    });
+    // Error: Oops!
+    //    at /test.js:3:9
+    //    at Generator.next (<anonymous>)
+    //    at onFulfilled (/node_modules/co/index.js:65:19)
+    //    at <anonymous>
+    runCo().catch(error => console.log(error.stack));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      const expected = 'Error: Oops!';
+      assert.ok(console.logged[0][0].includes(expected));
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
+
+  it('example 3.16', function(done) {
+    async function runAsync() {
+      await new Promise(resolve => setImmediate(resolve));
+      throw new Error('Oops!');
+    }
+    // Error: Oops!
+    //    at runAsync (/home/val/test.js:5:9)
+    //    at <anonymous>
+    runAsync().catch(error => console.error(error.stack));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      const expected = 'Error: Oops!';
+      assert.ok(console.logged[0][0].includes(expected));
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
+
+  it('example 3.18', function(done) {
+    async function runAsync() {
+      await new Promise(resolve => setImmediate(resolve));
+      throw new Error('Oops!');
+    }
+    // Error: Oops!
+    //    at runAsync (/home/val/test.js:5:9)
+    //    at <anonymous>
+    runAsync().catch(error => console.error(error.stack));
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 1);
+      const expected = 'Error: Oops!';
+      assert.ok(console.logged[0][0].includes(expected));
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
 });
