@@ -242,7 +242,7 @@ valid and evaluates to `1`, which is more robust.
 
 Async/await has a few other advantages over co and generators. The biggest advantage
 is that async/await is built-in to Node.js and modern browsers, so you don't
-need an external library like co. The other advantage is cleaner stack traces.
+need an external library like co. Async/await also has cleaner stack traces.
 Co stack traces often have a lot of `generator.next()` and `onFulfilled` lines
 that obscure the actual error.
 
@@ -252,9 +252,8 @@ that obscure the actual error.
 [require:example 3.15$]
 ```
 
-The equivalent async/await stack trace has the actual function name and doesn't
-have `generator.next()` or `onFulfilled`, because async/await's `onFulfilled`
-runs in the JavaScript interpreter rather than userland.
+The equivalent async/await stack trace has the function name and omits `generator.next()` and `onFulfilled`. Async/await's `onFulfilled`
+runs in the JavaScript interpreter, not userland.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.16</div></div>
 
@@ -274,8 +273,6 @@ an async function to be paused. What does all this mean for a developer looking
 to use async/await for their core business logic? Here's some core principles
 to remember based on the behaviors this chapter covered.
 
-<div class="page-break"></div>
-
 ### Don't `await` on a value that can't be a promise
 
 Just because you can `await 1` doesn't mean you should. A lot of async/await
@@ -287,20 +284,104 @@ beginners abuse `await` and `await` on everything.
 async function findSubstr(arr, str) {
   // Don't do this! There's no reason for this function to be async
   for (let i = await 0; i < arr.length; ++i) {
-    if (await arr[i].includes(str)) {
-      return arr[i];
-    }
+    if (await arr[i].includes(str)) return arr[i];
   }
-  return null;
 }
 ```
 
-In general, `await` means there's some 
+In general, you should use `await` on a value you expect to be a promise.
+There is no reason to `await` on a value that will never be a promise, and
+it falsely implies that the value may be a promise. If a function can be
+synchronous, it should be synchronous.
 
-The only reason to make this function async would be to pause execution and
-let other functions run like in example 3.10. In that case, you should use
-`await new Promise(setImmediate)` in order to make sure all other tasks
-have a chance to run, because of nuances with how the JavaScript event loop
-schedules tasks that are beyond the scope of this book.
+The only reason to make the `findSubstr()` function async would be to pause
+execution and let other functions run like in example 3.10. This is only
+potentially beneficial if `findSubstr()` runs on a massive array. In that case,
+you should use `await new Promise(setImmediate)` in order to make sure all other
+tasks have a chance to run.
 
-###
+Similarly, you must convert any value you want to `await` on into a promise.
+For example, if you want to `await` on multiple promises in parallel you must
+use `Promise.all()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.18</div></div>
+
+```javascript
+async function run() {
+  const p1 = Promise.resolve(1);
+  const p2 = Promise.resolve(2);
+  // Won't work, `arr1` will be an array of promises
+  const arr1 = await [p1, p2];
+  // Works! `arr1` will equal `[1, 2]`
+  const arr2 = await Promise.all(p1, p2);
+}
+```
+
+### Prefer using `return` with a non-promise
+
+As demonstrated in example 3.4, you can `return` a promise from an async function,
+but doing so has some nuances and corner cases. Instead of using a promise as
+the resolved value, use `await` to resolve the value and then `return` the value.
+
+It is generally easier to use `await` and return the resolved value
+than to explain the difference between `async` and `return`.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.19</div></div>
+
+```javascript
+async function fn1() {
+  // Fine, but has some issues with `try/catch` as shown in example 3.4
+  return asyncFunction();
+}
+async function fn2() {
+  // More verbose, but less error prone. Use this method unless you do
+  // not intend to handle `asyncFunction()` errors in this function.
+  const ret = await asyncFunction();
+  return ret;
+}
+```
+
+### Use loops rather than array helpers like `forEach()` and `map()` with `await`
+
+Because you can only `await` in an async function, async functions behave
+differently than synchronous functions when it comes to functional array methods
+like `forEach()`. For example, the below code throws a `SyntaxError` because
+`await` is not in an async function.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.20</div></div>
+
+```javascript
+async function test() {
+  const p1 = Promise.resolve(1);
+  const p2 = Promise.resolve(2);
+  // SyntaxError: Unexpected identifier
+  [p1, p2].forEach(p => { await p; });
+}
+```
+
+You might think that all you need is an async arrow function. But that
+does **not** pause `test()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.21</div></div>
+
+```javascript
+async function test() {
+  const p1 = Promise.resolve(1);
+  const p2 = Promise.resolve(2);
+  // This sets off two async functions in parallel, but does **not**
+  // pause `test()` because this `await` pauses the arrow function
+  [p1, p2].forEach(async (p) => {
+    console.log(await p);
+  });
+  // 'Done' will print **before** '1' and '2'.
+  console.log('Done');
+}
+```
+
+### Make sure you handle errors with `.catch()`
+
+Consolidated error handling is one of the most powerful features of async/await.
+Using `.catch()` on an async function call lets you handle all errors that occur
+in the async function, whether they're synchronous or asynchronous.
+
+### Use try/catch sparingly to handle specific errors

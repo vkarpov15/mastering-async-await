@@ -1697,10 +1697,8 @@ are two major differences between generator functions and async functions:</p>
 
 <span class="hljs-keyword">let</span> yielded = generatorObject.next(); <span class="hljs-comment">// Prints "Step 1"</span>
 <span class="hljs-built_in">console</span>.log(yielded.value); <span class="hljs-comment">// Prints "1"</span>
-
 yielded = generatorObject.next(); <span class="hljs-comment">// Prints "Step 2"</span>
 <span class="hljs-built_in">console</span>.log(yielded.value); <span class="hljs-comment">// Prints "2"</span>
-
 generatorObject.next(); <span class="hljs-comment">// Prints "Done"</span>
 </code></pre>
 <p>You can use generators to support syntax that is virtually identical to async/await.
@@ -1715,7 +1713,6 @@ There are numerous packages on npm for this. The most popular one is called <a h
   <span class="hljs-keyword">yield</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
 });
-
 <span class="hljs-comment">// In particular, wrapped functions return a promise</span>
 runCo().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
 </code></pre>
@@ -1728,7 +1725,6 @@ map of promises.</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> p1 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'Hello'</span>);
   <span class="hljs-keyword">const</span> p2 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'World'</span>);
-
   <span class="hljs-comment">// Co can convert arrays of promises and objects with promise</span>
   <span class="hljs-comment">// properties for you. With async/await, you'd have to use</span>
   <span class="hljs-comment">// `Promise.all()` on your own to `await` on an array of promises</span>
@@ -1752,7 +1748,7 @@ also causes a lot of unnecessary errors. With async/await, <code>await 1</code> 
 valid and evaluates to <code>1</code>, which is more robust.</p>
 <p>Async/await has a few other advantages over co and generators. The biggest advantage
 is that async/await is built-in to Node.js and modern browsers, so you don&#39;t
-need an external library like co. The other advantage is cleaner stack traces.
+need an external library like co. Async/await also has cleaner stack traces.
 Co stack traces often have a lot of <code>generator.next()</code> and <code>onFulfilled</code> lines
 that obscure the actual error.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.15</div></div>
@@ -1768,9 +1764,8 @@ that obscure the actual error.</p>
 <span class="hljs-comment">//    at &lt;anonymous&gt;</span>
 runCo().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
 </code></pre>
-<p>The equivalent async/await stack trace has the actual function name and doesn&#39;t
-have <code>generator.next()</code> or <code>onFulfilled</code>, because async/await&#39;s <code>onFulfilled</code>
-runs in the JavaScript interpreter rather than userland.</p>
+<p>The equivalent async/await stack trace has the function name and omits <code>generator.next()</code> and <code>onFulfilled</code>. Async/await&#39;s <code>onFulfilled</code>
+runs in the JavaScript interpreter, not userland.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.16</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runAsync</span>(<span class="hljs-params"></span>) </span>{
@@ -1791,8 +1786,6 @@ that is not enough to justify including an external library.</p>
 an async function to be paused. What does all this mean for a developer looking
 to use async/await for their core business logic? Here&#39;s some core principles
 to remember based on the behaviors this chapter covered.</p>
-<div class="page-break"></div>
-
 <h3 id="don-t-await-on-a-value-that-can-t-be-a-promise">Don&#39;t <code>await</code> on a value that can&#39;t be a promise</h3>
 <p>Just because you can <code>await 1</code> doesn&#39;t mean you should. A lot of async/await
 beginners abuse <code>await</code> and <code>await</code> on everything.</p>
@@ -1801,17 +1794,87 @@ beginners abuse <code>await</code> and <code>await</code> on everything.</p>
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findSubstr</span>(<span class="hljs-params">arr, str</span>) </span>{
   <span class="hljs-comment">// Don't do this! There's no reason for this function to be async</span>
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-keyword">await</span> <span class="hljs-number">0</span>; i &lt; arr.length; ++i) {
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">await</span> arr[i].includes(str)) {
-      <span class="hljs-keyword">return</span> arr[i];
-    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">await</span> arr[i].includes(str)) <span class="hljs-keyword">return</span> arr[i];
   }
-  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
 }
 </code></pre>
-<p>The only reason to make this function async would be to pause execution and
-let other functions run like in example 3.10. In that case, you should use
-<code>await new Promise(setImmediate)</code></p>
-<p>###</p>
+<p>In general, you should use <code>await</code> on a value you expect to be a promise.
+There is no reason to <code>await</code> on a value that will never be a promise, and
+it falsely implies that the value may be a promise. If a function can be
+synchronous, it should be synchronous.</p>
+<p>The only reason to make the <code>findSubstr()</code> function async would be to pause
+execution and let other functions run like in example 3.10. This is only
+potentially beneficial if <code>findSubstr()</code> runs on a massive array. In that case,
+you should use <code>await new Promise(setImmediate)</code> in order to make sure all other
+tasks have a chance to run.</p>
+<p>Similarly, you must convert any value you want to <code>await</code> on into a promise.
+For example, if you want to <code>await</code> on multiple promises in parallel you must
+use <code>Promise.all()</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.18</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">2</span>);
+  <span class="hljs-comment">// Won't work, `arr1` will be an array of promises</span>
+  <span class="hljs-keyword">const</span> arr1 = <span class="hljs-keyword">await</span> [p1, p2];
+  <span class="hljs-comment">// Works! `arr1` will equal `[1, 2]`</span>
+  <span class="hljs-keyword">const</span> arr2 = <span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.all(p1, p2);
+}
+</code></pre>
+<h3 id="prefer-using-return-with-a-non-promise">Prefer using <code>return</code> with a non-promise</h3>
+<p>As demonstrated in example 3.4, you can <code>return</code> a promise from an async function,
+but doing so has some nuances and corner cases. Instead of using a promise as
+the resolved value, use <code>await</code> to resolve the value and then <code>return</code> the value.</p>
+<p>It is generally easier to use <code>await</code> and return the resolved value
+than to explain the difference between <code>async</code> and <code>return</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.19</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Fine, but has some issues with `try/catch` as shown in example 3.4</span>
+  <span class="hljs-keyword">return</span> asyncFunction();
+}
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// More verbose, but less error prone. Use this method unless you do</span>
+  <span class="hljs-comment">// not intend to handle `asyncFunction()` errors in this function.</span>
+  <span class="hljs-keyword">const</span> ret = <span class="hljs-keyword">await</span> asyncFunction();
+  <span class="hljs-keyword">return</span> ret;
+}
+</code></pre>
+<h3 id="use-loops-rather-than-array-helpers-like-foreach-and-map-with-await-">Use loops rather than array helpers like <code>forEach()</code> and <code>map()</code> with <code>await</code></h3>
+<p>Because you can only <code>await</code> in an async function, async functions behave
+differently than synchronous functions when it comes to functional array methods
+like <code>forEach()</code>. For example, the below code throws a <code>SyntaxError</code> because
+<code>await</code> is not in an async function.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.20</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">2</span>);
+  <span class="hljs-comment">// SyntaxError: Unexpected identifier</span>
+  [p1, p2].forEach(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> { <span class="hljs-keyword">await</span> p; });
+}
+</code></pre>
+<p>You might think that all you need is an async arrow function. But that
+does <strong>not</strong> pause <code>test()</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.21</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">2</span>);
+  <span class="hljs-comment">// This sets off two async functions in parallel, but does **not**</span>
+  <span class="hljs-comment">// pause `test()` because this `await` pauses the arrow function</span>
+  [p1, p2].forEach(<span class="hljs-keyword">async</span> (p) =&gt; {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p);
+  });
+  <span class="hljs-comment">// 'Done' will print **before** '1' and '2'.</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done'</span>);
+}
+</code></pre>
+<h3 id="make-sure-you-handle-errors-with-catch-">Make sure you handle errors with <code>.catch()</code></h3>
+<p>Consolidated error handling is one of the most powerful features of async/await.
+Using <code>.catch()</code> on an async function call lets you handle all errors that occur
+in the async function, whether they&#39;re synchronous or asynchronous.</p>
+<h3 id="use-try-catch-sparingly-to-handle-specific-errors">Use try/catch sparingly to handle specific errors</h3>
 
         </div>
       </body>

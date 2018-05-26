@@ -184,10 +184,8 @@ describe('Chapter 3 Examples', function() {
 
     let yielded = generatorObject.next(); // Prints "Step 1"
     console.log(yielded.value); // Prints "1"
-
     yielded = generatorObject.next(); // Prints "Step 2"
     console.log(yielded.value); // Prints "2"
-
     generatorObject.next(); // Prints "Done"
     // acquit:ignore:start
     assert.deepEqual(console.logged.map(v => v[0]),
@@ -204,7 +202,6 @@ describe('Chapter 3 Examples', function() {
       yield new Promise(resolve => setTimeout(() => resolve(), 1000));
       console.log('Hello, World!');
     });
-
     // In particular, wrapped functions return a promise
     runCo().catch(error => console.log(error.stack));
     // acquit:ignore:start
@@ -220,7 +217,6 @@ describe('Chapter 3 Examples', function() {
     const runCo = co.wrap(function*() {
       const p1 = Promise.resolve('Hello');
       const p2 = Promise.resolve('World');
-
       // Co can convert arrays of promises and objects with promise
       // properties for you. With async/await, you'd have to use
       // `Promise.all()` on your own to `await` on an array of promises
