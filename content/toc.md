@@ -21,8 +21,10 @@
 
 1. `await` vs `return` [29](#page=30)
 2. Concurrency [31](#page=32)
-3. Async/Await vs Generators [33](#page=33)
+3. Async/Await vs Generators [33](#page=34)
 4. Core Principles [35](#page=36)
+5. Exercise 1: `return` and `.catch()` [38](#page=39)
+6. Exercise 2: Async `forEach()`
 
 ## 4. Async/Await in the Wild
 

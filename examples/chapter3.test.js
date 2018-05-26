@@ -306,4 +306,25 @@ describe('Chapter 3 Examples', function() {
     }, 50);
     // acquit:ignore:end
   });
+
+  it('example 3.23', function(done) {
+    const wrap = fn => function() {
+      // Ensure function call has an error handler
+      return fn.apply(null, arguments).catch(error => console.log(error));
+    };
+    const [fn1, fn2] = [
+      async function() { throw Error('err1'); },
+      async function() { throw Error('err2'); }
+    ].map(wrap);
+    fn1(); // Prints "err1"
+    fn2(); // Prints "err2"
+    // acquit:ignore:start
+    setTimeout(() => {
+      assert.equal(console.logged.length, 2);
+      assert.deepEqual(console.logged.map(l => l[0].message),
+        ['err1', 'err2']);
+      done();
+    }, 50);
+    // acquit:ignore:end
+  });
 });

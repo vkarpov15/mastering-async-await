@@ -273,8 +273,10 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <ol>
 <li><code>await</code> vs <code>return</code> <a href="#page=30">29</a></li>
 <li>Concurrency <a href="#page=32">31</a></li>
-<li>Async/Await vs Generators <a href="#page=33">33</a></li>
+<li>Async/Await vs Generators <a href="#page=34">33</a></li>
 <li>Core Principles <a href="#page=36">35</a></li>
+<li>Exercise 1: <code>return</code> and <code>.catch()</code> <a href="#page=39">38</a></li>
+<li>Exercise 2: Async <code>forEach()</code></li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
 <ol>
@@ -1865,9 +1867,38 @@ does <strong>not</strong> pause <code>test()</code>.</p>
 </code></pre>
 <h3 id="make-sure-you-handle-errors-with-catch-">Make sure you handle errors with <code>.catch()</code></h3>
 <p>Consolidated error handling is one of the most powerful features of async/await.
-Using <code>.catch()</code> on an async function call lets you handle all errors that occur
-in the async function, whether they&#39;re synchronous or asynchronous.</p>
-<h3 id="use-try-catch-sparingly-to-handle-specific-errors">Use try/catch sparingly to handle specific errors</h3>
+Using <code>.catch()</code> on an async function call lets you handle all errors (synchronous and asynchronous) that occur
+in the async function. Use <code>.catch()</code>
+for catch-all error handlers rather than <code>try/catch</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.22</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Bad! Doesn't handle returned promise rejections and is clunky</span>
+  <span class="hljs-keyword">try</span> { <span class="hljs-comment">/* Complex function here */</span> } <span class="hljs-keyword">catch</span> (err) { handleError(err); }
+}
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-comment">/* Complex function here */</span> }
+<span class="hljs-comment">// Do this instead. Handles `return` errors and has less boilerplate</span>
+fn2().catch(handleError);
+</code></pre>
+<p>In general, any error in an async function should end up in a <code>.catch()</code>
+handler. If you see async/await based code with no <code>.catch()</code> calls, there&#39;s
+an unhandled error somewhere. Good async/await code uses some centralized
+mechanism like a <code>wrap()</code> function to ensure every async function call gets
+a <code>.catch()</code> at the end.</p>
+<div class="example-header-wrap"><div class="example-header">Example 3.23</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> wrap = <span class="hljs-function"><span class="hljs-params">fn</span> =&gt;</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Ensure function call has an error handler</span>
+  <span class="hljs-keyword">return</span> fn.apply(<span class="hljs-literal">null</span>, <span class="hljs-built_in">arguments</span>).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error));
+};
+<span class="hljs-keyword">const</span> [fn1, fn2] = [
+  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'err1'</span>); },
+  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'err2'</span>); }
+].map(wrap);
+fn1(); <span class="hljs-comment">// Prints "err1"</span>
+fn2(); <span class="hljs-comment">// Prints "err2"</span>
+</code></pre>
+<h1 id="exercise-1-return-and-catch-">Exercise 1: <code>return</code> and <code>.catch()</code></h1>
 
         </div>
       </body>

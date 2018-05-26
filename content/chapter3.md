@@ -378,5 +378,32 @@ async function test() {
 ### Make sure you handle errors with `.catch()`
 
 Consolidated error handling is one of the most powerful features of async/await.
-Using `.catch()` on an async function call lets you handle all errors that occur
-in the async function, whether they're synchronous or asynchronous.
+Using `.catch()` on an async function call lets you handle all errors (synchronous and asynchronous) that occur
+in the async function. Use `.catch()`
+for catch-all error handlers rather than `try/catch`.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.22</div></div>
+
+```javascript
+async function fn1() {
+  // Bad! Doesn't handle returned promise rejections and is clunky
+  try { /* Complex function here */ } catch (err) { handleError(err); }
+}
+async function fn2() { /* Complex function here */ }
+// Do this instead. Handles `return` errors and has less boilerplate
+fn2().catch(handleError);
+```
+
+In general, any error in an async function should end up in a `.catch()`
+handler. If you see async/await based code with no `.catch()` calls, there's
+an unhandled error somewhere. Good async/await code uses some centralized
+mechanism like a `wrap()` function to ensure every async function call gets
+a `.catch()` at the end.
+
+<div class="example-header-wrap"><div class="example-header">Example 3.23</div></div>
+
+```javascript
+[require:example 3.23$]
+```
+
+# Exercise 1: `return` and `.catch()`
