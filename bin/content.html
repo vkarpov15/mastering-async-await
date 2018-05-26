@@ -1632,21 +1632,18 @@ async function is paused.</p>
 }
 </code></pre>
 <p>This makes async functions useful for breaking up long-running synchronous
-code in JavaScript, similar to how you might use threads in another language.
-For the sake of an example, let&#39;s say you wanted to run two functions in
+functions.
+For example, suppose you want to run two functions in
 parallel that each compute a large <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci number</a>. Without async/await,
-this would be tricky and require subtle recursion. Async/await makes this
+you&#39;d need tricky recursion. Async/await makes this
 task trivial.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.10</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.all([fibonacci(<span class="hljs-number">50000</span>), fibonacci(<span class="hljs-number">50000</span>)]);
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fibonacci</span>(<span class="hljs-params">n</span>) </span>{
-  <span class="hljs-keyword">let</span> prev2 = <span class="hljs-number">1</span>;
-  <span class="hljs-keyword">let</span> prev1 = <span class="hljs-number">1</span>;
-  <span class="hljs-keyword">let</span> cur = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">let</span> [prev2, prev1, cur] = [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>];
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">2</span>; i &lt; n; ++i) {
-    <span class="hljs-comment">// Pause this instance of `fibonacci()` so the other `fibonacci()`</span>
-    <span class="hljs-comment">// function call can make progress.</span>
+    <span class="hljs-comment">// Pause this `fibonacci()` call, let the other call make progress</span>
     <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
     <span class="hljs-comment">// "Fib: 10000"</span>
     <span class="hljs-comment">// "Fib: 10000"</span>
@@ -1659,12 +1656,11 @@ task trivial.</p>
   <span class="hljs-keyword">return</span> cur;
 }
 </code></pre>
-<p>This example may
-seem contrived: a more realistic example would be an Express API endpoint
-that runs a potentially expensive algorithm like <a href="http://thecodebarbarian.com/single-link-clustering-with-node-js.html">clustering</a>.
-I have used this pattern in a production Express API specifically to run an
-<code>O(n^5)</code> clustering algorithm in an Express route handler without bogging down
-the entire server.</p>
+<p>This example is simple but contrived. A more realistic example would be
+an Express API endpoint that runs a potentially expensive algorithm like
+<a href="http://thecodebarbarian.com/single-link-clustering-with-node-js.html">clustering</a>.
+I have used this pattern in a production Express API to run an
+<code>O(n^5)</code> clustering algorithm in a route without blocking other routes.</p>
 <p>The key takeaway here is that an async function will run with no interruptions
 unless you pause it with <code>await</code> or exit the function with <code>return</code> or <code>throw</code>.
 JavaScript is still single threaded in the conventional sense, so two async
@@ -1673,13 +1669,14 @@ function using <code>await</code> to give the event loop and other functions a c
 run.</p>
 <h2 id="async-await-vs-generators">Async/Await vs Generators</h2>
 <p>Async/await has a lot in common with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator">generators</a>, a feature that JavaScript introduced in the 2015 edition of the
-language spec. Like async functions, generator functions can be paused. There
+language spec. Like async functions, generator functions can be paused and
+later resumed. There
 are two major differences between generator functions and async functions:</p>
 <ol>
 <li>The keyword you use to pause a generator function is <code>yield</code>, not <code>await</code>.</li>
-<li>When you pause a generator function, control goes back to your JavaScript code, rather than to the underlying JavaScript runtime. You resume the generator function by calling <code>next()</code> on a generator object.</li>
+<li>When you pause a generator function, control goes back to your JavaScript code, rather than the JS interpreter. You resume the generator function by calling <code>next()</code> on a generator object.</li>
 </ol>
-<p>Below is an example of a generator function, using <code>yield</code> to pause the function and <code>next()</code> to resume it.</p>
+<p>The below example demonstrates using <code>yield</code> to pause the generator and <code>next()</code> to resume it.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.11</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-comment">// The `function*` syntax makes this function a generator function</span>
@@ -1701,13 +1698,12 @@ yielded = generatorObject.next(); <span class="hljs-comment">// Prints "Step 2"<
 <span class="hljs-built_in">console</span>.log(yielded.value); <span class="hljs-comment">// Prints "2"</span>
 generatorObject.next(); <span class="hljs-comment">// Prints "Done"</span>
 </code></pre>
-<p>You can use generators to support syntax that is virtually identical to async/await.
-There are numerous packages on npm for this. The most popular one is called <a href="https://www.npmjs.com/package/co">co</a>, originally written by TJ Holowaychuk, the author of Express and Mocha. <a href="http://thecodebarbarian.com/3-common-co-design-patterns">Co design patterns</a> are virtually identical to async/await design patterns. Below is example 1.1, using co instead of async/await.</p>
+<p>With the help of a library, generators support a pattern virtually identical
+to async/await. The most popular generator concurrency library is <a href="https://www.npmjs.com/package/co">co</a>. Here&#39;s example 1.1 with co instead of async/await.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.12</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> co = <span class="hljs-built_in">require</span>(<span class="hljs-string">'co'</span>);
-<span class="hljs-comment">// `co.wrap()` wraps the generator function, and returns a function</span>
-<span class="hljs-comment">// that behaves a lot like an async function.</span>
+<span class="hljs-comment">// `co.wrap()` converts a generator into an async-like function</span>
 <span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// This function will print "Hello, World!" after 1 second.</span>
   <span class="hljs-keyword">yield</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
@@ -1717,8 +1713,8 @@ There are numerous packages on npm for this. The most popular one is called <a h
 runCo().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
 </code></pre>
 <p>Co offers several neat features that async/await does not natively support. By
-virtue of being a userland library, co can iterate faster and be more extensible.
-For example, co can natively handle when you <code>yield</code> an array of promises or a
+virtue of being a userland library, co can be more extensible.
+For example, co can handle when you <code>yield</code> an array of promises or a
 map of promises.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.13</div></div>
 
@@ -1737,9 +1733,8 @@ you <code>yield</code> something that it can&#39;t convert to a promise.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.14</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Throws 'TypeError: You may only yield a function, promise,</span>
-  <span class="hljs-comment">// generator, array, or object but the following object was</span>
-  <span class="hljs-comment">// passed: "1"'</span>
+  <span class="hljs-comment">// 'TypeError: You may only yield a function, promise, generator,</span>
+  <span class="hljs-comment">// array, or object but the following object was passed: "1"'</span>
   <span class="hljs-keyword">yield</span> <span class="hljs-number">1</span>;
 });
 </code></pre>
@@ -1782,9 +1777,9 @@ JavaScript, throws fewer unnecessary errors, and has most of the functionality
 you need. Co has some neat syntactic sugar and works in older browsers, but
 that is not enough to justify including an external library.</p>
 <h2 id="core-principles">Core Principles</h2>
-<p>So far, this chapter has been about the technical details of what it means for
+<p>So far, this chapter has covered the technical details of what it means for
 an async function to be paused. What does all this mean for a developer looking
-to use async/await for their core business logic? Here&#39;s some core principles
+to use async/await for their application? Here&#39;s some core principles
 to remember based on the behaviors this chapter covered.</p>
 <h3 id="don-t-await-on-a-value-that-can-t-be-a-promise">Don&#39;t <code>await</code> on a value that can&#39;t be a promise</h3>
 <p>Just because you can <code>await 1</code> doesn&#39;t mean you should. A lot of async/await
@@ -1824,8 +1819,7 @@ use <code>Promise.all()</code>.</p>
 <h3 id="prefer-using-return-with-a-non-promise">Prefer using <code>return</code> with a non-promise</h3>
 <p>As demonstrated in example 3.4, you can <code>return</code> a promise from an async function,
 but doing so has some nuances and corner cases. Instead of using a promise as
-the resolved value, use <code>await</code> to resolve the value and then <code>return</code> the value.</p>
-<p>It is generally easier to use <code>await</code> and return the resolved value
+the resolved value, use <code>await</code> to resolve the value and then <code>return</code> the value. It is generally easier to use <code>await</code> and return the resolved value
 than to explain the difference between <code>async</code> and <code>return</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.19</div></div>
 
@@ -1862,11 +1856,10 @@ does <strong>not</strong> pause <code>test()</code>.</p>
   <span class="hljs-keyword">const</span> p1 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">1</span>);
   <span class="hljs-keyword">const</span> p2 = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">2</span>);
   <span class="hljs-comment">// This sets off two async functions in parallel, but does **not**</span>
-  <span class="hljs-comment">// pause `test()` because this `await` pauses the arrow function</span>
-  [p1, p2].forEach(<span class="hljs-keyword">async</span> (p) =&gt; {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p);
-  });
-  <span class="hljs-comment">// 'Done' will print **before** '1' and '2'.</span>
+  <span class="hljs-comment">// pause `test()` because `await p` pauses the arrow function.</span>
+  [p1, p2].forEach(<span class="hljs-keyword">async</span> (p) =&gt; { <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p); });
+  <span class="hljs-comment">// 'Done' will print **before** '1' and '2' because `await p`</span>
+  <span class="hljs-comment">// pauses the arrow functions, **not** `test()`</span>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done'</span>);
 }
 </code></pre>

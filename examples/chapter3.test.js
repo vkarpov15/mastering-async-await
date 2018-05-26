@@ -138,12 +138,9 @@ describe('Chapter 3 Examples', function() {
   it('example 3.10', async function() {
     await Promise.all([fibonacci(50000), fibonacci(50000)]);
     async function fibonacci(n) {
-      let prev2 = 1;
-      let prev1 = 1;
-      let cur = 1;
+      let [prev2, prev1, cur] = [1, 1, 1];
       for (let i = 2; i < n; ++i) {
-        // Pause this instance of `fibonacci()` so the other `fibonacci()`
-        // function call can make progress.
+        // Pause this `fibonacci()` call, let the other call make progress
         await new Promise(resolve => setImmediate(resolve));
         // "Fib: 10000"
         // "Fib: 10000"
@@ -195,8 +192,7 @@ describe('Chapter 3 Examples', function() {
 
   it('example 3.12', function(done) {
     const co = require('co');
-    // `co.wrap()` wraps the generator function, and returns a function
-    // that behaves a lot like an async function.
+    // `co.wrap()` converts a generator into an async-like function
     const runCo = co.wrap(function*() {
       // This function will print "Hello, World!" after 1 second.
       yield new Promise(resolve => setTimeout(() => resolve(), 1000));
@@ -236,9 +232,8 @@ describe('Chapter 3 Examples', function() {
 
   it('example 3.14', function(done) {
     const runCo = co.wrap(function*() {
-      // Throws 'TypeError: You may only yield a function, promise,
-      // generator, array, or object but the following object was
-      // passed: "1"'
+      // 'TypeError: You may only yield a function, promise, generator,
+      // array, or object but the following object was passed: "1"'
       yield 1;
     });
     // acquit:ignore:start

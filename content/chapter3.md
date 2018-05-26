@@ -164,10 +164,10 @@ async function run() {
 ```
 
 This makes async functions useful for breaking up long-running synchronous
-code in JavaScript, similar to how you might use threads in another language.
-For the sake of an example, let's say you wanted to run two functions in
+functions.
+For example, suppose you want to run two functions in
 parallel that each compute a large [Fibonacci number](https://en.wikipedia.org/wiki/Fibonacci_number). Without async/await,
-this would be tricky and require subtle recursion. Async/await makes this
+you'd need tricky recursion. Async/await makes this
 task trivial.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.10</div></div>
@@ -176,12 +176,11 @@ task trivial.
 [require:example 3.10$]
 ```
 
-This example may
-seem contrived: a more realistic example would be an Express API endpoint
-that runs a potentially expensive algorithm like [clustering](http://thecodebarbarian.com/single-link-clustering-with-node-js.html).
-I have used this pattern in a production Express API specifically to run an
-`O(n^5)` clustering algorithm in an Express route handler without bogging down
-the entire server.
+This example is simple but contrived. A more realistic example would be
+an Express API endpoint that runs a potentially expensive algorithm like
+[clustering](http://thecodebarbarian.com/single-link-clustering-with-node-js.html).
+I have used this pattern in a production Express API to run an
+`O(n^5)` clustering algorithm in a route without blocking other routes.
 
 The key takeaway here is that an async function will run with no interruptions
 unless you pause it with `await` or exit the function with `return` or `throw`.
@@ -193,13 +192,14 @@ run.
 ## Async/Await vs Generators
 
 Async/await has a lot in common with [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator), a feature that JavaScript introduced in the 2015 edition of the
-language spec. Like async functions, generator functions can be paused. There
+language spec. Like async functions, generator functions can be paused and
+later resumed. There
 are two major differences between generator functions and async functions:
 
 1. The keyword you use to pause a generator function is `yield`, not `await`.
-2. When you pause a generator function, control goes back to your JavaScript code, rather than to the underlying JavaScript runtime. You resume the generator function by calling `next()` on a generator object.
+2. When you pause a generator function, control goes back to your JavaScript code, rather than the JS interpreter. You resume the generator function by calling `next()` on a generator object.
 
-Below is an example of a generator function, using `yield` to pause the function and `next()` to resume it.
+The below example demonstrates using `yield` to pause the generator and `next()` to resume it.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.11</div></div>
 
@@ -207,8 +207,8 @@ Below is an example of a generator function, using `yield` to pause the function
 [require:example 3.11$]
 ```
 
-You can use generators to support syntax that is virtually identical to async/await.
-There are numerous packages on npm for this. The most popular one is called [co](https://www.npmjs.com/package/co), originally written by TJ Holowaychuk, the author of Express and Mocha. [Co design patterns](http://thecodebarbarian.com/3-common-co-design-patterns) are virtually identical to async/await design patterns. Below is example 1.1, using co instead of async/await.
+With the help of a library, generators support a pattern virtually identical
+to async/await. The most popular generator concurrency library is [co](https://www.npmjs.com/package/co). Here's example 1.1 with co instead of async/await.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.12</div></div>
 
@@ -217,8 +217,8 @@ There are numerous packages on npm for this. The most popular one is called [co]
 ```
 
 Co offers several neat features that async/await does not natively support. By
-virtue of being a userland library, co can iterate faster and be more extensible.
-For example, co can natively handle when you `yield` an array of promises or a
+virtue of being a userland library, co can be more extensible.
+For example, co can handle when you `yield` an array of promises or a
 map of promises.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.13</div></div>
@@ -268,9 +268,9 @@ that is not enough to justify including an external library.
 
 ## Core Principles
 
-So far, this chapter has been about the technical details of what it means for
+So far, this chapter has covered the technical details of what it means for
 an async function to be paused. What does all this mean for a developer looking
-to use async/await for their core business logic? Here's some core principles
+to use async/await for their application? Here's some core principles
 to remember based on the behaviors this chapter covered.
 
 ### Don't `await` on a value that can't be a promise
@@ -321,9 +321,7 @@ async function run() {
 
 As demonstrated in example 3.4, you can `return` a promise from an async function,
 but doing so has some nuances and corner cases. Instead of using a promise as
-the resolved value, use `await` to resolve the value and then `return` the value.
-
-It is generally easier to use `await` and return the resolved value
+the resolved value, use `await` to resolve the value and then `return` the value. It is generally easier to use `await` and return the resolved value
 than to explain the difference between `async` and `return`.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.19</div></div>
@@ -369,11 +367,10 @@ async function test() {
   const p1 = Promise.resolve(1);
   const p2 = Promise.resolve(2);
   // This sets off two async functions in parallel, but does **not**
-  // pause `test()` because this `await` pauses the arrow function
-  [p1, p2].forEach(async (p) => {
-    console.log(await p);
-  });
-  // 'Done' will print **before** '1' and '2'.
+  // pause `test()` because `await p` pauses the arrow function.
+  [p1, p2].forEach(async (p) => { console.log(await p); });
+  // 'Done' will print **before** '1' and '2' because `await p`
+  // pauses the arrow functions, **not** `test()`
   console.log('Done');
 }
 ```
@@ -383,5 +380,3 @@ async function test() {
 Consolidated error handling is one of the most powerful features of async/await.
 Using `.catch()` on an async function call lets you handle all errors that occur
 in the async function, whether they're synchronous or asynchronous.
-
-### Use try/catch sparingly to handle specific errors
