@@ -406,4 +406,53 @@ a `.catch()` at the end.
 [require:example 3.23$]
 ```
 
-# Exercise 1: `return` and `.catch()`
+# Exercise 1: Implementing Custom Thenables
+
+As you saw in example 3.2, all you need to integrate an object with async/await
+is a `then()` function. The `await` keyword calls `then()` under the hood and
+pauses the async function until `onFulfilled()` or `onRejected()` is called.
+This means you can add a `then()` function to any object to make it work with
+async/await.
+
+Many JavaScript HTTP clients, like [superagent](https://www.npmjs.com/package/superagent), support a chainable
+API for building up requests with function calls. Many ODMs and ORMs support
+a similar API for building database queries.
+
+```javascript
+superagent.get(url).set('API-Key', 'test').
+  end((err, res) => { /* Handle response */ });
+```
+
+The below `HTTPRequest` class provides a simplified HTTP client with a chainable
+API, but currently it only supports callbacks via the `exec()` function.
+Implement the `then()` function so this `HTTPRequest` class works with async/await.
+
+Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-31`](http://bit.ly/async-await-exercise-31).
+
+```javascript
+class HTTPRequest { // Only modify the `then()` function below
+  static create() { return new HTTPRequest(); }
+  get(url) {
+    this.method = 'get';
+    this.url = url;
+    return this;
+  }
+  exec(callback) {
+    fetch(this.url, this).then(res => res.json()).
+      then(res => callback(null, res)).catch(callback);
+  }
+  then(onFulfilled, onRejected) {
+    throw new Error('Not Implemented'); // Implement this function
+  }
+}
+// Don't modify the below code
+run().catch(error => console.error(error.stack));
+async function run() {
+  const url = 'https://' +
+    'us-central1-mastering-async-await.cloudfunctions.net/posts';
+  const res = await HTTPRequest.create().get(url);
+  console.log('Success', res[0].id === 51)
+}
+```

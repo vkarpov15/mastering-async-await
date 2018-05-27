@@ -275,7 +275,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>Concurrency <a href="#page=32">31</a></li>
 <li>Async/Await vs Generators <a href="#page=34">33</a></li>
 <li>Core Principles <a href="#page=36">35</a></li>
-<li>Exercise 1: <code>return</code> and <code>.catch()</code> <a href="#page=39">38</a></li>
+<li>Exercise 1: Implementing Custom Thenables <a href="#page=39">38</a></li>
 <li>Exercise 2: Async <code>forEach()</code></li>
 </ol>
 <h2 id="4-async-await-in-the-wild">4. Async/Await in the Wild</h2>
@@ -1898,7 +1898,48 @@ a <code>.catch()</code> at the end.</p>
 fn1(); <span class="hljs-comment">// Prints "err1"</span>
 fn2(); <span class="hljs-comment">// Prints "err2"</span>
 </code></pre>
-<h1 id="exercise-1-return-and-catch-">Exercise 1: <code>return</code> and <code>.catch()</code></h1>
+<h1 id="exercise-1-implementing-custom-thenables">Exercise 1: Implementing Custom Thenables</h1>
+<p>As you saw in example 3.2, all you need to integrate an object with async/await
+is a <code>then()</code> function. The <code>await</code> keyword calls <code>then()</code> under the hood and
+pauses the async function until <code>onFulfilled()</code> or <code>onRejected()</code> is called.
+This means you can add a <code>then()</code> function to any object to make it work with
+async/await.</p>
+<p>Many JavaScript HTTP clients, like <a href="https://www.npmjs.com/package/superagent">superagent</a>, support a chainable
+API for building up requests with function calls. Many ODMs and ORMs support
+a similar API for building database queries.</p>
+<pre><code class="lang-javascript">superagent.get(url).set(<span class="hljs-string">'API-Key'</span>, <span class="hljs-string">'test'</span>).
+  end(<span class="hljs-function">(<span class="hljs-params">err, res</span>) =&gt;</span> { <span class="hljs-comment">/* Handle response */</span> });
+</code></pre>
+<p>The below <code>HTTPRequest</code> class provides a simplified HTTP client with a chainable
+API, but currently it only supports callbacks via the <code>exec()</code> function.
+Implement the <code>then()</code> function so this <code>HTTPRequest</code> class works with async/await.</p>
+<p>Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-31"><code>http://bit.ly/async-await-exercise-31</code></a>.</p>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HTTPRequest</span> </span>{ <span class="hljs-comment">// Only modify the `then()` function below</span>
+  <span class="hljs-keyword">static</span> create() { <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> HTTPRequest(); }
+  get(url) {
+    <span class="hljs-keyword">this</span>.method = <span class="hljs-string">'get'</span>;
+    <span class="hljs-keyword">this</span>.url = url;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+  }
+  exec(callback) {
+    fetch(<span class="hljs-keyword">this</span>.url, <span class="hljs-keyword">this</span>).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json()).
+      then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> callback(<span class="hljs-literal">null</span>, res)).catch(callback);
+  }
+  then(onFulfilled, onRejected) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Not Implemented'</span>); <span class="hljs-comment">// Implement this function</span>
+  }
+}
+<span class="hljs-comment">// Don't modify the below code</span>
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> url = <span class="hljs-string">'https://'</span> +
+    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net/posts'</span>;
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> HTTPRequest.create().get(url);
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Success'</span>, res[<span class="hljs-number">0</span>].id === <span class="hljs-number">51</span>)
+}
+</code></pre>
 
         </div>
       </body>
