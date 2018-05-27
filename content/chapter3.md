@@ -456,3 +456,50 @@ async function run() {
   console.log('Success', res[0].id === 51)
 }
 ```
+
+# Exercise 2: Async `forEach()`
+
+As shown in example 3.21, the `forEach()` array function has several quirks
+when it comes to async/await:
+
+```javascript
+async function fn1() {
+  // SyntaxError because `await` is not in an async function
+  [1, 2].forEach(p => { await p; });
+}
+async function fn2() {
+  [Promise.resolve(1), Promise.resolve(2)].
+    forEach(async (p) => { console.log(await p); });
+  // "Done" prints **before** "1" & "2", because the above `await`
+  // pauses the above arrow function, **not** `fn2()`
+  console.log('Done');
+}
+```
+
+Implement an async function `forEachAsync()` that takes an array
+and an async function `fn()`, and calls `fn()` on every element of the array
+in series. The `forEachAsync()` function should wait for one instance of `fn()`
+to finish running before continuing on to the next one.
+
+Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-32`](http://bit.ly/async-await-exercise-32).
+
+```javascript
+// Implement this function
+async function forEachAsync(arr, fn) { throw Error('Not Implemented!') }
+
+// Below is test code, don't modify this
+run().catch(err => console.log(err.stack));
+async function run() {
+  let i = 0;
+  const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  async function fn1(n) {
+    await new Promise(resolve => setTimeout(resolve, 100 - n * 10));
+    if (i++ !== n) throw Error('Make sure to `await` on `fn()`');
+  }
+  await forEachAsync(arr, fn1);
+  if (i !== 10) throw Error('Call `fn()` on every array element');
+  console.log('Success!');
+}
+```

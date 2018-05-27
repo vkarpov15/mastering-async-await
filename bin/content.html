@@ -1940,6 +1940,45 @@ run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Success'</span>, res[<span class="hljs-number">0</span>].id === <span class="hljs-number">51</span>)
 }
 </code></pre>
+<h1 id="exercise-2-async-foreach-">Exercise 2: Async <code>forEach()</code></h1>
+<p>As shown in example 3.21, the <code>forEach()</code> array function has several quirks
+when it comes to async/await:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// SyntaxError because `await` is not in an async function</span>
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>].forEach(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> { <span class="hljs-keyword">await</span> p; });
+}
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span>(<span class="hljs-params"></span>) </span>{
+  [<span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">1</span>), <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">2</span>)].
+    forEach(<span class="hljs-keyword">async</span> (p) =&gt; { <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> p); });
+  <span class="hljs-comment">// "Done" prints **before** "1" &amp; "2", because the above `await`</span>
+  <span class="hljs-comment">// pauses the above arrow function, **not** `fn2()`</span>
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done'</span>);
+}
+</code></pre>
+<p>Implement an async function <code>forEachAsync()</code> that takes an array
+and an async function <code>fn()</code>, and calls <code>fn()</code> on every element of the array
+in series. The <code>forEachAsync()</code> function should wait for one instance of <code>fn()</code>
+to finish running before continuing on to the next one.</p>
+<p>Below is the starter code. You may copy this code and complete this exercise in
+Node.js, or you may complete it in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-32"><code>http://bit.ly/async-await-exercise-32</code></a>.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Implement this function</span>
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forEachAsync</span>(<span class="hljs-params">arr, fn</span>) </span>{ <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Not Implemented!'</span>) }
+
+<span class="hljs-comment">// Below is test code, don't modify this</span>
+run().catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(err.stack));
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">const</span> arr = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>];
+  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params">n</span>) </span>{
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">100</span> - n * <span class="hljs-number">10</span>));
+    <span class="hljs-keyword">if</span> (i++ !== n) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Make sure to `await` on `fn()`'</span>);
+  }
+  <span class="hljs-keyword">await</span> forEachAsync(arr, fn1);
+  <span class="hljs-keyword">if</span> (i !== <span class="hljs-number">10</span>) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Call `fn()` on every array element'</span>);
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Success!'</span>);
+}
+</code></pre>
 
         </div>
       </body>
