@@ -1772,7 +1772,7 @@ runs in the JavaScript interpreter, not userland.</p>
 <span class="hljs-comment">// Error: Oops!</span>
 <span class="hljs-comment">//    at runAsync (/home/val/test.js:5:9)</span>
 <span class="hljs-comment">//    at &lt;anonymous&gt;</span>
-runAsync().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+runAsync().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
 </code></pre>
 <p>In general, async/await is the better paradigm because it is built in to
 JavaScript, throws fewer unnecessary errors, and has most of the functionality

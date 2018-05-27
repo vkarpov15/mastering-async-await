@@ -277,7 +277,7 @@ describe('Chapter 3 Examples', function() {
     // Error: Oops!
     //    at runAsync (/home/val/test.js:5:9)
     //    at <anonymous>
-    runAsync().catch(error => console.error(error.stack));
+    runAsync().catch(error => console.log(error.stack));
     // acquit:ignore:start
     setTimeout(() => {
       assert.equal(console.logged.length, 1);
@@ -296,7 +296,7 @@ describe('Chapter 3 Examples', function() {
     // Error: Oops!
     //    at runAsync (/home/val/test.js:5:9)
     //    at <anonymous>
-    runAsync().catch(error => console.error(error.stack));
+    runAsync().catch(error => console.log(error.stack));
     // acquit:ignore:start
     setTimeout(() => {
       assert.equal(console.logged.length, 1);
