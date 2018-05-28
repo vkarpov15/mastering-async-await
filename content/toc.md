@@ -24,12 +24,13 @@
 3. Async/Await vs Generators [33](#page=34)
 4. Core Principles [35](#page=36)
 5. Exercise 1: Implementing Custom Thenables [38](#page=39)
-6. Exercise 2: Async `forEach()`
+6. Exercise 2: Async `forEach()` [39](#page=40)
 
-## 4. Async/Await in the Wild
+## 4. Async/Await in the Wild [40](#page=41)
 
 1. With Mocha
 2. With Express
 3. With MongoDB
 4. With React and Redux
 5. Exercise 1: Does X Support Async/Await?
+6. Exercise 2: Socket.io Integration

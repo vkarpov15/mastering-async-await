@@ -23,10 +23,10 @@ async function run() {
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
 
-  const examples = [1, 2, 3].
+  const examples = [1, 2, 3, 4].
     map(c => fs.readFileSync(`./examples/chapter${c}.test.js`, 'utf8').toString());
 
-  const chapters = [1, 2, 3].
+  const chapters = [1, 2, 3, 4].
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
 
@@ -76,6 +76,9 @@ async function run() {
         </div>
         <div class="chapter">
           ${marked(chapters[2])}
+        </div>
+        <div class="chapter">
+          ${marked(chapters[3])}
         </div>
       </body>
     </html>
