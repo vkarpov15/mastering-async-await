@@ -280,8 +280,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 </ol>
 <h2 id="4-async-await-in-the-wild-40-page-41-">4. Async/Await in the Wild <a href="#page=41">40</a></h2>
 <ol>
-<li>With Mocha</li>
-<li>With Express</li>
+<li>With Mocha <a href="#page=42">41</a></li>
+<li>With Express <a href="#page=43">42</a></li>
 <li>With MongoDB</li>
 <li>With React and Redux</li>
 <li>Exercise 1: Does X Support Async/Await?</li>
@@ -1989,12 +1989,129 @@ with the prolific open source JavaScript ecosystem. It is no secret that
 JavaScript was a painful language to work with in 2005, but that pain lead
 developers to build an incredible variety of libraries and frameworks to
 address common problems.</p>
-<p>Now that JavaScript has excellent
-features like async/await, these libraries and frameworks are even better.
+<p>Now that JavaScript has features like async/await, these libraries and frameworks
+are even more powerful.
 In this chapter, you&#39;ll see how async/await interacts with several common
-npm packages. In addition, you&#39;ll learn several principles for how to evaluate
-what work you need to do to integrate async/await with your favorite libraries
-and frameworks.</p>
+npm packages. In addition, you&#39;ll learn to evaluate whether a
+package works with async/await.</p>
+<p>Broadly speaking, npm packages belong to one of two categories when it comes
+to integrating with async/await: libraries and frameworks.</p>
+<ul>
+<li>Generally, when working with a <em>framework</em>, like Express or Redux, you pass functions to the framework that the framework then calls for you.</li>
+<li>Conversely, a <em>library</em>, like superagent or the MongoDB driver, exposes a collection of functions for you that you&#39;re responsible for calling.</li>
+</ul>
+<p>Not all npm packages fall neatly into one of these categories. But, these
+categories help break the question of whether a given package &quot;works&quot;
+with async/await down into two easier questions.</p>
+<p>For a framework to support async/await, it must support functions that return
+promises.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.1</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-comment">// Express is the most popular web framework for Node.js.</span>
+<span class="hljs-keyword">const</span> app = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>)();
+<span class="hljs-comment">// Does Express handle functions that return promises?</span>
+app.get(<span class="hljs-string">'*'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">1000</span>));
+  res.send(<span class="hljs-string">'Hello, World!'</span>);
+});
+</code></pre>
+<p>For a library to support async/await, its functions must return thenables.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.2</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-comment">// Superagent is a popular HTTP client library for Node.js</span>
+<span class="hljs-keyword">const</span> superagent = <span class="hljs-built_in">require</span>(<span class="hljs-string">'superagent'</span>);
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Do superagent's functions return thenables?</span>
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> superagent.get(<span class="hljs-string">'http://google.com'</span>);
+}
+</code></pre>
+<p>Now let&#39;s apply these principles to several popular npm packages, starting
+with the test framework <a href="http://npmjs.com/package/mocha">mocha</a>.</p>
+<h1 id="with-mocha">With Mocha</h1>
+<p>Mocha falls firmly into the framework category. It&#39;s a framework that runs
+behavior-driven development (BDD) tests for you. The below example is from
+the Mocha home page. It has one test that asserts that JavaScript&#39;s
+built-in <code>indexOf()</code> function handles a simple case correctly.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.3</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>);
+describe(<span class="hljs-string">'Array'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  describe(<span class="hljs-string">'#indexOf()'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    it(<span class="hljs-string">'should return -1 when the value is not present'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+      assert.equal([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>].indexOf(<span class="hljs-number">4</span>), <span class="hljs-number">-1</span>);
+    });
+  });
+});
+</code></pre>
+<p>The <code>describe()</code> calls are analogous to test suites in more conventional
+testing frameworks like <a href="https://junit.org/junit5/">JUnit</a>, and the <code>it()</code>
+calls are individual tests. So Mocha&#39;s async/await support is contingent
+on whether the <code>it()</code> function supports passing in a function that returns
+a promise.</p>
+<p>To figure out whether Mocha supports promises, go to their documentation site,
+which has a <a href="https://mochajs.org/#working-with-promises">section on promises</a>
+pictured below.</p>
+<p><img src="https://i.imgur.com/dLnbbfs.png"></p>
+<p>So Mocha does support async/await as a framework. Digging deeper, it turns out
+Mocha has enjoyed <a href="https://github.com/mochajs/mocha/blob/master/CHANGELOG.md#1180--2014-03-13">rudimentary promise support since <code>v1.8.0</code> in March 2014</a>.</p>
+<div class="page-break"></div>
+
+<p>Below is an example of using Mocha with an async function.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.4</div></div>
+
+<pre><code class="lang-javascript">describe(<span class="hljs-string">'async'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  it(<span class="hljs-string">'works'</span>, <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    assert.equal(<span class="hljs-keyword">await</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-number">42</span>), <span class="hljs-number">42</span>);
+  });
+});
+</code></pre>
+<h1 id="with-express">With Express</h1>
+<p><a href="http://expressjs.com/">Express</a> is a Node.js web framework used for building
+HTTP servers, like RESTful APIs and classic web applications. The key term
+here is that Express is primarily a framework, which means its async/await
+support is predicated on supporting functions that return promises. Below is
+an example showing how to use Express with synchronous functions.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.5</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> app = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>)();
+app.get(<span class="hljs-string">'*'</span>, (req, res) =&gt; res.send(<span class="hljs-string">'Hello, World!'</span>));
+<span class="hljs-keyword">const</span> server = app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<p>Since Mocha supports async/await out of the box, you might mistakenly assume
+that Express supports async/await too. That would be a mistake. However, it is
+an easy mistake to make because the below code works fine, even though the
+Express route handler function is now async.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.6</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> app = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>)();
+app.get(<span class="hljs-string">'*'</span>, <span class="hljs-keyword">async</span> (req, res) =&gt; res.send(<span class="hljs-string">'Hello, World!'</span>));
+<span class="hljs-keyword">const</span> server = app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<p>Figuring out that Express doesn&#39;t fully support async/await is tricky because
+they don&#39;t explicitly say one way or the other in the docs. If you Google
+&quot;express async/await&quot;, you&#39;ll end up at <a href="https://github.com/expressjs/express/issues/2259">an old GitHub issue</a> that&#39;s still open and
+implies that promises are not quite supported.</p>
+<p><img src="https://i.imgur.com/9afBtuL.png"></p>
+<p>Unfortunately, this GitHub issue isn&#39;t explicit about where the interaction
+between Express and async/await breaks down. The issue is what happens when
+your async function throws an error.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.7</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> app = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>)();
+<span class="hljs-comment">// Process will crash, won't send a response</span>
+app.get(<span class="hljs-string">'*'</span>, <span class="hljs-keyword">async</span> () =&gt; { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); });
+<span class="hljs-keyword">const</span> server = app.listen(<span class="hljs-number">3000</span>);
+<span class="hljs-comment">// This request will error out, but not with the 'Oops!' error</span>
+<span class="hljs-keyword">const</span> request = superagent.get(<span class="hljs-string">'http://localhost:3000'</span>).end();
+</code></pre>
+<p>In older versions of Node.js, the superagent request above will hang. In newer
+versions of Node.js, the Express server process will crash because Express
+does <strong>not</strong> handle errors in promises.</p>
+<p>Error handling is a common cause of async/await integration issues. Even if
+a framework seems to support async functions, make sure to check whether it
+handles async function errors correctly. In this case, Express does not handle
+errors in async functions correctly.</p>
 
         </div>
       </body>

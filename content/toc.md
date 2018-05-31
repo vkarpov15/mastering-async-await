@@ -28,8 +28,8 @@
 
 ## 4. Async/Await in the Wild [40](#page=41)
 
-1. With Mocha
-2. With Express
+1. With Mocha [41](#page=42)
+2. With Express [42](#page=43)
 3. With MongoDB
 4. With React and Redux
 5. Exercise 1: Does X Support Async/Await?
