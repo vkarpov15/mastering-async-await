@@ -149,7 +149,20 @@ In older versions of Node.js, the superagent request above will hang. In newer
 versions of Node.js, the Express server process will crash because Express
 does **not** handle errors in promises.
 
+Unfortunately, there is no way to make Express handle promises correctly without
+monkey-patching Express itself or using a wrapper function. Using a wrapper
+function is the better choice, because it is difficult to foresee all the
+potential consequences of replacing part of a framework's code. Below is an
+example of a wrapper function you can use to handle async function errors with
+Express.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.8</div></div>
+
+```javascript
+[require:Example 4.8$]
+```
+
 Error handling is a common cause of async/await integration issues. Even if
 a framework seems to support async functions, make sure to check whether it
-handles async function errors correctly. In this case, Express does not handle
+handles errors in async function correctly. In this case, Express does not handle
 errors in async functions correctly.

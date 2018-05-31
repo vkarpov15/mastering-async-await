@@ -2108,9 +2108,39 @@ app.get(<span class="hljs-string">'*'</span>, <span class="hljs-keyword">async</
 <p>In older versions of Node.js, the superagent request above will hang. In newer
 versions of Node.js, the Express server process will crash because Express
 does <strong>not</strong> handle errors in promises.</p>
+<p>Unfortunately, there is no way to make Express handle promises correctly without
+monkey-patching Express itself or using a wrapper function. Using a wrapper
+function is the better choice, because it is difficult to foresee all the
+potential consequences of replacing part of a framework&#39;s code. Below is an
+example of a wrapper function you can use to handle async function errors with
+Express.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.8</div></div>
+
+<pre><code class="lang-javascript">app.get(<span class="hljs-string">'*'</span>, wrap(<span class="hljs-keyword">async</span> () =&gt; { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); }));
+<span class="hljs-keyword">const</span> server = app.listen(<span class="hljs-number">3000</span>);
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-keyword">await</span> superagent.get(<span class="hljs-string">'http://localhost:3000'</span>);
+} <span class="hljs-keyword">catch</span> (error) {
+  <span class="hljs-comment">// error.response.text === 'Oops!'</span>
+}
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">wrap</span>(<span class="hljs-params">fn</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> fn(req, res).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (res.headersSent) {
+      <span class="hljs-comment">// `headersSent` means Express has already started sending</span>
+      <span class="hljs-comment">// an HTTP response, so we can't report the error via the</span>
+      <span class="hljs-comment">// HTTP response. Depending on your app's needs, you may</span>
+      <span class="hljs-comment">// choose to rethrow the error here, or ignore it.</span>
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-comment">// Error occurred, set the response status to 500 (Internal</span>
+    <span class="hljs-comment">// Server Error) and send the error message.</span>
+    res.status(<span class="hljs-number">500</span>).send(error.message);
+  });
+}
+</code></pre>
 <p>Error handling is a common cause of async/await integration issues. Even if
 a framework seems to support async functions, make sure to check whether it
-handles async function errors correctly. In this case, Express does not handle
+handles errors in async function correctly. In this case, Express does not handle
 errors in async functions correctly.</p>
 
         </div>
