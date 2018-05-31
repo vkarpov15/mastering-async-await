@@ -1,7 +1,11 @@
 'use strict';
 
 const assert = require('assert');
+const redux = require('redux');
 const superagent = require('superagent');
+
+// For monkeypatched console later
+const _console = console;
 
 describe('Chapter 4 Examples', function() {
   let app;
@@ -199,6 +203,95 @@ describe('Chapter 4 Examples', function() {
           ]);
           done();
         }, 150);
+        // acquit:ignore:end
+      });
+    });
+  });
+
+  describe('Redux', function() {
+    let reducer;
+    let store;
+
+    beforeEach(function() {
+      const { createStore } = redux;
+      reducer = (state, action) => {
+        switch(action.type) {
+          case 'INCREMENT': return state + 1;
+          case 'DECREMENT': return state - 1;
+          default:          return state;
+        };
+      };
+      store = createStore(reducer, 0);
+    });
+
+    const console = {
+      logged: [],
+      log: function() {
+        console.logged.push(Array.prototype.slice.call(arguments));
+      }
+    };
+
+    beforeEach(function() {
+      console.logged = [];
+    });
+
+    it('Example 4.12', function() {
+      // A _store_ tracks state and lets you dispatch _actions_
+      const { createStore } = require('redux');
+      // A _reducer_ is a sync function that changes the state
+      const reducer = (state, action) => {
+        switch(action.type) { // Redux calls reducer on every action
+          case 'INCREMENT': return state + 1;
+          case 'DECREMENT': return state - 1;
+          default:          return state;
+        };
+      };
+      // Create a new store and subscribe to state changes
+      const store = createStore(reducer, 0);
+      store.subscribe(() => console.log(store.getState()));
+
+      store.dispatch({ type: 'INCREMENT' }); // Prints "1"
+      store.dispatch({ type: 'INCREMENT' }); // Prints "2"
+      store.dispatch({ type: 'DECREMENT' }); // Prints "1"
+      // acquit:ignore:start
+      assert.deepEqual(console.logged, [[1], [2], [1]]);
+      // acquit:ignore:end
+    });
+
+    it('Example 4.13', function(done) {
+      store.subscribe(() => console.log(store.getState()));
+
+      run().catch(error => _console.log(error.stack));
+
+      async function run() {
+        store.dispatch({ type: 'INCREMENT' }); // Prints "1"
+        await new Promise(resolve => setImmediate(resolve));
+        store.dispatch({ type: 'INCREMENT' }); // Prints "2"
+        // acquit:ignore:start
+        assert.deepEqual(console.logged, [[1], [2]]);
+        done();
+        // acquit:ignore:end
+      }
+    });
+
+    it('Example 4.14', function(done) {
+      const { createStore, applyMiddleware } = require('redux');
+      const thunk = require('redux-thunk').default;
+
+      // The 3rd arg to `createStore()` is composed Redux _middleware_,
+      // in this case just the `redux-thunk` middleware.
+      const store = createStore(reducer, 0, applyMiddleware(thunk));
+      store.subscribe(() => console.log(store.getState()));
+
+      // `redux-thunk` lets you dispatch _action creators_, which are
+      // potentially async functions that can `dispatch()` more actions
+      store.dispatch(async (dispatch) => {
+        dispatch({ type: 'INCREMENT' }); // Prints "1"
+        await new Promise(resolve => setImmediate(resolve));
+        dispatch({ type: 'INCREMENT' }); // Prints "2"
+        // acquit:ignore:start
+        assert.deepEqual(console.logged, [[1], [2]]);
+        done();
         // acquit:ignore:end
       });
     });

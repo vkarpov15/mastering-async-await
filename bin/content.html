@@ -283,7 +283,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>With Mocha <a href="#page=42">41</a></li>
 <li>With Express <a href="#page=43">42</a></li>
 <li>With MongoDB <a href="#page=45">44</a></li>
-<li>With React and Redux</li>
+<li>With Redux <a href="#page=47">46</a></li>
+<li>With React <a href="#49">48</a></li>
 <li>Exercise 1: Does X Support Async/Await?</li>
 <li>Exercise 2: Socket.io Integration</li>
 </ol>
@@ -2217,6 +2218,87 @@ like in example 4.10, you can use <code>await</code> within the <code>for</code>
 pause the function so you don&#39;t load more documents until you&#39;ve processed
 the documents you already have.</p>
 <h1 id="with-react-and-redux">With React and Redux</h1>
+<p><a href="http://npmjs.com/package/react">React</a> is the most popular UI framework for
+browser-side JavaScript, and <a href="https://www.npmjs.com/package/redux">Redux</a> is
+the most popular state management framework for React. The two have become
+largely synonymous since Redux&#39;s release in 2015. For the purposes of async/await
+integration, both React and Redux are frameworks.</p>
+<p>First, let&#39;s look at how to integrate Redux with async/await. Below is an
+example of using Redux with synchronous functions in vanilla Node.js. Redux
+has 3 primary concepts: stores, actions, and reducers. A <em>store</em> tracks the
+state of your application, an <em>action</em> is an object representing some change
+going through the system, and a <em>reducer</em> is a synchronous function that
+modifies the application state object in response to actions.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-comment">// A _store_ tracks state and lets you dispatch _actions_</span>
+<span class="hljs-keyword">const</span> { createStore } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux'</span>);
+<span class="hljs-comment">// A _reducer_ is a sync function that changes the state</span>
+<span class="hljs-keyword">const</span> reducer = <span class="hljs-function">(<span class="hljs-params">state, action</span>) =&gt;</span> {
+  <span class="hljs-keyword">switch</span>(action.type) { <span class="hljs-comment">// Redux calls reducer on every action</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'INCREMENT'</span>: <span class="hljs-keyword">return</span> state + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'DECREMENT'</span>: <span class="hljs-keyword">return</span> state - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">default</span>:          <span class="hljs-keyword">return</span> state;
+  };
+};
+<span class="hljs-comment">// Create a new store and subscribe to state changes</span>
+<span class="hljs-keyword">const</span> store = createStore(reducer, <span class="hljs-number">0</span>);
+store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(store.getState()));
+
+store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "1"</span>
+store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "2"</span>
+store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'DECREMENT'</span> }); <span class="hljs-comment">// Prints "1"</span>
+</code></pre>
+<p>Redux beginners might be wondering why you need to dispatch actions rather than
+modifying the state directly using the assignment operator.
+It&#39;s hard to watch for changes on a JavaScript value, so
+actions exist to make it easy to observe all changes going through the system.
+In particular, Redux makes it easy to update your React UI every time your state
+changes.</p>
+<p>So can you use async/await with Redux? The answer is not cut and dried. Redux
+reducers <strong>must</strong> be synchronous, so you cannot use an async function as a
+reducer. However, there is nothing stopping you from dispatching actions
+in an async function.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
+
+<pre><code class="lang-javascript">store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(store.getState()));
+
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> _console.log(error.stack));
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "1"</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
+  store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "2"</span>
+}
+</code></pre>
+<p>The approach of calling <code>store.dispatch()</code> from an async function works, but
+doesn&#39;t toe the Redux party line. The <a href="https://redux.js.org/advanced/async-actions#async-action-creators">official Redux approach</a> is to use the <code>redux-thunk</code> package and action creators. An <em>action creator</em> is
+a function that returns a function with a single parameter,
+<code>dispatch</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { createStore, applyMiddleware } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux'</span>);
+<span class="hljs-keyword">const</span> thunk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux-thunk'</span>).default;
+
+<span class="hljs-comment">// The 3rd arg to `createStore()` is composed Redux _middleware_,</span>
+<span class="hljs-comment">// in this case just the `redux-thunk` middleware.</span>
+<span class="hljs-keyword">const</span> store = createStore(reducer, <span class="hljs-number">0</span>, applyMiddleware(thunk));
+store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(store.getState()));
+
+<span class="hljs-comment">// `redux-thunk` lets you dispatch _action creators_, which are</span>
+<span class="hljs-comment">// potentially async functions that can `dispatch()` more actions</span>
+store.dispatch(<span class="hljs-keyword">async</span> (dispatch) =&gt; {
+  dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "1"</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
+  dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "2"</span>
+});
+</code></pre>
+<p><code>redux-thunk</code>&#39;s purpose is inversion of control (IoC). In other
+words, you can define your action creator in a separate file and accept
+<code>dispatch()</code> as a parameter, so it doesn&#39;t have a hard-coded dependency on
+any one Redux store. Like AngularJS dependency injection, but for React.</p>
+<h1 id="with-react">With React</h1>
+<p>Redux is best with React.</p>
 
         </div>
       </body>

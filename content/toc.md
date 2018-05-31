@@ -31,6 +31,7 @@
 1. With Mocha [41](#page=42)
 2. With Express [42](#page=43)
 3. With MongoDB [44](#page=45)
-4. With React and Redux [46](#page=47)
-5. Exercise 1: Does X Support Async/Await?
-6. Exercise 2: Socket.io Integration
+4. With Redux [46](#page=47)
+5. With React [48](#49)
+6. Exercise 1: Does X Support Async/Await?
+7. Exercise 2: Socket.io Integration

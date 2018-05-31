@@ -240,3 +240,60 @@ pause the function so you don't load more documents until you've processed
 the documents you already have.
 
 # With React and Redux
+
+[React](http://npmjs.com/package/react) is the most popular UI framework for
+browser-side JavaScript, and [Redux](https://www.npmjs.com/package/redux) is
+the most popular state management framework for React. The two have become
+largely synonymous since Redux's release in 2015. For the purposes of async/await
+integration, both React and Redux are frameworks.
+
+First, let's look at how to integrate Redux with async/await. Below is an
+example of using Redux with synchronous functions in vanilla Node.js. Redux
+has 3 primary concepts: stores, actions, and reducers. A _store_ tracks the
+state of your application, an _action_ is an object representing some change
+going through the system, and a _reducer_ is a synchronous function that
+modifies the application state object in response to actions.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
+
+```javascript
+[require:Example 4.12$]
+```
+
+Redux beginners might be wondering why you need to dispatch actions rather than
+modifying the state directly using the assignment operator.
+It's hard to watch for changes on a JavaScript value, so
+actions exist to make it easy to observe all changes going through the system.
+In particular, Redux makes it easy to update your React UI every time your state
+changes.
+
+So can you use async/await with Redux? The answer is not cut and dried. Redux
+reducers **must** be synchronous, so you cannot use an async function as a
+reducer. However, there is nothing stopping you from dispatching actions
+in an async function.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
+
+```javascript
+[require:Example 4.13$]
+```
+
+The approach of calling `store.dispatch()` from an async function works, but
+doesn't toe the Redux party line. The [official Redux approach](https://redux.js.org/advanced/async-actions#async-action-creators) is to use the `redux-thunk` package and action creators. An _action creator_ is
+a function that returns a function with a single parameter,
+`dispatch`.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+
+```javascript
+[require:Example 4.14$]
+```
+
+`redux-thunk`'s purpose is inversion of control (IoC). In other
+words, you can define your action creator in a separate file and accept
+`dispatch()` as a parameter, so it doesn't have a hard-coded dependency on
+any one Redux store. Like AngularJS dependency injection, but for React.
+
+# With React
+
+Redux is best with React. 
