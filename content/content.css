@@ -72,6 +72,12 @@ h3 code {
   height: 0px;
 }
 
+.space-example-header {
+  content: ' ';
+  height: 1px;
+  position: relative;
+}
+
 .example-header {
   border: 1px solid #dfdfdf;
   top: -15px;

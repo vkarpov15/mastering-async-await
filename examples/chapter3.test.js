@@ -1,7 +1,6 @@
 const Promise = require('../content/promise').Promise;
 const assert = require('assert');
 const co = require('co');
-const tickId = require('tick-id');
 
 const _console = console;
 

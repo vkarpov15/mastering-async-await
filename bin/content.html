@@ -83,6 +83,12 @@ h3 code {
   height: 0px;
 }
 
+.space-example-header {
+  content: ' ';
+  height: 1px;
+  position: relative;
+}
+
 .example-header {
   border: 1px solid #dfdfdf;
   top: -15px;
@@ -2196,30 +2202,8 @@ cursor using a <code>for</code> loop:</p>
 <p>That&#39;s right, you can <code>await</code> within a <code>for</code> loop&#39;s statements. This pattern
 is a more intuitive and performant way to iterate through a cursor than using
 recursion or streams.</p>
-<p>A Node.js readable stream is essentially an event emitter that emits 3 events:
-&#39;data&#39; when a new piece of data is ready, &#39;error&#39; when an error occurred, and
-&#39;end&#39; when the stream is done. MongoDB cursors also support a stream syntax.</p>
-<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
-
-<pre><code class="lang-javascript"><span class="hljs-comment">// Do not `await`, `find()` returns a cursor synchronously</span>
-<span class="hljs-keyword">const</span> cursor = db.collection(<span class="hljs-string">'Movie'</span>).find();
-<span class="hljs-comment">// Prints "1977", "1980", "1983", "done"</span>
-cursor.on(<span class="hljs-string">'data'</span>, doc =&gt; <span class="hljs-built_in">console</span>.log(doc.year));
-cursor.on(<span class="hljs-string">'end'</span>, () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'done'</span>));
-</code></pre>
-<p>Why is async/await better for performance? Suppose you needed to make the
-<code>on(&#39;data&#39;)</code> handler async. If your <code>on(&#39;data&#39;)</code> handler is slow, you&#39;ll
-have a bunch of <code>on(&#39;data&#39;)</code> handlers running in parallel and the memory
-overhead will defeat the purpose of using a cursor!</p>
-<p>When streaming, the
-MongoDB driver will read documents as fast as it can, there&#39;s no way to
-apply &quot;back pressure&quot; to the MongoDB driver&#39;s stream. With a <code>for</code> loop
-like in example 4.10, you can use <code>await</code> within the <code>for</code> loop body and
-pause the function so you don&#39;t load more documents until you&#39;ve processed
-the documents you already have.</p>
-<h1 id="with-react-and-redux">With React and Redux</h1>
-<p><a href="http://npmjs.com/package/react">React</a> is the most popular UI framework for
-browser-side JavaScript, and <a href="https://www.npmjs.com/package/redux">Redux</a> is
+<h1 id="with-redux">With Redux</h1>
+<p><a href="http://npmjs.com/package/react">React</a> is the most popular JavaScript UI framework, and <a href="https://www.npmjs.com/package/redux">Redux</a> is
 the most popular state management framework for React. The two have become
 largely synonymous since Redux&#39;s release in 2015. For the purposes of async/await
 integration, both React and Redux are frameworks.</p>
@@ -2229,7 +2213,10 @@ has 3 primary concepts: stores, actions, and reducers. A <em>store</em> tracks t
 state of your application, an <em>action</em> is an object representing some change
 going through the system, and a <em>reducer</em> is a synchronous function that
 modifies the application state object in response to actions.</p>
-<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
+<div class="page-break"></div>
+
+<p><br></p>
+<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-comment">// A _store_ tracks state and lets you dispatch _actions_</span>
 <span class="hljs-keyword">const</span> { createStore } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux'</span>);
@@ -2259,29 +2246,30 @@ changes.</p>
 reducers <strong>must</strong> be synchronous, so you cannot use an async function as a
 reducer. However, there is nothing stopping you from dispatching actions
 in an async function.</p>
-<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
 
 <pre><code class="lang-javascript">store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(store.getState()));
 
 run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> _console.log(error.stack));
-
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
   store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "1"</span>
   <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
   store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'INCREMENT'</span> }); <span class="hljs-comment">// Prints "2"</span>
 }
 </code></pre>
-<p>The approach of calling <code>store.dispatch()</code> from an async function works, but
+<p>Calling <code>store.dispatch()</code> from an async function works, but
 doesn&#39;t toe the Redux party line. The <a href="https://redux.js.org/advanced/async-actions#async-action-creators">official Redux approach</a> is to use the <code>redux-thunk</code> package and action creators. An <em>action creator</em> is
 a function that returns a function with a single parameter,
 <code>dispatch</code>.</p>
-<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+<div class="page-break"></div>
+
+<p><br></p>
+<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { createStore, applyMiddleware } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux'</span>);
 <span class="hljs-keyword">const</span> thunk = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redux-thunk'</span>).default;
 
-<span class="hljs-comment">// The 3rd arg to `createStore()` is composed Redux _middleware_,</span>
-<span class="hljs-comment">// in this case just the `redux-thunk` middleware.</span>
+<span class="hljs-comment">// The 3rd arg to `createStore()` is composed Redux _middleware_</span>
 <span class="hljs-keyword">const</span> store = createStore(reducer, <span class="hljs-number">0</span>, applyMiddleware(thunk));
 store.subscribe(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(store.getState()));
 
@@ -2298,7 +2286,62 @@ words, you can define your action creator in a separate file and accept
 <code>dispatch()</code> as a parameter, so it doesn&#39;t have a hard-coded dependency on
 any one Redux store. Like AngularJS dependency injection, but for React.</p>
 <h1 id="with-react">With React</h1>
-<p>Redux is best with React.</p>
+<p>Redux is best with React. In the interest of keeping this example minimally
+bloated, this chapter will avoid JSX, Babel, etc. and just run vanilla React
+in Node.js. Below is an example of creating a component that shows &quot;Hello, World!&quot;
+in React:</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { renderToString } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react-dom/server'</span>);
+<span class="hljs-keyword">const</span> { createElement, Component } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> createElement(<span class="hljs-string">'h1'</span>, <span class="hljs-literal">null</span>, <span class="hljs-string">'Hello, World!'</span>);
+  }
+}
+
+<span class="hljs-comment">// &lt;h1 data-reactroot=""&gt;Hello, World!&lt;/h1&gt;</span>
+<span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
+</code></pre>
+<p>At the time of this writing, the <code>render()</code> function <strong>cannot</strong> be async by default. An async <code>render()</code> will cause React to throw a &quot;Objects are not valid as a React child&quot; error. The <a href="https://auth0.com/blog/time-slice-suspense-react16/">React Suspense</a>
+feature may change this, but that API is currently a work in progress.</p>
+<p>React components also have <a href="https://reactjs.org/docs/react-component.html">lifecycle hooks</a> that get called when
+something happens to the component. For example, <code>componentWillMount()</code> gets
+called when a component is about to get added to the DOM. The below script
+will also generate HTML that shows &quot;Hello, World!&quot; because <code>componentWillMount()</code>
+runs before the first <code>render()</code>.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.15</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { renderToString } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react-dom/server'</span>);
+<span class="hljs-keyword">const</span> { createElement, Component } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  componentWillMount() {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-string">'Hello, World!'</span> });
+  }
+  render() { <span class="hljs-keyword">return</span> createElement(<span class="hljs-string">'h1'</span>, <span class="hljs-literal">null</span>, <span class="hljs-keyword">this</span>.state.text); }
+}
+<span class="hljs-comment">// &lt;h1 data-reactroot=""&gt;Hello, World!&lt;/h1&gt;</span>
+<span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
+</code></pre>
+<p>The <code>componentWillMount()</code> hook does not
+handle async functions either. The below
+script will produce an empty <code>&lt;h1&gt;</code> and produce a
+&quot;Can only update a mounting component&quot; warning.</p>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">async</span> componentWillMount() {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-string">'Hello, World!'</span> });
+  }
+  render() { <span class="hljs-keyword">return</span> createElement(<span class="hljs-string">'h1'</span>, <span class="hljs-literal">null</span>, <span class="hljs-keyword">this</span>.state.text); }
+}
+<span class="hljs-comment">// &lt;h1 data-reactroot=""&gt;&lt;/h1&gt;</span>
+<span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
+</code></pre>
+<p>In general, React doesn&#39;t handle async functions well. To use async functions
+with React, you should use a framework like Redux.</p>
 
         </div>
       </body>

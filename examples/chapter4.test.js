@@ -186,25 +186,6 @@ describe('Chapter 4 Examples', function() {
       afterEach(async function() {
         await db.collection('Movie').drop();
       });
-
-      it('Example 4.11', function(done) {
-        // Do not `await`, `find()` returns a cursor synchronously
-        const cursor = db.collection('Movie').find();
-        // Prints "1977", "1980", "1983", "done"
-        cursor.on('data', doc => console.log(doc.year));
-        cursor.on('end', () => console.log('done'));
-        // acquit:ignore:start
-        setTimeout(() => {
-          assert.deepEqual(console.logged, [
-            [1977],
-            [1980],
-            [1983],
-            ['done']
-          ]);
-          done();
-        }, 150);
-        // acquit:ignore:end
-      });
     });
   });
 
@@ -235,7 +216,7 @@ describe('Chapter 4 Examples', function() {
       console.logged = [];
     });
 
-    it('Example 4.12', function() {
+    it('Example 4.11', function() {
       // A _store_ tracks state and lets you dispatch _actions_
       const { createStore } = require('redux');
       // A _reducer_ is a sync function that changes the state
@@ -258,11 +239,10 @@ describe('Chapter 4 Examples', function() {
       // acquit:ignore:end
     });
 
-    it('Example 4.13', function(done) {
+    it('Example 4.12', function(done) {
       store.subscribe(() => console.log(store.getState()));
 
       run().catch(error => _console.log(error.stack));
-
       async function run() {
         store.dispatch({ type: 'INCREMENT' }); // Prints "1"
         await new Promise(resolve => setImmediate(resolve));
@@ -274,12 +254,11 @@ describe('Chapter 4 Examples', function() {
       }
     });
 
-    it('Example 4.14', function(done) {
+    it('Example 4.13', function(done) {
       const { createStore, applyMiddleware } = require('redux');
       const thunk = require('redux-thunk').default;
 
-      // The 3rd arg to `createStore()` is composed Redux _middleware_,
-      // in this case just the `redux-thunk` middleware.
+      // The 3rd arg to `createStore()` is composed Redux _middleware_
       const store = createStore(reducer, 0, applyMiddleware(thunk));
       store.subscribe(() => console.log(store.getState()));
 

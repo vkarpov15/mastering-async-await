@@ -217,32 +217,9 @@ That's right, you can `await` within a `for` loop's statements. This pattern
 is a more intuitive and performant way to iterate through a cursor than using
 recursion or streams.
 
-A Node.js readable stream is essentially an event emitter that emits 3 events:
-'data' when a new piece of data is ready, 'error' when an error occurred, and
-'end' when the stream is done. MongoDB cursors also support a stream syntax.
+# With Redux
 
-<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
-
-```javascript
-[require:Example 4.11$]
-```
-
-Why is async/await better for performance? Suppose you needed to make the
-`on('data')` handler async. If your `on('data')` handler is slow, you'll
-have a bunch of `on('data')` handlers running in parallel and the memory
-overhead will defeat the purpose of using a cursor!
-
-When streaming, the
-MongoDB driver will read documents as fast as it can, there's no way to
-apply "back pressure" to the MongoDB driver's stream. With a `for` loop
-like in example 4.10, you can use `await` within the `for` loop body and
-pause the function so you don't load more documents until you've processed
-the documents you already have.
-
-# With React and Redux
-
-[React](http://npmjs.com/package/react) is the most popular UI framework for
-browser-side JavaScript, and [Redux](https://www.npmjs.com/package/redux) is
+[React](http://npmjs.com/package/react) is the most popular JavaScript UI framework, and [Redux](https://www.npmjs.com/package/redux) is
 the most popular state management framework for React. The two have become
 largely synonymous since Redux's release in 2015. For the purposes of async/await
 integration, both React and Redux are frameworks.
@@ -254,10 +231,14 @@ state of your application, an _action_ is an object representing some change
 going through the system, and a _reducer_ is a synchronous function that
 modifies the application state object in response to actions.
 
-<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
+<div class="page-break"></div>
+
+<br>
+
+<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
 
 ```javascript
-[require:Example 4.12$]
+[require:Example 4.11$]
 ```
 
 Redux beginners might be wondering why you need to dispatch actions rather than
@@ -272,21 +253,25 @@ reducers **must** be synchronous, so you cannot use an async function as a
 reducer. However, there is nothing stopping you from dispatching actions
 in an async function.
 
-<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
+<div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
 
 ```javascript
-[require:Example 4.13$]
+[require:Example 4.12$]
 ```
 
-The approach of calling `store.dispatch()` from an async function works, but
+Calling `store.dispatch()` from an async function works, but
 doesn't toe the Redux party line. The [official Redux approach](https://redux.js.org/advanced/async-actions#async-action-creators) is to use the `redux-thunk` package and action creators. An _action creator_ is
 a function that returns a function with a single parameter,
 `dispatch`.
 
-<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+<div class="page-break"></div>
+
+<br>
+
+<div class="example-header-wrap"><div class="example-header">Example 4.13</div></div>
 
 ```javascript
-[require:Example 4.14$]
+[require:Example 4.13$]
 ```
 
 `redux-thunk`'s purpose is inversion of control (IoC). In other
@@ -296,4 +281,71 @@ any one Redux store. Like AngularJS dependency injection, but for React.
 
 # With React
 
-Redux is best with React. 
+Redux is best with React. In the interest of keeping this example minimally
+bloated, this chapter will avoid JSX, Babel, etc. and just run vanilla React
+in Node.js. Below is an example of creating a component that shows "Hello, World!"
+in React:
+
+<div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
+
+```javascript
+const { renderToString } = require('react-dom/server');
+const { createElement, Component } = require('react');
+
+class MyComponent extends Component {
+  render() {
+    return createElement('h1', null, 'Hello, World!');
+  }
+}
+
+// <h1 data-reactroot="">Hello, World!</h1>
+console.log(renderToString(createElement(MyComponent)));
+```
+
+At the time of this writing, the `render()` function **cannot** be async by default. An async `render()` will cause React to throw a "Objects are not valid as a React child" error. The [React Suspense](https://auth0.com/blog/time-slice-suspense-react16/)
+feature may change this, but that API is currently a work in progress.
+
+React components also have [lifecycle hooks](https://reactjs.org/docs/react-component.html) that get called when
+something happens to the component. For example, `componentWillMount()` gets
+called when a component is about to get added to the DOM. The below script
+will also generate HTML that shows "Hello, World!" because `componentWillMount()`
+runs before the first `render()`.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.15</div></div>
+
+```javascript
+const { renderToString } = require('react-dom/server');
+const { createElement, Component } = require('react');
+
+class MyComponent extends Component {
+  componentWillMount() {
+    this.setState({ text: 'Hello, World!' });
+  }
+  render() { return createElement('h1', null, this.state.text); }
+}
+// <h1 data-reactroot="">Hello, World!</h1>
+console.log(renderToString(createElement(MyComponent)));
+```
+
+The `componentWillMount()` hook does not
+handle async functions either. The below
+script will produce an empty `<h1>` and produce a
+"Can only update a mounting component" warning.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.16</div></div>
+
+```javascript
+class MyComponent extends Component {
+  async componentWillMount() {
+    this.setState({ text: null });
+    await new Promise(resolve => setImmediate(resolve));
+    this.setState({ text: 'Hello, World!' });
+  }
+  render() { return createElement('h1', null, this.state.text); }
+}
+// <h1 data-reactroot=""></h1>
+console.log(renderToString(createElement(MyComponent)));
+```
+
+In general, React doesn't handle async functions well. To use async functions
+with React, you should use a framework like Redux.
