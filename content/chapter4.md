@@ -162,7 +162,81 @@ Express.
 [require:Example 4.8$]
 ```
 
-Error handling is a common cause of async/await integration issues. Even if
-a framework seems to support async functions, make sure to check whether it
-handles errors in async function correctly. In this case, Express does not handle
-errors in async functions correctly.
+Error handling often causes async/await integration issues. Make sure to check
+whether frameworks you use
+handle errors in async function correctly. Express is not the only framework that seems to support async functions at first glance but does not
+handle errors.
+
+# With MongoDB
+
+Mocha is an example of a framework that fully supports async functions and
+Express is an example of a framework that does not support async functions.
+Let's take a look at an example of a Node.js library: the
+[official MongoDB driver for Node.js](http://npmjs.com/package/mongodb).
+
+The MongoDB driver generally does not execute
+functions for you, with a few exceptions like callbacks.
+Apps built on the MongoDB driver primarily use the driver's functions for CRUD (create, read, update, delete) operations:
+
+<div class="example-header-wrap"><div class="example-header">Example 4.9</div></div>
+
+```javascript
+[require:Example 4.9$]
+```
+
+For a library to support async/await, its functions must return
+thenables. The documentation shows that functions like
+`insertOne()` return a promise, as long as you don't specify a callback.
+
+<img src="https://i.imgur.com/Cr8TuDT.png">
+
+This means the MongoDB driver supports async/await from a library perspective.
+However, using the MongoDB driver with async/await lets you do more than just
+`await` on individual CRUD operations. Async/await opens up some elegant
+alternatives for streaming data using `for` loops.
+
+Most database applications only read a few documents from the database at a
+time. But what happens if you need to read through millions of documents, more
+than can fit into your application's memory at one time? The MongoDB driver
+has a construct called a [cursor](http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html) that lets you iterate through huge data sets by only loading a fixed number of
+documents into memory at any one time.
+
+Fundamentally, a MongoDB cursor is an object with a function `next()` that
+returns a promise which resolves to the next document, or `null` if there are
+no more documents. Without async/await, iterating through a cursor using
+`next()` required recursion. With async/await, you can iterate through a
+cursor using a `for` loop:
+
+<div class="example-header-wrap"><div class="example-header">Example 4.10</div></div>
+
+```javascript
+[require:Example 4.10$]
+```
+
+That's right, you can `await` within a `for` loop's statements. This pattern
+is a more intuitive and performant way to iterate through a cursor than using
+recursion or streams.
+
+A Node.js readable stream is essentially an event emitter that emits 3 events:
+'data' when a new piece of data is ready, 'error' when an error occurred, and
+'end' when the stream is done. MongoDB cursors also support a stream syntax.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
+
+```javascript
+[require:Example 4.11$]
+```
+
+Why is async/await better for performance? Suppose you needed to make the
+`on('data')` handler async. If your `on('data')` handler is slow, you'll
+have a bunch of `on('data')` handlers running in parallel and the memory
+overhead will defeat the purpose of using a cursor!
+
+When streaming, the
+MongoDB driver will read documents as fast as it can, there's no way to
+apply "back pressure" to the MongoDB driver's stream. With a `for` loop
+like in example 4.10, you can use `await` within the `for` loop body and
+pause the function so you don't load more documents until you've processed
+the documents you already have.
+
+# With React and Redux

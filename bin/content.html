@@ -282,7 +282,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <ol>
 <li>With Mocha <a href="#page=42">41</a></li>
 <li>With Express <a href="#page=43">42</a></li>
-<li>With MongoDB</li>
+<li>With MongoDB <a href="#page=45">44</a></li>
 <li>With React and Redux</li>
 <li>Exercise 1: Does X Support Async/Await?</li>
 <li>Exercise 2: Socket.io Integration</li>
@@ -2138,10 +2138,85 @@ Express.</p>
   });
 }
 </code></pre>
-<p>Error handling is a common cause of async/await integration issues. Even if
-a framework seems to support async functions, make sure to check whether it
-handles errors in async function correctly. In this case, Express does not handle
-errors in async functions correctly.</p>
+<p>Error handling often causes async/await integration issues. Make sure to check
+whether frameworks you use
+handle errors in async function correctly. Express is not the only framework that seems to support async functions at first glance but does not
+handle errors.</p>
+<h1 id="with-mongodb">With MongoDB</h1>
+<p>Mocha is an example of a framework that fully supports async functions and
+Express is an example of a framework that does not support async functions.
+Let&#39;s take a look at an example of a Node.js library: the
+<a href="http://npmjs.com/package/mongodb">official MongoDB driver for Node.js</a>.</p>
+<p>The MongoDB driver generally does not execute
+functions for you, with a few exceptions like callbacks.
+Apps built on the MongoDB driver primarily use the driver&#39;s functions for CRUD (create, read, update, delete) operations:</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.9</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> { MongoClient } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'mongodb'</span>);
+<span class="hljs-keyword">const</span> uri = <span class="hljs-string">'mongodb://localhost:27017/test'</span>;
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">await</span> MongoClient.connect(uri);
+<span class="hljs-keyword">const</span> db = client.db(<span class="hljs-string">'test'</span>);
+
+<span class="hljs-keyword">await</span> db.collection(<span class="hljs-string">'test'</span>).insertOne({ <span class="hljs-attr">answer</span>: <span class="hljs-number">42</span> }); <span class="hljs-comment">// Create</span>
+<span class="hljs-keyword">const</span> doc = <span class="hljs-keyword">await</span> db.collection(<span class="hljs-string">'test'</span>).findOne(); <span class="hljs-comment">// Read</span>
+<span class="hljs-built_in">console</span>.log(doc.answer); <span class="hljs-comment">// Prints "42"</span>
+</code></pre>
+<p>For a library to support async/await, its functions must return
+thenables. The documentation shows that functions like
+<code>insertOne()</code> return a promise, as long as you don&#39;t specify a callback.</p>
+<p><img src="https://i.imgur.com/Cr8TuDT.png"></p>
+<p>This means the MongoDB driver supports async/await from a library perspective.
+However, using the MongoDB driver with async/await lets you do more than just
+<code>await</code> on individual CRUD operations. Async/await opens up some elegant
+alternatives for streaming data using <code>for</code> loops.</p>
+<p>Most database applications only read a few documents from the database at a
+time. But what happens if you need to read through millions of documents, more
+than can fit into your application&#39;s memory at one time? The MongoDB driver
+has a construct called a <a href="http://mongodb.github.io/node-mongodb-native/3.0/api/Cursor.html">cursor</a> that lets you iterate through huge data sets by only loading a fixed number of
+documents into memory at any one time.</p>
+<p>Fundamentally, a MongoDB cursor is an object with a function <code>next()</code> that
+returns a promise which resolves to the next document, or <code>null</code> if there are
+no more documents. Without async/await, iterating through a cursor using
+<code>next()</code> required recursion. With async/await, you can iterate through a
+cursor using a <code>for</code> loop:</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.10</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">await</span> db.collection(<span class="hljs-string">'Movie'</span>).insertMany([
+  { <span class="hljs-attr">title</span>: <span class="hljs-string">'Star Wars'</span>, <span class="hljs-attr">year</span>: <span class="hljs-number">1977</span> },
+  { <span class="hljs-attr">title</span>: <span class="hljs-string">'The Empire Strikes Back'</span>, <span class="hljs-attr">year</span>: <span class="hljs-number">1980</span> },
+  { <span class="hljs-attr">title</span>: <span class="hljs-string">'Return of the Jedi'</span>, <span class="hljs-attr">year</span>: <span class="hljs-number">1983</span> }
+]);
+<span class="hljs-comment">// Do not `await`, `find()` returns a cursor synchronously</span>
+<span class="hljs-keyword">const</span> cursor = db.collection(<span class="hljs-string">'Movie'</span>).find();
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> v = <span class="hljs-keyword">await</span> cursor.next(); v != <span class="hljs-literal">null</span>; v = <span class="hljs-keyword">await</span> cursor.next()) {
+  <span class="hljs-built_in">console</span>.log(v.year); <span class="hljs-comment">// Prints "1977", "1980", "1983"</span>
+}
+</code></pre>
+<p>That&#39;s right, you can <code>await</code> within a <code>for</code> loop&#39;s statements. This pattern
+is a more intuitive and performant way to iterate through a cursor than using
+recursion or streams.</p>
+<p>A Node.js readable stream is essentially an event emitter that emits 3 events:
+&#39;data&#39; when a new piece of data is ready, &#39;error&#39; when an error occurred, and
+&#39;end&#39; when the stream is done. MongoDB cursors also support a stream syntax.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.11</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-comment">// Do not `await`, `find()` returns a cursor synchronously</span>
+<span class="hljs-keyword">const</span> cursor = db.collection(<span class="hljs-string">'Movie'</span>).find();
+<span class="hljs-comment">// Prints "1977", "1980", "1983", "done"</span>
+cursor.on(<span class="hljs-string">'data'</span>, doc =&gt; <span class="hljs-built_in">console</span>.log(doc.year));
+cursor.on(<span class="hljs-string">'end'</span>, () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'done'</span>));
+</code></pre>
+<p>Why is async/await better for performance? Suppose you needed to make the
+<code>on(&#39;data&#39;)</code> handler async. If your <code>on(&#39;data&#39;)</code> handler is slow, you&#39;ll
+have a bunch of <code>on(&#39;data&#39;)</code> handlers running in parallel and the memory
+overhead will defeat the purpose of using a cursor!</p>
+<p>When streaming, the
+MongoDB driver will read documents as fast as it can, there&#39;s no way to
+apply &quot;back pressure&quot; to the MongoDB driver&#39;s stream. With a <code>for</code> loop
+like in example 4.10, you can use <code>await</code> within the <code>for</code> loop body and
+pause the function so you don&#39;t load more documents until you&#39;ve processed
+the documents you already have.</p>
+<h1 id="with-react-and-redux">With React and Redux</h1>
 
         </div>
       </body>
