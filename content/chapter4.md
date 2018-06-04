@@ -243,7 +243,7 @@ modifies the application state object in response to actions.
 
 Redux beginners might be wondering why you need to dispatch actions rather than
 modifying the state directly using the assignment operator.
-It's hard to watch for changes on a JavaScript value, so
+Watching for changes on a JavaScript value is hard, so
 actions exist to make it easy to observe all changes going through the system.
 In particular, Redux makes it easy to update your React UI every time your state
 changes.
@@ -324,8 +324,7 @@ console.log(renderToString(createElement(MyComponent)));
 
 The `componentWillMount()` hook does **not**
 handle async functions. The below
-script produces an empty `<h1>`. React also doesn't
-handle errors that occur in an async `componentWillMount()`.
+script produces an empty `<h1>`.
 
 <div class="example-header-wrap"><div class="example-header">Example 4.16</div></div>
 
@@ -342,10 +341,36 @@ class MyComponent extends Component {
 console.log(renderToString(createElement(MyComponent)));
 ```
 
-In general, React doesn't handle async functions well. To use async functions
-with React, you should use a framework like Redux.
+React also doesn't
+handle errors that occur in an async `componentWillMount()`.
 
 <div class="example-header-wrap"><div class="example-header">Example 4.17</div></div>
+
+```javascript
+class MyComponent extends Component {
+  async componentWillMount() {
+    this.setState({ text: null });
+    await new Promise(resolve => setImmediate(resolve));
+    // Unhandled promise rejection
+    throw Error('Oops');
+  }
+  render() { return createElement('h1', null, this.state.text); }
+}
+// <h1 data-reactroot=""></h1>
+console.log(renderToString(createElement(MyComponent)));
+```
+
+In general, React doesn't handle async functions well. Even though
+async `componentWillMount()` works in the browser, React won't handle errors
+and there's no way to `.catch()`. To use async functions
+with React, you should use a framework like Redux. The following is an example of
+using Redux action creators with React.
+
+<div class="page-break"></div>
+
+<br>
+
+<div class="example-header-wrap"><div class="example-header">Example 4.18</div></div>
 
 ```javascript
 const reducer = (state, action) => Object.assign({}, state, action);
@@ -365,6 +390,33 @@ setInterval(() => {
   console.log(renderToString(createElement(MyComponent)));
 }, 100);
 ```
+
+Unfortunately, `redux-thunk` doesn't handle errors in async action creators
+for you. But, since the action creator is a function as opposed to a class
+method, you can handle errors using a wrapper function like in Example 4.8.
+For React and Redux, the wrapper function should `dispatch()` an error action
+that your UI can then handle.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.19</div></div>
+
+```javascript
+const wrap = fn => dispatch => {
+  fn(dispatch).catch(error => dispatch({ type: 'ERROR', error }));
+};
+
+store.dispatch(wrap(async (dispatch) => {
+  await new Promise(resolve => setTimeout(resolve, 250));
+  dispatch({ type: 'SET', v: 'Hello, World!' });
+}));
+```
+
+For frameworks that lack good async/await support, like React, Redux, and Express,
+you should use wrapper functions to handle errors in a way
+that makes sense for the framework. Be wary of plugins that monkey-patch the
+framework to support async/await. But, above all, make sure you handle errors
+in your async functions, because not all frameworks will do that for you.
+
+<div class="page-break"></div>
 
 # Exercise 1: Does X Support Async/Await?
 
@@ -407,3 +459,7 @@ In this case, `schedule` returns array of `jobs`.
 <div class="page-break"></div>
 
 # Exercise 2: Socket.io Integration
+
+[Socket.io](https://www.npmjs.com/package/socket.io) is a popular websocket-based
+pub/sub solution. In other words, Socket.io is an event emitter that lets you
+send events over the network.

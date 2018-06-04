@@ -19,6 +19,7 @@ class MyComponent extends Component {
 store.dispatch(async (dispatch) => {
   await new Promise(resolve => setTimeout(resolve, 250));
   dispatch({ type: 'SET', payload: 'Hello, World!' });
+  throw Error('Oops')
 });
 
 setInterval(() => {

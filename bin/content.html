@@ -2236,7 +2236,7 @@ store.dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">
 </code></pre>
 <p>Redux beginners might be wondering why you need to dispatch actions rather than
 modifying the state directly using the assignment operator.
-It&#39;s hard to watch for changes on a JavaScript value, so
+Watching for changes on a JavaScript value is hard, so
 actions exist to make it easy to observe all changes going through the system.
 In particular, Redux makes it easy to update your React UI every time your state
 changes.</p>
@@ -2318,8 +2318,7 @@ runs before the first <code>render()</code>.</p>
 </code></pre>
 <p>The <code>componentWillMount()</code> hook does <strong>not</strong>
 handle async functions. The below
-script produces an empty <code>&lt;h1&gt;</code>. React also doesn&#39;t
-handle errors that occur in an async <code>componentWillMount()</code>.</p>
+script produces an empty <code>&lt;h1&gt;</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 4.16</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
@@ -2333,9 +2332,31 @@ handle errors that occur in an async <code>componentWillMount()</code>.</p>
 <span class="hljs-comment">// &lt;h1 data-reactroot=""&gt;&lt;/h1&gt;</span>
 <span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
 </code></pre>
-<p>In general, React doesn&#39;t handle async functions well. To use async functions
-with React, you should use a framework like Redux.</p>
+<p>React also doesn&#39;t
+handle errors that occur in an async <code>componentWillMount()</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 4.17</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">async</span> componentWillMount() {
+    <span class="hljs-keyword">this</span>.setState({ <span class="hljs-attr">text</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
+    <span class="hljs-comment">// Unhandled promise rejection</span>
+    <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops'</span>);
+  }
+  render() { <span class="hljs-keyword">return</span> createElement(<span class="hljs-string">'h1'</span>, <span class="hljs-literal">null</span>, <span class="hljs-keyword">this</span>.state.text); }
+}
+<span class="hljs-comment">// &lt;h1 data-reactroot=""&gt;&lt;/h1&gt;</span>
+<span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
+</code></pre>
+<p>In general, React doesn&#39;t handle async functions well. Even though
+async <code>componentWillMount()</code> works in the browser, React won&#39;t handle errors
+and there&#39;s no way to <code>.catch()</code>. To use async functions
+with React, you should use a framework like Redux. The following is an example of
+using Redux action creators with React.</p>
+<div class="page-break"></div>
+
+<p><br></p>
+<div class="example-header-wrap"><div class="example-header">Example 4.18</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> reducer = <span class="hljs-function">(<span class="hljs-params">state, action</span>) =&gt;</span> <span class="hljs-built_in">Object</span>.assign({}, state, action);
 <span class="hljs-keyword">const</span> store = createStore(reducer, { <span class="hljs-attr">v</span>: <span class="hljs-string">''</span> }, applyMiddleware(thunk));
@@ -2354,6 +2375,29 @@ setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt
   <span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
 }, <span class="hljs-number">100</span>);
 </code></pre>
+<p>Unfortunately, <code>redux-thunk</code> doesn&#39;t handle errors in async action creators
+for you. But, since the action creator is a function as opposed to a class
+method, you can handle errors using a wrapper function like in Example 4.8.
+For React and Redux, the wrapper function should <code>dispatch()</code> an error action
+that your UI can then handle.</p>
+<div class="example-header-wrap"><div class="example-header">Example 4.19</div></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> wrap = <span class="hljs-function"><span class="hljs-params">fn</span> =&gt;</span> dispatch =&gt; {
+  fn(dispatch).catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'ERROR'</span>, error }));
+};
+
+store.dispatch(wrap(<span class="hljs-keyword">async</span> (dispatch) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">250</span>));
+  dispatch({ <span class="hljs-attr">type</span>: <span class="hljs-string">'SET'</span>, <span class="hljs-attr">v</span>: <span class="hljs-string">'Hello, World!'</span> });
+}));
+</code></pre>
+<p>For frameworks that lack good async/await support, like React, Redux, and Express,
+you should use wrapper functions to handle errors in a way
+that makes sense for the framework. Be wary of plugins that monkey-patch the
+framework to support async/await. But, above all, make sure you handle errors
+in your async functions, because not all frameworks will do that for you.</p>
+<div class="page-break"></div>
+
 <h1 id="exercise-1-does-x-support-async-await-">Exercise 1: Does X Support Async/Await?</h1>
 <p><a href="https://www.npmjs.com/package/agenda">Agenda</a> is an npm module that lets you
 schedule jobs to run at certain times. Below is the documentation for Agenda&#39;s
@@ -2382,6 +2426,9 @@ persisted in the database.</p>
 <div class="page-break"></div>
 
 <h1 id="exercise-2-socket-io-integration">Exercise 2: Socket.io Integration</h1>
+<p><a href="https://www.npmjs.com/package/socket.io">Socket.io</a> is a popular websocket-based
+pub/sub solution. In other words, Socket.io is an event emitter that lets you
+send events over the network.</p>
 
         </div>
       </body>
