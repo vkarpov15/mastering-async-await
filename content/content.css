@@ -73,9 +73,7 @@ h3 code {
 }
 
 .space-example-header {
-  content: ' ';
-  height: 1px;
-  position: relative;
+  font-size: 0.25em;
 }
 
 .example-header {

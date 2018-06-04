@@ -242,7 +242,7 @@ describe('Chapter 4 Examples', function() {
     it('Example 4.12', function(done) {
       store.subscribe(() => console.log(store.getState()));
 
-      run().catch(error => _console.log(error.stack));
+      run().catch(error => console.log(error.stack));
       async function run() {
         store.dispatch({ type: 'INCREMENT' }); // Prints "1"
         await new Promise(resolve => setImmediate(resolve));
@@ -257,7 +257,6 @@ describe('Chapter 4 Examples', function() {
     it('Example 4.13', function(done) {
       const { createStore, applyMiddleware } = require('redux');
       const thunk = require('redux-thunk').default;
-
       // The 3rd arg to `createStore()` is composed Redux _middleware_
       const store = createStore(reducer, 0, applyMiddleware(thunk));
       store.subscribe(() => console.log(store.getState()));

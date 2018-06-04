@@ -248,10 +248,10 @@ actions exist to make it easy to observe all changes going through the system.
 In particular, Redux makes it easy to update your React UI every time your state
 changes.
 
-So can you use async/await with Redux? The answer is not cut and dried. Redux
+So can you use async/await with Redux? Redux
 reducers **must** be synchronous, so you cannot use an async function as a
-reducer. However, there is nothing stopping you from dispatching actions
-in an async function.
+reducer. However, you can dispatch actions
+from an async function.
 
 <div class="example-header-wrap"><div class="example-header">Example 4.12</div></div>
 
@@ -275,16 +275,15 @@ a function that returns a function with a single parameter,
 ```
 
 `redux-thunk`'s purpose is inversion of control (IoC). In other
-words, you can define your action creator in a separate file and accept
-`dispatch()` as a parameter, so it doesn't have a hard-coded dependency on
-any one Redux store. Like AngularJS dependency injection, but for React.
+words, an action creator that takes `dispatch()` as a parameter doesn't have
+a hard-coded dependency on any one Redux store. Like AngularJS dependency
+injection, but for React.
 
 # With React
 
-Redux is best with React. In the interest of keeping this example minimally
-bloated, this chapter will avoid JSX, Babel, etc. and just run vanilla React
-in Node.js. Below is an example of creating a component that shows "Hello, World!"
-in React:
+Redux is best with React. To avoid bloat, this chapter will not use JSX,
+React's preferred extended JS syntax. Below is an example of creating a component
+that shows "Hello, World!" in React:
 
 <div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
 
@@ -297,40 +296,36 @@ class MyComponent extends Component {
     return createElement('h1', null, 'Hello, World!');
   }
 }
-
 // <h1 data-reactroot="">Hello, World!</h1>
 console.log(renderToString(createElement(MyComponent)));
 ```
 
-At the time of this writing, the `render()` function **cannot** be async by default. An async `render()` will cause React to throw a "Objects are not valid as a React child" error. The [React Suspense](https://auth0.com/blog/time-slice-suspense-react16/)
-feature may change this, but that API is currently a work in progress.
+Currently, `render()` functions **cannot** be async. An async `render()` will cause React to throw a "Objects are not valid as a React child" error. The
+upcoming [React Suspense API](https://auth0.com/blog/time-slice-suspense-react16/)
+may change this.
 
-React components also have [lifecycle hooks](https://reactjs.org/docs/react-component.html) that get called when
-something happens to the component. For example, `componentWillMount()` gets
-called when a component is about to get added to the DOM. The below script
+React components have [lifecycle hooks](https://reactjs.org/docs/react-component.html) that React calls when it
+does something with a component. For example, React calls `componentWillMount()` before adding a component to the DOM. The below script
 will also generate HTML that shows "Hello, World!" because `componentWillMount()`
 runs before the first `render()`.
+
+<br>
 
 <div class="example-header-wrap"><div class="example-header">Example 4.15</div></div>
 
 ```javascript
-const { renderToString } = require('react-dom/server');
-const { createElement, Component } = require('react');
-
 class MyComponent extends Component {
-  componentWillMount() {
-    this.setState({ text: 'Hello, World!' });
-  }
-  render() { return createElement('h1', null, this.state.text); }
+  componentWillMount() { this.setState({ v: 'Hello, World!' }); }
+  render() { return createElement('h1', null, this.state.v); }
 }
 // <h1 data-reactroot="">Hello, World!</h1>
 console.log(renderToString(createElement(MyComponent)));
 ```
 
-The `componentWillMount()` hook does not
-handle async functions either. The below
-script will produce an empty `<h1>` and produce a
-"Can only update a mounting component" warning.
+The `componentWillMount()` hook does **not**
+handle async functions. The below
+script produces an empty `<h1>`. React also doesn't
+handle errors that occur in an async `componentWillMount()`.
 
 <div class="example-header-wrap"><div class="example-header">Example 4.16</div></div>
 
@@ -349,3 +344,24 @@ console.log(renderToString(createElement(MyComponent)));
 
 In general, React doesn't handle async functions well. To use async functions
 with React, you should use a framework like Redux.
+
+<div class="example-header-wrap"><div class="example-header">Example 4.17</div></div>
+
+```javascript
+const reducer = (state, action) => Object.assign({}, state, action);
+const store = createStore(reducer, { v: '' }, applyMiddleware(thunk));
+
+class MyComponent extends Component {
+  componentWillMount() { this.setState(store.getState()); }
+  render() { return createElement('h1', null, this.state.v); }
+}
+
+store.dispatch(async (dispatch) => {
+  await new Promise(resolve => setTimeout(resolve, 250));
+  dispatch({ type: 'SET', v: 'Hello, World!' });
+});
+setInterval(() => {
+  // First 2 will print an empty <h1>, then "Hello, World!"
+  console.log(renderToString(createElement(MyComponent)));
+}, 100);
+```
