@@ -288,8 +288,8 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>With Express <a href="#page=43">42</a></li>
 <li>With MongoDB <a href="#page=45">44</a></li>
 <li>With Redux <a href="#page=47">46</a></li>
-<li>With React <a href="#49">48</a></li>
-<li>Exercise 1: Does X Support Async/Await?</li>
+<li>With React <a href="#page=49">48</a></li>
+<li>Exercise 1: Does X Support Async/Await? <a href="#page=50">49</a></li>
 <li>Exercise 2: Socket.io Integration</li>
 </ol>
 
@@ -2354,6 +2354,34 @@ setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt
   <span class="hljs-built_in">console</span>.log(renderToString(createElement(MyComponent)));
 }, <span class="hljs-number">100</span>);
 </code></pre>
+<h1 id="exercise-1-does-x-support-async-await-">Exercise 1: Does X Support Async/Await?</h1>
+<p><a href="https://www.npmjs.com/package/agenda">Agenda</a> is an npm module that lets you
+schedule jobs to run at certain times. Below is the documentation for Agenda&#39;s
+<code>schedule()</code> function. Does the <code>schedule()</code> function support async/await
+from a library perspective?</p>
+<h3 id="schedule-when-name-data-cb-">schedule(when, name, [data], [cb])</h3>
+<p>Schedules a job to run <code>name</code> once at a given time. <code>when</code> can be a <code>Date</code> or a
+<code>String</code> such as <code>tomorrow at 5pm</code>.</p>
+<p><code>data</code> is an optional argument that will be passed to the processing function
+under <code>job.attrs.data</code>.</p>
+<p><code>cb</code> is an optional callback function which will be called when the job has been
+persisted in the database.</p>
+<p>Returns the <code>job</code>.</p>
+<pre><code class="lang-js">agenda.schedule(<span class="hljs-string">'tomorrow at noon'</span>, <span class="hljs-string">'printAnalyticsReport'</span>, {
+  <span class="hljs-attr">userCount</span>: <span class="hljs-number">100</span>
+});
+</code></pre>
+<p>Optionally, <code>name</code> could be array of job names, similar to <code>every</code> method.</p>
+<pre><code class="lang-js">agenda.schedule(<span class="hljs-string">'tomorrow at noon'</span>, [
+  <span class="hljs-string">'printAnalyticsReport'</span>,
+  <span class="hljs-string">'sendNotifications'</span>,
+  <span class="hljs-string">'updateUserRecords'</span>
+]);
+</code></pre>
+<p>In this case, <code>schedule</code> returns array of <code>jobs</code>.</p>
+<div class="page-break"></div>
+
+<h1 id="exercise-2-socket-io-integration">Exercise 2: Socket.io Integration</h1>
 
         </div>
       </body>

@@ -32,6 +32,6 @@
 2. With Express [42](#page=43)
 3. With MongoDB [44](#page=45)
 4. With Redux [46](#page=47)
-5. With React [48](#49)
-6. Exercise 1: Does X Support Async/Await?
+5. With React [48](#page=49)
+6. Exercise 1: Does X Support Async/Await? [49](#page=50)
 7. Exercise 2: Socket.io Integration

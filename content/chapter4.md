@@ -365,3 +365,45 @@ setInterval(() => {
   console.log(renderToString(createElement(MyComponent)));
 }, 100);
 ```
+
+# Exercise 1: Does X Support Async/Await?
+
+[Agenda](https://www.npmjs.com/package/agenda) is an npm module that lets you
+schedule jobs to run at certain times. Below is the documentation for Agenda's
+`schedule()` function. Does the `schedule()` function support async/await
+from a library perspective?
+
+### schedule(when, name, [data], [cb])
+
+Schedules a job to run `name` once at a given time. `when` can be a `Date` or a
+`String` such as `tomorrow at 5pm`.
+
+`data` is an optional argument that will be passed to the processing function
+under `job.attrs.data`.
+
+`cb` is an optional callback function which will be called when the job has been
+persisted in the database.
+
+Returns the `job`.
+
+```js
+agenda.schedule('tomorrow at noon', 'printAnalyticsReport', {
+  userCount: 100
+});
+```
+
+Optionally, `name` could be array of job names, similar to `every` method.
+
+```js
+agenda.schedule('tomorrow at noon', [
+  'printAnalyticsReport',
+  'sendNotifications',
+  'updateUserRecords'
+]);
+```
+
+In this case, `schedule` returns array of `jobs`.
+
+<div class="page-break"></div>
+
+# Exercise 2: Socket.io Integration
