@@ -304,7 +304,8 @@ Once you have this `_wrapResolveReject()` helper, you need to use it in
 <div class="example-header-wrap"><div class="example-header">Example 2.12</div></div>
 
 ```javascript
-resolve(value) { // Beginning omitted for brevity
+resolve(value) {
+  // ...
   if (typeof then === 'function') {
     // If `then()` calls `resolve()` with a 'PENDING' promise and then
     // throws, the `then()` promise will be fulfilled like example 2.10
@@ -313,8 +314,11 @@ resolve(value) { // Beginning omitted for brevity
       return then.call(value, resolve, reject);
     } catch (error) { return reject(error); }
   }
-} // End omitted for brevity
+  // ...
+}
 ```
+
+<div class="page-break"></div>
 
 Also, you need to use `_wrapResolveReject()` in the constructor itself:
 

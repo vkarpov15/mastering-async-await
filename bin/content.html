@@ -21,7 +21,7 @@ a {
 }
 
 h1 {
-  padding-top: 0px;
+  padding-top: 3px;
   margin-top: 0px;
   font-size: 2em;
 }
@@ -1226,7 +1226,8 @@ _wrapResolveReject() {
 <code>resolve()</code>:</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.12</div></div>
 
-<pre><code class="lang-javascript">resolve(value) { <span class="hljs-comment">// Beginning omitted for brevity</span>
+<pre><code class="lang-javascript">resolve(value) {
+  <span class="hljs-comment">// ...</span>
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> then === <span class="hljs-string">'function'</span>) {
     <span class="hljs-comment">// If `then()` calls `resolve()` with a 'PENDING' promise and then</span>
     <span class="hljs-comment">// throws, the `then()` promise will be fulfilled like example 2.10</span>
@@ -1235,8 +1236,11 @@ _wrapResolveReject() {
       <span class="hljs-keyword">return</span> then.call(value, resolve, reject);
     } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> reject(error); }
   }
-} <span class="hljs-comment">// End omitted for brevity</span>
+  <span class="hljs-comment">// ...</span>
+}
 </code></pre>
+<div class="page-break"></div>
+
 <p>Also, you need to use <code>_wrapResolveReject()</code> in the constructor itself:</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.13</div></div>
 
@@ -2461,14 +2465,20 @@ ws.onclose = <span class="hljs-function"><span class="hljs-params">()</span> =&g
         </div>
         <div class="chapter">
           <h1 id="moving-on">Moving On</h1>
-<p>Async/await is an exciting new tool that will make JavaScript much easier to
-work with.</p>
+<p>Async/await is an exciting new tool that makes JavaScript much easier to
+work with. It won&#39;t solve all your problems, but it will make your day-to-day
+much easier by replacing callbacks and promise chaining with <code>for</code> loops
+and <code>if</code> statements. However, in order to work effectively with async/await,
+you need to understand the fundamentals. Here are some key points to remember
+when working with async/await.</p>
 <ul>
 <li>An async function always returns a promise.</li>
 <li><code>await</code> pauses an async function until the awaited promise is settled.</li>
 <li>Other JavaScript may run when an async function is paused.</li>
 <li>Error handling is a common problem. Make sure you handle errors with <code>.catch()</code>.</li>
 </ul>
+<p>Congratulations on completing this book, and good luck with your async/await
+coding adventures!</p>
 
         </div>
       </body>
