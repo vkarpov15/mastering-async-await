@@ -21,6 +21,7 @@ async function run() {
   const blank = fs.readFileSync('./content/blank.html', 'utf8');
   const cover = fs.readFileSync('./content/cover.html', 'utf8');
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
+  const outro = fs.readFileSync('./content/outro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
 
   const examples = [1, 2, 3, 4].
@@ -79,6 +80,9 @@ async function run() {
         </div>
         <div class="chapter">
           ${marked(chapters[3])}
+        </div>
+        <div class="chapter">
+          ${marked(outro)}
         </div>
       </body>
     </html>

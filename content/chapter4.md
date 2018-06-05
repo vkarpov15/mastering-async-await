@@ -281,7 +281,7 @@ injection, but for React.
 
 # With React
 
-Redux is best with React. To avoid bloat, this chapter will not use JSX,
+Redux is best with React, the most popular UI framework for JavaScript. To avoid bloat, this chapter will not use JSX,
 React's preferred extended JS syntax. Below is an example of creating a component
 that shows "Hello, World!" in React:
 
@@ -308,8 +308,6 @@ React components have [lifecycle hooks](https://reactjs.org/docs/react-component
 does something with a component. For example, React calls `componentWillMount()` before adding a component to the DOM. The below script
 will also generate HTML that shows "Hello, World!" because `componentWillMount()`
 runs before the first `render()`.
-
-<br>
 
 <div class="example-header-wrap"><div class="example-header">Example 4.15</div></div>
 
@@ -365,8 +363,6 @@ async `componentWillMount()` works in the browser, React won't handle errors
 and there's no way to `.catch()`. To use async functions
 with React, you should use a framework like Redux. The following is an example of
 using Redux action creators with React.
-
-<div class="page-break"></div>
 
 <br>
 
@@ -458,8 +454,45 @@ In this case, `schedule` returns array of `jobs`.
 
 <div class="page-break"></div>
 
-# Exercise 2: Socket.io Integration
+# Exercise 2: WebSocket Integration
 
-[Socket.io](https://www.npmjs.com/package/socket.io) is a popular websocket-based
-pub/sub solution. In other words, Socket.io is an event emitter that lets you
-send events over the network.
+[WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+are a tool for real-time communication between a browser and a server. Without
+WebSockets, a server can't send data to a browser unless the browser makes an
+HTTP request. With a WebSocket connection, a server can push data to the browser.
+
+The key function for interacting with a WebSocket is the `onmessage` function,
+which JavaScript calls for you when the socket has new data to process.
+
+```javascript
+const ws = new WebSocket('wss://echo.websocket.org/');
+
+ws.onmessage = e => console.log('Got', e.data);
+```
+
+JavaScript
+does **not** handle errors that occur in `onmessage` if `onmessage` is async.
+Write a function that wraps async `onmessage` functions and logs any errors
+that occur to the console.
+
+Below is the starter code. You may copy this code and complete this exercise in
+Node.js, although you will need the [`isomorphic-ws` npm module](https://github.com/heineiuo/isomorphic-ws) because Node.js does **not**
+have WebSockets. You may complete also complete it in your browser
+on CodePen at [`http://bit.ly/async-await-exercise-42`](http://bit.ly/async-await-exercise-32).
+
+```javascript
+// Implement this function
+function wrap(onmessage) {
+  console.log('Not implemented')
+}
+
+// Do not modify the below code
+const ws = new WebSocket('wss://echo.websocket.org/');
+
+ws.onmessage = wrap(async function(e) {
+  throw Error('If you see this error in the console, you completed this exercise');
+});
+
+ws.onopen = () => ws.send('Hello, World');
+ws.onclose = () => console.log('disconnected');
+```

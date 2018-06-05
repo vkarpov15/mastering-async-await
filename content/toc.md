@@ -34,4 +34,6 @@
 4. With Redux [46](#page=47)
 5. With React [48](#page=49)
 6. Exercise 1: Does X Support Async/Await? [50](#page=51)
-7. Exercise 2: Socket.io Integration [51](#page=52)
+7. Exercise 2: WebSocket Integration [51](#page=52)
+
+## 5. Moving On [52](#page=53)

@@ -289,9 +289,10 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 <li>With MongoDB <a href="#page=45">44</a></li>
 <li>With Redux <a href="#page=47">46</a></li>
 <li>With React <a href="#page=49">48</a></li>
-<li>Exercise 1: Does X Support Async/Await? <a href="#page=50">49</a></li>
-<li>Exercise 2: Socket.io Integration</li>
+<li>Exercise 1: Does X Support Async/Await? <a href="#page=51">50</a></li>
+<li>Exercise 2: WebSocket Integration <a href="#page=52">51</a></li>
 </ol>
+<h2 id="5-moving-on-52-page-53-">5. Moving On <a href="#page=53">52</a></h2>
 
         </div>
         <div class="chapter">
@@ -364,7 +365,7 @@ callback hell for the newly minted <a href="https://medium.freecodecamp.org/avoi
 <p>The purpose of this book is to take you from someone who is casually acquainted
 with promises and async/await to someone who is comfortable building and debugging
 a complex app whose core logic is built on async/await. This book is only
-50 pages and is meant to be read in about 2 hours total. You may read it all in
+52 pages and is meant to be read in about 2 hours total. You may read it all in
 one sitting, but you would be better served reading one chapter at a time,
 studying the exercises at the end, and getting a good night&#39;s sleep in between
 chapters to really internalize the information.</p>
@@ -2283,7 +2284,7 @@ words, an action creator that takes <code>dispatch()</code> as a parameter doesn
 a hard-coded dependency on any one Redux store. Like AngularJS dependency
 injection, but for React.</p>
 <h1 id="with-react">With React</h1>
-<p>Redux is best with React. To avoid bloat, this chapter will not use JSX,
+<p>Redux is best with React, the most popular UI framework for JavaScript. To avoid bloat, this chapter will not use JSX,
 React&#39;s preferred extended JS syntax. Below is an example of creating a component
 that shows &quot;Hello, World!&quot; in React:</p>
 <div class="example-header-wrap"><div class="example-header">Example 4.14</div></div>
@@ -2306,7 +2307,6 @@ may change this.</p>
 does something with a component. For example, React calls <code>componentWillMount()</code> before adding a component to the DOM. The below script
 will also generate HTML that shows &quot;Hello, World!&quot; because <code>componentWillMount()</code>
 runs before the first <code>render()</code>.</p>
-<p><br></p>
 <div class="example-header-wrap"><div class="example-header">Example 4.15</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
@@ -2353,8 +2353,6 @@ async <code>componentWillMount()</code> works in the browser, React won&#39;t ha
 and there&#39;s no way to <code>.catch()</code>. To use async functions
 with React, you should use a framework like Redux. The following is an example of
 using Redux action creators with React.</p>
-<div class="page-break"></div>
-
 <p><br></p>
 <div class="example-header-wrap"><div class="example-header">Example 4.18</div></div>
 
@@ -2425,10 +2423,52 @@ persisted in the database.</p>
 <p>In this case, <code>schedule</code> returns array of <code>jobs</code>.</p>
 <div class="page-break"></div>
 
-<h1 id="exercise-2-socket-io-integration">Exercise 2: Socket.io Integration</h1>
-<p><a href="https://www.npmjs.com/package/socket.io">Socket.io</a> is a popular websocket-based
-pub/sub solution. In other words, Socket.io is an event emitter that lets you
-send events over the network.</p>
+<h1 id="exercise-2-websocket-integration">Exercise 2: WebSocket Integration</h1>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSockets</a>
+are a tool for real-time communication between a browser and a server. Without
+WebSockets, a server can&#39;t send data to a browser unless the browser makes an
+HTTP request. With a WebSocket connection, a server can push data to the browser.</p>
+<p>The key function for interacting with a WebSocket is the <code>onmessage</code> function,
+which JavaScript calls for you when the socket has new data to process.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">'wss://echo.websocket.org/'</span>);
+
+ws.onmessage = <span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got'</span>, e.data);
+</code></pre>
+<p>JavaScript
+does <strong>not</strong> handle errors that occur in <code>onmessage</code> if <code>onmessage</code> is async.
+Write a function that wraps async <code>onmessage</code> functions and logs any errors
+that occur to the console.</p>
+<p>Below is the starter code. You may copy this code and complete this exercise in
+Node.js, although you will need the <a href="https://github.com/heineiuo/isomorphic-ws"><code>isomorphic-ws</code> npm module</a> because Node.js does <strong>not</strong>
+have WebSockets. You may complete also complete it in your browser
+on CodePen at <a href="http://bit.ly/async-await-exercise-32"><code>http://bit.ly/async-await-exercise-42</code></a>.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Implement this function</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">wrap</span>(<span class="hljs-params">onmessage</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Not implemented'</span>)
+}
+
+<span class="hljs-comment">// Do not modify the below code</span>
+<span class="hljs-keyword">const</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">'wss://echo.websocket.org/'</span>);
+
+ws.onmessage = wrap(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+  <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'If you see this error in the console, you completed this exercise'</span>);
+});
+
+ws.onopen = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ws.send(<span class="hljs-string">'Hello, World'</span>);
+ws.onclose = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'disconnected'</span>);
+</code></pre>
+
+        </div>
+        <div class="chapter">
+          <h1 id="moving-on">Moving On</h1>
+<p>Async/await is an exciting new tool that will make JavaScript much easier to
+work with.</p>
+<ul>
+<li>An async function always returns a promise.</li>
+<li><code>await</code> pauses an async function until the awaited promise is settled.</li>
+<li>Other JavaScript may run when an async function is paused.</li>
+<li>Error handling is a common problem. Make sure you handle errors with <code>.catch()</code>.</li>
+</ul>
 
         </div>
       </body>

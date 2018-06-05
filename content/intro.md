@@ -79,7 +79,7 @@ callback hell for the newly minted [async/await hell](https://medium.freecodecam
 The purpose of this book is to take you from someone who is casually acquainted
 with promises and async/await to someone who is comfortable building and debugging
 a complex app whose core logic is built on async/await. This book is only
-50 pages and is meant to be read in about 2 hours total. You may read it all in
+52 pages and is meant to be read in about 2 hours total. You may read it all in
 one sitting, but you would be better served reading one chapter at a time,
 studying the exercises at the end, and getting a good night's sleep in between
 chapters to really internalize the information.
