@@ -490,7 +490,7 @@ function wrap(onmessage) {
 const ws = new WebSocket('wss://echo.websocket.org/');
 
 ws.onmessage = wrap(async function(e) {
-  throw Error('If you see this error in the console, you completed this exercise');
+  throw Error('Congratulations, you completed this exercise!');
 });
 
 ws.onopen = () => ws.send('Hello, World');

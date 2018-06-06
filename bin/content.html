@@ -2455,7 +2455,7 @@ on CodePen at <a href="http://bit.ly/async-await-exercise-32"><code>http://bit.l
 <span class="hljs-keyword">const</span> ws = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-string">'wss://echo.websocket.org/'</span>);
 
 ws.onmessage = wrap(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
-  <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'If you see this error in the console, you completed this exercise'</span>);
+  <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Congratulations, you completed this exercise!'</span>);
 });
 
 ws.onopen = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> ws.send(<span class="hljs-string">'Hello, World'</span>);
@@ -2466,17 +2466,21 @@ ws.onclose = <span class="hljs-function"><span class="hljs-params">()</span> =&g
         <div class="chapter">
           <h1 id="moving-on">Moving On</h1>
 <p>Async/await is an exciting new tool that makes JavaScript much easier to
-work with. It won&#39;t solve all your problems, but it will make your day-to-day
-much easier by replacing callbacks and promise chaining with <code>for</code> loops
-and <code>if</code> statements. However, in order to work effectively with async/await,
-you need to understand the fundamentals. Here are some key points to remember
-when working with async/await.</p>
+work with. Async/await won&#39;t solve all your problems, but it will make your
+day-to-day easier by replacing callbacks and promise chaining with <code>for</code> loops
+and <code>if</code> statements. But remember the fundamentals, or you&#39;ll end up trading
+callback hell and promise hell for async/await hell.
+Here are some key points to remember when working with async/await.</p>
 <ul>
 <li>An async function always returns a promise.</li>
 <li><code>await</code> pauses an async function until the awaited promise is settled.</li>
+<li><code>await</code> on a value that isn&#39;t a promise is a no-op.</li>
 <li>Other JavaScript may run when an async function is paused.</li>
 <li>Error handling is a common problem. Make sure you handle errors with <code>.catch()</code>.</li>
 </ul>
+<p>To get more content on async/await, including design patterns and tools for
+integrating with popular frameworks, check out my blog&#39;s async/await section
+at <a href="http://bit.ly/async-await-blog"><code>bit.ly/async-await-blog</code></a>.</p>
 <p>Congratulations on completing this book, and good luck with your async/await
 coding adventures!</p>
 
