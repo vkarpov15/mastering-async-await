@@ -90,11 +90,12 @@ The exercises require more thought than
 code and should be easy to answer within a few minutes.
 
 The first 3 chapters are focused on promise and async/await fundamentals, and strive
-to avoid frameworks and outside dependencies. In particular, the first 3 chapters'
-code samples and exercises are meant to run in Node.js 8.x and the first 3 chapters
-will **not** cover transpilers. In the interest of providing realistic examples,
+to avoid frameworks and outside dependencies. In particular, the code samples and exercises are meant to run in Node.js 8.x and  will **not** use any transpilers
+like Babel.
+
+In the interest of providing realistic examples,
 the code samples will use the `superagent` module for making HTTP requests. The
-4th chapter will discuss transpilers and integrating async/await with some common
+4th chapter will discuss integrating async/await with some common
 npm modules.
 
 If you find any issues with the code samples or exercises,

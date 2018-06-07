@@ -19,12 +19,15 @@
     "react-redux": "5.0.7",
     "redux": "4.0.0",
     "redux-thunk": "2.3.0",
+    "serve": "8.1.1",
     "socket.io": "2.1.1",
     "superagent": "3.8.3"
   },
   "scripts": {
     "compile": "node compile.js",
     "test": "mocha ./examples/*.test.js",
-    "test-promise": "promises-aplus-tests content/promise.js"
+    "test-promise": "promises-aplus-tests content/promise.js",
+    "serve": "serve .",
+    "website": "node ./website"
   }
 }
