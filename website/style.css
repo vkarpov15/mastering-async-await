@@ -3,7 +3,17 @@ body {
   background-color: #eee;
   margin: 0px;
   font-size: 14pt;
-  color: #232323;
+  color: #122F41;
+}
+
+a {
+  text-decoration: none;
+  color: #368BC1;
+}
+
+p {
+  line-height: 1.5em;
+  color: #122F41;
 }
 
 #container {
