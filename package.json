@@ -10,6 +10,8 @@
     "co": "4.6.0",
     "express": "4.16.3",
     "highlight.js": "9.12.0",
+    "inline-css": "2.2.2",
+    "mailgun-js": "0.18.0",
     "mocha": "5.1.0",
     "mongodb": "3.0.8",
     "mongodb-topology-manager": "2.0.0",
@@ -25,7 +27,7 @@
     "superagent": "3.8.3"
   },
   "scripts": {
-    "app": "node ./app",
+    "app": "env MAILGUN=`cat ./credentials/mailgun.txt` env MAILGUN_DOMAIN=`cat ./credentials/mailgun_domain.txt` node ./app",
     "compile": "node compile.js",
     "test": "mocha ./examples/*.test.js",
     "test-promise": "promises-aplus-tests content/promise.js",
