@@ -29,7 +29,7 @@
   },
   "scripts": {
     "app": "env MAILGUN=`cat ./credentials/mailgun.txt` env MAILGUN_DOMAIN=`cat ./credentials/mailgun_domain.txt` node ./app",
-    "app-prod": "env MAILGUN=`cat ./credentials/mailgun.txt` env MAILGUN_DOMAIN=`cat ./credentials/mailgun_domain.txt` forever start --append ./app"
+    "app-prod": "env MAILGUN=`cat ./credentials/mailgun.txt` env MAILGUN_DOMAIN=`cat ./credentials/mailgun_domain.txt` forever start --append ./app",
     "compile": "node compile.js",
     "test": "mocha ./examples/*.test.js",
     "test-promise": "promises-aplus-tests content/promise.js",
