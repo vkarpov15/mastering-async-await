@@ -16,6 +16,10 @@ p {
   color: #122F41;
 }
 
+li {
+  line-height: 1.5em;
+}
+
 #container {
   width: 1200px;
   margin-left: auto;

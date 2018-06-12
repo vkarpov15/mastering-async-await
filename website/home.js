@@ -34,7 +34,19 @@ module.exports = props => `
     in hours, not days.
   </p>
 
-  <h3>About the Author</a>
+  <h3>About the Author</h3>
+
+  <p>
+    Valeri Karpov is the lead maintainer of <a href="https://www.npmjs.com/package/mongoose">Mongoose</a>,
+    the most popular ODM for MongoDB and Node.js. He's a core contributor to
+    <a href="https://www.npmjs.com/package/mocha">Mocha</a>, <a href="https://www.npmjs.com/package/agenda">Agenda</a>,
+    and several other npm modules that combine for over 10 million monthly downloads.
+    He's the Lead Backend Engineer for <a href="https://www.trybooster.com/">Booster Fuels</a>
+    and the author of <a href="http://es2015generators.com/"><i>The 80/20 Guide to ES2015 Generators</i></a>
+    and <a href="https://www.amazon.com/Professional-AngularJS-Valeri-Karpov/dp/1118832078/ref=sr_1_1?ie=UTF8&qid=1528769632&sr=8-1&keywords=professional+angularjs"><i>Professional AngularJS</i></a>.
+    His blog, <a href="http://thecodebarbarian.com/">thecodebarbarian.com</a>,
+    is the top search result on Google for "async await design patterns".
+  </p>
 
   <h3>Preview</h3>
 
