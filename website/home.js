@@ -36,17 +36,35 @@ module.exports = props => `
 
   <h3>About the Author</h3>
 
-  <p>
+  <p id="author">
+    <img src="https://pbs.twimg.com/profile_images/891062607053860864/rDX7vHYT_400x400.jpg" style="float: right; width: 145px; margin-left: 10px">
+
     Valeri Karpov is the lead maintainer of <a href="https://www.npmjs.com/package/mongoose">Mongoose</a>,
-    the most popular ODM for MongoDB and Node.js. He's a core contributor to
+    the top ODM for MongoDB and Node.js, and the Lead Backend Engineer for
+    <a href="https://www.trybooster.com/">Booster Fuels</a>.
+    He's a core contributor to
     <a href="https://www.npmjs.com/package/mocha">Mocha</a>, <a href="https://www.npmjs.com/package/agenda">Agenda</a>,
-    and several other npm modules that combine for over 10 million monthly downloads.
-    He's the Lead Backend Engineer for <a href="https://www.trybooster.com/">Booster Fuels</a>
-    and the author of <a href="http://es2015generators.com/"><i>The 80/20 Guide to ES2015 Generators</i></a>
+    and other npm modules with over 10M combined monthly downloads.
+    He's the author of <a href="http://es2015generators.com/"><i>The 80/20 Guide to ES2015 Generators</i></a>
     and <a href="https://www.amazon.com/Professional-AngularJS-Valeri-Karpov/dp/1118832078/ref=sr_1_1?ie=UTF8&qid=1528769632&sr=8-1&keywords=professional+angularjs"><i>Professional AngularJS</i></a>.
-    His blog, <a href="http://thecodebarbarian.com/">thecodebarbarian.com</a>,
-    is the top search result on Google for "async await design patterns".
+    <a href="http://thecodebarbarian.com/">His blog</a>
+    is the top result on Google for "async await design patterns".
+
+    <div class="clear"></div>
   </p>
+
+  <div class="author-links">
+    <div class="left">
+      Talks
+    </div>
+    <div class="left">
+      Workshops
+    </div>
+    <div class="left">
+      <a href="http://thecodebarbarian.com/tag/asyncawait.html">Articles</a>
+    </div>
+    <div class="clear"></div>
+  </div>
 
   <h3>Preview</h3>
 
@@ -54,5 +72,9 @@ module.exports = props => `
     <li><a href="/bin/toc.pdf">Table of Contents</a></li>
     <li><a href="/bin/page-32-33.pdf">Pages 32-33</a></li>
   </ul>
+
+  <h3>Buy</h3>
+
+  
 </div>
 `;
