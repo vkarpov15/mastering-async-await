@@ -1,4 +1,9 @@
 module.exports = props => `
+<style>
+  #container {
+    min-height: 1000px;
+  }
+</style>
 <div class="left">
   <img id="cover" src="/images/cover_400.png" />
 </div>
@@ -39,8 +44,8 @@ module.exports = props => `
   <p id="author">
     <img src="https://pbs.twimg.com/profile_images/891062607053860864/rDX7vHYT_400x400.jpg" style="float: right; width: 145px; margin-left: 10px">
 
-    Valeri Karpov is the lead maintainer of <a href="https://www.npmjs.com/package/mongoose">Mongoose</a>,
-    the top ODM for MongoDB and Node.js, and the Lead Backend Engineer for
+    Valeri Karpov is the lead maintainer of <a href="https://www.npmjs.com/package/mongoose">Mongoose</a>
+    and the Lead Backend Engineer for
     <a href="https://www.trybooster.com/">Booster Fuels</a>.
     He's a core contributor to
     <a href="https://www.npmjs.com/package/mocha">Mocha</a>, <a href="https://www.npmjs.com/package/agenda">Agenda</a>,
@@ -53,18 +58,14 @@ module.exports = props => `
     <div class="clear"></div>
   </p>
 
-  <div class="author-links">
-    <div class="left">
-      Talks
-    </div>
-    <div class="left">
-      Workshops
-    </div>
-    <div class="left">
-      <a href="http://thecodebarbarian.com/tag/asyncawait.html">Articles</a>
-    </div>
-    <div class="clear"></div>
-  </div>
+  <h3>Buy</h3>
+
+  <form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" target="_top">
+  <input type="hidden" name="cmd" value="_s-xclick">
+  <input type="hidden" name="hosted_button_id" value="PCKRMQJK8KTNQ">
+  <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+  <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+  </form>
 
   <h3>Preview</h3>
 
@@ -72,9 +73,5 @@ module.exports = props => `
     <li><a href="/bin/toc.pdf">Table of Contents</a></li>
     <li><a href="/bin/page-32-33.pdf">Pages 32-33</a></li>
   </ul>
-
-  <h3>Buy</h3>
-
-  
 </div>
 `;
