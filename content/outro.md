@@ -15,7 +15,7 @@ Here are some key points to remember when working with async/await.
 
 To get more content on async/await, including design patterns and tools for
 integrating with popular frameworks, check out my blog's async/await section
-at [`bit.ly/async-await-blog`](http://bit.ly/async-await-blog).
+at [`bit.ly/asyncawait-blog`](http://bit.ly/asyncawait-blog).
 
 Congratulations on completing this book, and good luck with your async/await
 coding adventures!
