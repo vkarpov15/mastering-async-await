@@ -1,5 +1,6 @@
 'use strict';
 
+const Keen = require('keen-js');
 const email = require('./email');
 const express = require('express');
 const fs = require('fs');
@@ -11,6 +12,11 @@ const mailgunDomain = process.env.MAILGUN_DOMAIN.trim();
 const mailgun = require('mailgun-js')({
   apiKey: mailgunKey,
   domain: mailgunDomain
+});
+
+const keen = new Keen({
+  projectId: '5b218103c9e77c0001524f51',
+  writeKey: '99B21BF12053F617C31642B4B3E2FBF3FCCBBD9F04051F08C430BB2CC944469D279DB805568E2666E9B0216AA1B6764971995D8EF88D364285D816E42B5DCF87B35BC3698B3894071809A588D6FEB0E5EDC29B9B90B71E7F21CD3A4849CCE8DE'
 });
 
 const css = fs.readFileSync('./website/style.css').toString();
@@ -39,14 +45,17 @@ async function run() {
       return 'IGNORED';
     }
 
+    const to = params['payer_email'] || 'val@karpov.io'
     await mailgun.messages().send({
       from: 'noreply@asyncawait.net',
-      to: 'val@karpov.io',
+      to,
       subject: 'Your Copy of Mastering Async/Await',
       text,
       html: await html,
       attachment: './bin/mastering-async-await.pdf'
     });
+
+    keen.addEvent('track', { type: 'purchase', to }, () => {});
 
     return 'SENT';
   }));
