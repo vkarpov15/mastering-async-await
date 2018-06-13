@@ -20,6 +20,7 @@ run().catch(error => console.error(error.stack));
 async function run() {
   const blank = fs.readFileSync('./content/blank.html', 'utf8');
   const cover = fs.readFileSync('./content/cover.html', 'utf8');
+  const dedication = fs.readFileSync('./content/dedication.html', 'utf8');
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
   const outro = fs.readFileSync('./content/outro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
@@ -33,7 +34,8 @@ async function run() {
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
-    cover: fs.readFileSync('./content/cover.css', 'utf8')
+    cover: fs.readFileSync('./content/cover.css', 'utf8'),
+    dedication: fs.readFileSync('./content/dedication.css', 'utf8')
   };
 
   const coverHtml = `
@@ -88,20 +90,32 @@ async function run() {
     </html>
   `;
 
+  const dedicationHtml = `
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+    <style>
+      ${css.dedication}
+    </style>
+    <div id="content">
+      ${dedication}
+    </div>
+  `;
+
   fs.writeFileSync('./bin/cover.html', coverHtml);
   fs.writeFileSync('./bin/content.html', contentHtml);
+  fs.writeFileSync('./bin/dedication.html', dedicationHtml);
 
   let browser = nightmare({ show: false });
 
   await browser.goto(`file://${__dirname}/bin/cover.html`).
-    pdf('./bin/cover.pdf', { marginsType: 0 }).
-    end();
-
-  browser = nightmare({ show: false });
+    pdf('./bin/cover.pdf', { marginsType: 0 });
 
   await browser.goto(`file://${__dirname}/bin/content.html`).
-    pdf('./bin/content.pdf', { marginsType: 0 }).
-    end();
+    pdf('./bin/content.pdf', { marginsType: 0 });
+
+  await browser.goto(`file://${__dirname}/bin/dedication.html`).
+    pdf('./bin/dedication.pdf', { marginsType: 0 });
 
   console.log('Done');
   process.exit(0);
