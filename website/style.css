@@ -70,3 +70,8 @@ img#cover {
 .author-links .left {
   margin-left: 15px;
 }
+
+.buy-button {
+  width: 172px;
+  margin-top: 5px;
+}
