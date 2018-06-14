@@ -45,7 +45,9 @@ async function run() {
       return 'IGNORED';
     }
 
-    const to = params['payer_email'] || 'val@karpov.io'
+    const to = params['payer_email'] != null ?
+      decodeURIComponent(params['payer_email']) :
+      'val@karpov.io';
     await mailgun.messages().send({
       from: 'noreply@asyncawait.net',
       to,
@@ -69,7 +71,10 @@ function wrap(fn) {
   return function(req, res) {
     fn(req).then(
       v => res.status(200).send(v),
-      e => res.status(500).send(require('util').inspect(e))
+      e => {
+        console.log(e.stack);
+        res.status(500).send(require('util').inspect(e));
+      }
     );
   }
 }
