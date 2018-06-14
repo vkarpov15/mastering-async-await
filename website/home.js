@@ -61,12 +61,31 @@ module.exports = props => `
   <h3>Buy</h3>
 
   <div class="buy-button">
-    <form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" target="_top">
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
     <input type="hidden" name="cmd" value="_s-xclick">
-    <input type="hidden" name="hosted_button_id" value="PCKRMQJK8KTNQ">
-    <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" onclick="client.addEvent('track', { type: 'clickthrough' });">
-    <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+    <input type="hidden" name="hosted_button_id" value="JWETZFLXVWQPY">
+    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" onclick="client.addEvent('track', { type: 'clickthrough' });">
+    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
     </form>
+  </div>
+
+  <div class="money-back">
+    <p>
+      <i>
+        Have an issue?
+        <a href="https://github.com/vkarpov15/mastering-async-await-issues/issues">Report it on GitHub</a>
+        and we'll respond within 24 hours
+      </i>.
+    </p>
+
+    <p>
+      <i>
+        Not happy with your purchase? Report an issue on the
+        <a href="https://www.paypal.com/disputes/">PayPal Resolution Center</a>
+        or email <a href="mailto:val@karpov.io">val@karpov.io</a> with your
+        PayPal transaction id for a full refund.
+      </i>
+    </p>
   </div>
 
   <h3>Preview</h3>
