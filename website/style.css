@@ -79,3 +79,8 @@ img#cover {
 .money-back {
   font-size: 0.75em;
 }
+
+.price {
+  width: 170px;
+  text-align: center;
+}
