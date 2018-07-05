@@ -1,0 +1,60 @@
+body {
+  margin: 0px;
+  font-family: 'Roboto', sans-serif;
+}
+
+#content {
+  width: 800px;
+  height: 150px;
+  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.left {
+  float: left;
+  width: 300px;
+}
+
+.left img {
+  width: 300px;
+}
+
+.fade {
+  background: linear-gradient(to right, transparent, #232323);
+  margin-left: -70px;
+  width: 70px;
+  float: left;
+  height: 175px;
+}
+
+.right {
+  float: left;
+  width: 485px;
+  background: #232323;
+  height: 175px;
+  padding-left: 15px;
+  text-align: center;
+}
+
+.tagline {
+  margin-top: 1em;
+  color: white;
+  font-size: 0.9em;
+}
+
+.title {
+  margin-top: 0.25em;
+  color: #368BC1;
+  font-size: 2em;
+}
+
+.cta {
+  border-radius: 3px;
+  background-color: white;
+  color: #122F41;
+  padding: 5px;
+  width: 140px;
+  margin-top: 0.75em;
+  display: inline-block;
+}
