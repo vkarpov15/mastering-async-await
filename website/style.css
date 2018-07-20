@@ -84,3 +84,24 @@ img#cover {
   width: 170px;
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .left {
+    display: none;
+  }
+
+  #container {
+    width: 100%;
+    padding: 0px;
+  }
+
+  .right {
+    margin: 0px;
+    padding: 0px;
+    width: auto;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 50px;
+  }
+}

@@ -12,9 +12,9 @@ module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
   <img id="cover" src="/images/cover_400.png" />
 </div>
 <div class="right">
-  <h1>Mastering Async/Await</h1>
+  <h1 class="title">Mastering Async/Await</h1>
 
-  <h3>
+  <h3 class="tagline">
     Learn how
     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function">async/await</a>
     works
