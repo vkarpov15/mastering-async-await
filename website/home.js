@@ -8,11 +8,6 @@ const defaultBuyButton = `
 `;
 
 module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
-<style>
-  #container {
-    min-height: 1700px;
-  }
-</style>
 <div class="left">
   <img id="cover" src="/images/cover_400.png" />
 </div>
@@ -103,7 +98,7 @@ module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
     <li><a href="/bin/page-30-31.pdf">Pages 30-31</a></li>
   </ul>
 
-  <h3>From Twitter</h3>
+  <h3>Endorsements</h3>
 
   <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">So I started reading &quot;Mastering Async/Await&quot; by <a href="https://twitter.com/code_barbarian?ref_src=twsrc%5Etfw">@code_barbarian</a> - and just like his &quot;Generators guide&quot; it is an awesome practical tutorial for all the ways you should be using &quot;async/await&quot; in JS. No fluff, straight examples, great text. <a href="https://t.co/nnAEFhtTjj">https://t.co/nnAEFhtTjj</a></p>&mdash; Gleb Bahmutov (@bahmutov) <a href="https://twitter.com/bahmutov/status/1013882918941446146?ref_src=twsrc%5Etfw">July 2, 2018</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -117,4 +112,5 @@ module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
 
   -- <a href="https://twitter.com/BradVogel">Brad Vogel</a>, CTO of <a href="https://mixmax.com/">Mixmax</a>
 </div>
+<div style="clear: both"></div>
 `;
