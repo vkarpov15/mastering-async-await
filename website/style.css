@@ -85,6 +85,10 @@ img#cover {
   text-align: center;
 }
 
+.tagline {
+  color: #368BC1;
+}
+
 @media (max-width: 768px) {
   .left {
     display: none;
