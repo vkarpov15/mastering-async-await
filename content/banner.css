@@ -1,10 +1,16 @@
 body {
   margin: 0px;
   font-family: 'Roboto', sans-serif;
+  padding: 15px;
+}
+
+.banner {
+  border: 1px solid black;
+  width: 650px;
 }
 
 #content {
-  width: 800px;
+  width: 650px;
   height: 150px;
   overflow: hidden;
   overflow-y: hidden;
@@ -13,34 +19,26 @@ body {
 
 .left {
   float: left;
-  width: 300px;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
 }
 
 .left img {
-  width: 300px;
-}
-
-.fade {
-  background: linear-gradient(to right, transparent, #232323);
-  margin-left: -70px;
-  width: 70px;
-  float: left;
-  height: 175px;
+  height: 150px;
 }
 
 .right {
   float: left;
-  width: 485px;
-  background: #232323;
-  height: 175px;
-  padding-left: 15px;
+  width: 500px;
+  height: 150px;
   text-align: center;
 }
 
 .tagline {
-  margin-top: 1em;
-  color: white;
-  font-size: 0.9em;
+  margin-top: 20px;
+  color: black;
+  font-size: 1.5em;
 }
 
 .title {
@@ -51,8 +49,8 @@ body {
 
 .cta {
   border-radius: 3px;
-  background-color: white;
-  color: #122F41;
+  background-color: #368BC1;
+  color: white;
   padding: 5px;
   width: 140px;
   margin-top: 0.75em;
