@@ -9,7 +9,7 @@ const defaultBuyButton = `
 
 module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
 <div class="left">
-  <img id="cover" src="/content/mock.png" />
+  <img id="cover" src="/content/mock_lite.jpeg" />
 </div>
 <div class="right">
   <h1 class="title">Mastering Async/Await</h1>
