@@ -1,28 +1,13 @@
-/*const defaultBuyButton = `
+const defaultBuyButton = `
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 <input type="hidden" name="cmd" value="_s-xclick">
 <input type="hidden" name="hosted_button_id" value="JWETZFLXVWQPY">
 <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" onclick="client.addEvent('track', { type: 'clickthrough' });">
 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
 </form>
-`;*/
-
-const saleBuyButton = `
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="72U6FCHY5CLBU">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
 `;
 
-const saleDefaultPrice = `
-  <del>&nbsp;$24.99&nbsp;</del>
-  $19.99<br>
-  <small>Labor Day Sale until September 4</small>
-`;
-
-module.exports = ({ price = saleDefaultPrice, buyButton = saleBuyButton }) => `
+module.exports = ({ price = '$24.99', buyButton = defaultBuyButton }) => `
 <div class="left">
   <img id="cover" src="/content/mock_lite.jpeg" />
 </div>
