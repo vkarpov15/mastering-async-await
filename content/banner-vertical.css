@@ -1,0 +1,58 @@
+body {
+  margin: 0px;
+  font-family: 'Roboto', sans-serif;
+  padding: 15px;
+}
+
+.banner {
+  border: 1px solid black;
+  width: 280px;
+}
+
+#content {
+  width: 280px;
+  height: 380px;
+  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.left {
+  width: 280px;
+  height: 280px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.left img {
+  height: 280px;
+}
+
+.right {
+  width: 280px;
+  height: 130px;
+  text-align: center;
+}
+
+.tagline {
+  margin-top: 20px;
+  color: black;
+  font-size: 1.5em;
+  display: none;
+}
+
+.title {
+  margin-top: 0.25em;
+  color: #368BC1;
+  font-size: 2em;
+}
+
+.cta {
+  border-radius: 3px;
+  background-color: #368BC1;
+  color: white;
+  padding: 5px;
+  width: 140px;
+  margin-top: 0.75em;
+  display: inline-block;
+}
