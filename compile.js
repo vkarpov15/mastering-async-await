@@ -131,7 +131,8 @@ async function compileEpub(chapters) {
     title: 'Mastering Async/Await',
     author: 'Valeri Karpov',
     output: `${process.cwd()}/bin/mastering-async-await.epub`,
-    content: [{ title: 'Chapter 1', data: chapters[0] }]
+    content: [{ title: 'Chapter 1', data: chapters[0] }],
+    css: fs.readFileSync('./content/epub.css', 'utf8')
   };
   await new Epub(options).promise;
 }
