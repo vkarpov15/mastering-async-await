@@ -1,6 +1,8 @@
 'use strict';
 
+const Epub = require('epub-gen');
 const acquit = require('acquit');
+const archiver = require('archiver');
 const highlight = require('highlight.js');
 const fs = require('fs');
 const marked = require('marked');
@@ -31,6 +33,9 @@ async function run() {
   const chapters = [1, 2, 3, 4].
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
+
+  await compileEpub(chapters.map(ch => marked(ch)));
+  return;
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -119,4 +124,14 @@ async function run() {
 
   console.log('Done');
   process.exit(0);
+}
+
+async function compileEpub(chapters) {
+  const options = {
+    title: 'Mastering Async/Await',
+    author: 'Valeri Karpov',
+    output: `${process.cwd()}/bin/mastering-async-await.epub`,
+    content: [{ title: 'Chapter 1', data: chapters[0] }]
+  };
+  await new Epub(options).promise;
 }
