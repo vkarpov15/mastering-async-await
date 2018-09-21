@@ -67,6 +67,10 @@ h3 code {
   background-color: #f6f6f6;
 }
 
+.example-footer {
+  display: none;
+}
+
 .example-header-wrap {
   position: relative;
   height: 0px;
