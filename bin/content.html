@@ -78,6 +78,10 @@ h3 code {
   background-color: #f6f6f6;
 }
 
+.example-footer {
+  display: none;
+}
+
 .example-header-wrap {
   position: relative;
   height: 0px;
@@ -403,34 +407,40 @@ keyword pauses the function&#39;s execution for approximately 1 second.</p>
 
 test();
 </code></pre>
+<div class="example-footer">Example 1.1</div>
+
 <p>You can use the <code>await</code> keyword anywhere in the body of an async function. This means
 you can use <code>await</code> in <code>if</code> statements, <code>for</code> loops, and <code>try/catch</code> blocks. Below
 is another way to pause an async function&#39;s execution for about 1 second.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.2</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Wait for 100ms 10 times. This function also prints after 1 second.</span>
+  <span class="hljs-comment">// Wait 100ms 10 times. This function also prints after 1 sec.</span>
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
-    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">100</span>));
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">100</span>));
   }
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
 }
 
 test();
 </code></pre>
+<div class="example-footer">Example 1.2</div>
+
 <p>There is one major restriction for using <code>await</code>: you can only use <code>await</code>
 within the body of a function that&#39;s marked <code>async</code>. The following code throws a
 <code>SyntaxError</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.3</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
+  <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">1000</span>));
   <span class="hljs-comment">// SyntaxError: Unexpected identifier</span>
   <span class="hljs-keyword">await</span> p;
 }
 
 test();
 </code></pre>
+<div class="example-footer">Example 1.3</div>
+
 <p>In particular, you can&#39;t use <code>await</code> in a closure embedded in an async function, unless
 the closure is also an async function. The below code also throws a <code>SyntaxError</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.4</div></div>
@@ -440,29 +450,33 @@ the closure is also an async function. The below code also throws a <code>Syntax
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'test'</span>);
   assert.doesNotThrow(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-comment">// "SyntaxError: Unexpected identifier" because the above function</span>
-    <span class="hljs-comment">// is **not** marked async. "Closure" = function inside a function</span>
+    <span class="hljs-comment">// "SyntaxError: Unexpected identifier" because the above</span>
+    <span class="hljs-comment">// function isn't async. Closure = function inside a function</span>
     <span class="hljs-keyword">await</span> p;
   });
 }
 </code></pre>
+<div class="example-footer">Example 1.4</div>
+
 <p>As long as you don&#39;t create a new function, you can use <code>await</code> underneath any
 number of <code>for</code> loops and <code>if</code> statements.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.5</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
-    <span class="hljs-comment">// Convoluted way to print out "Hello, World!" once per second by</span>
-    <span class="hljs-comment">// pausing execution for 200ms 5 times</span>
+    <span class="hljs-comment">// Convoluted way to print out "Hello, World!" once per</span>
+    <span class="hljs-comment">// second by pausing execution for 200ms 5 times</span>
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
       <span class="hljs-keyword">if</span> (i % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>) {
-        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">200</span>));
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">200</span>));
       }
     }
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.5</div>
+
 <div class="page-break"></div>
 
 <h2 id="return-values">Return Values</h2>
@@ -486,10 +500,12 @@ synchronous.</p>
   <span class="hljs-comment">// promise resolved to.</span>
   <span class="hljs-built_in">console</span>.log(res);
 
-  <span class="hljs-comment">// Prints "Hello, World!". You can use `await` in function params!</span>
+  <span class="hljs-comment">// Prints "Hello, World!". You can `await` in function params!</span>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> promise);
 }
 </code></pre>
+<div class="example-footer">Example 1.6</div>
+
 <p>An async function <strong>always</strong> returns a promise. When you <code>return</code> from an async
 function, JavaScript resolves the promise to the value you returned. This means
 calling async functions from other async functions is very natural. You can
@@ -497,16 +513,18 @@ calling async functions from other async functions is very natural. You can
 <div class="example-header-wrap"><div class="example-header">Example 1.7</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
-  <span class="hljs-comment">// "Hello, World" is the _resolved value_ for this function call</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">1000</span>));
+  <span class="hljs-comment">// "Hello, World" is the resolved value for this function call</span>
   <span class="hljs-keyword">return</span> <span class="hljs-string">'Hello, World!'</span>;
 }
 
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Prints "Hello, World!" after 1s. `computeValue` returns a promise!</span>
+  <span class="hljs-comment">// Prints after 1 second. `computeValue` returns a promise!</span>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> computeValue());
 }
 </code></pre>
+<div class="example-footer">Example 1.7</div>
+
 <p>This book will refer to the value you <code>return</code> from an async function as the
 <em>resolved value</em>. In <code>computeValue</code> above, &quot;Hello, World!&quot; is the resolved
 value, <code>computeValue()</code> still returns a promise. This distinction is subtle
@@ -526,6 +544,8 @@ resolved value promise is fulfilled or rejected. Below is another async function
   }, <span class="hljs-number">1000</span>);
 }
 </code></pre>
+<div class="example-footer">Example 1.8</div>
+
 <p>If you <code>return</code> a promise from an async function, the resolved value will
 still not equal the return value. The below example demonstrates that the
 <code>resolvedValue</code> promise that the function body returns is not the same as
@@ -538,10 +558,12 @@ the return value from <code>computeValue()</code>.</p>
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// No `await` below, so `returnValue` will be a promise</span>
   <span class="hljs-keyword">const</span> returnValue = computeValue();
-  <span class="hljs-comment">// `false`. The return value and resolved value are always different</span>
+  <span class="hljs-comment">// `false`. Return value never strictly equals resolved value.</span>
   <span class="hljs-built_in">console</span>.log(returnValue === resolvedValue);
 }
 </code></pre>
+<div class="example-footer">Example 1.9</div>
+
 <p>Async/await beginners often mistakenly think they need to <code>return</code> a promise
 from an async function. They likely read that an async function always returns
 a promise and think they&#39;re responsible for returning a promise. An async function
@@ -550,12 +572,14 @@ always returns a promise, but, like in example 1.9, JavaScript creates the retur
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// Adding `Promise.resolve()` below is unnecessary. It adds</span>
-  <span class="hljs-comment">// perf overhead because you're creating an unnecessary promise.</span>
-  <span class="hljs-comment">// "Unnecessary code is not as harmless as I used to think. It</span>
-  <span class="hljs-comment">// sends the misleading signal that it's necessary." - Paul Graham</span>
+  <span class="hljs-comment">// perf overhead because you're creating an unnecessary promise</span>
+  <span class="hljs-comment">// "Unnecessary code is not as harmless as I thought. It sends</span>
+  <span class="hljs-comment">// the misleading signal that it's necessary" - Paul Graham</span>
   <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'Hello, World!'</span>);
 }
 </code></pre>
+<div class="example-footer">Example 1.10</div>
+
 <div class="page-break"></div>
 
 <h2 id="error-handling">Error Handling</h2>
@@ -575,6 +599,8 @@ to the promise&#39;s value. What about if <code>p</code> is rejected?</p>
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.11</div>
+
 <p>If <code>p</code> is rejected, <code>await p</code> throws an error that you can catch with a
 normal JavaScript <code>try/catch</code>. Note that the <code>await</code> statement is what throws
 an error, <strong>not</strong> the promise instantiation.</p>
@@ -595,6 +621,8 @@ ones. Suppose you have code that throws a <code>TypeError: cannot read property 
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.12</div>
+
 <p>In callback-based code, you had to watch out for synchronous errors like <code>TypeError</code>
 separately from asynchronous errors. This lead to a lot of server crashes and
 red text in Chrome consoles, because discipline doesn&#39;t scale.</p>
@@ -614,8 +642,8 @@ single async operation needs 3 distinct error handling patterns!</p>
       <span class="hljs-keyword">if</span> (error) {
         <span class="hljs-keyword">return</span> callback(error);
       }
-      <span class="hljs-comment">// And you also need to be careful that accessing `res.x` doesn't</span>
-      <span class="hljs-comment">// throw **and** calling `callback()` doesn't throw.</span>
+      <span class="hljs-comment">// And you also need to be careful that both accessing</span>
+      <span class="hljs-comment">// `res.x` and calling `callback()` don't throw.</span>
       <span class="hljs-keyword">try</span> {
         <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, res.x);
       } <span class="hljs-keyword">catch</span> (error) {
@@ -625,6 +653,8 @@ single async operation needs 3 distinct error handling patterns!</p>
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.13</div>
+
 <p>When there&#39;s this much boilerplate for error handling, even the most rigorous
 and disciplined developers end up missing a spot. The result is uncaught errors,
 server downtime, and buggy user interfaces. Below is an equivalent example with
@@ -634,8 +664,8 @@ a single pattern.</p>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWrapper</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">try</span> {
-    <span class="hljs-comment">// `try/catch` will catch sync errors in `test()`, async promise</span>
-    <span class="hljs-comment">// rejections, and errors with accessing `res.x`.</span>
+    <span class="hljs-comment">// `try/catch` will catch sync errors in `test()`, async</span>
+    <span class="hljs-comment">// promise rejections, and errors with accessing `res.x`.</span>
     <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> test();
     <span class="hljs-keyword">return</span> res.x;
   } <span class="hljs-keyword">catch</span> (error) {
@@ -643,6 +673,8 @@ a single pattern.</p>
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.14</div>
+
 <p>Let&#39;s take a look at how the <code>throw</code> keyword works with async functions now that
 you&#39;ve seen how <code>try/catch</code> works. When you <code>throw</code> in an async function,
 JavaScript will reject the returned promise.
@@ -667,6 +699,8 @@ an async function as the <em>rejected value</em>.</p>
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.15</div>
+
 <p>Remember that the <code>computeValue()</code> function call itself does <strong>not</strong> throw an
 error in the <code>test()</code> function. The <code>await</code> keyword is what throws an error that
 you can handle with <code>try/catch</code>. The below code will print &quot;No Error&quot; unless you
@@ -688,6 +722,8 @@ uncomment the <code>await</code> block.</p>
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.16</div>
+
 <div class="page-break"></div>
 
 <p>Just because you can <code>try/catch</code> around a promise doesn&#39;t necessarily mean you
@@ -704,6 +740,8 @@ should. Since async functions return promises, you can also use <code>.catch()</
   <span class="hljs-built_in">console</span>.log(err.message);
 }
 </code></pre>
+<div class="example-footer">Example 1.17</div>
+
 <p>Both <code>try/catch</code> and <code>catch()</code> have their place. In particular, <code>catch()</code>
 makes it easier to centralize your error handling. A common async/await
 novice mistake is putting <code>try/catch</code> at the top of every single function.
@@ -727,6 +765,8 @@ errors, you&#39;re better off using <code>catch()</code>.</p>
 
 fn2().catch(handleError);
 </code></pre>
+<div class="example-footer">Example 1.18</div>
+
 <div class="page-break"></div>
 
 <h2 id="retrying-failed-requests">Retrying Failed Requests</h2>
@@ -739,17 +779,19 @@ a <code>for</code> loop. Below is a simplified implementation of a <code>getWith
 using callbacks and the <a href="https://www.npmjs.com/package/superagent"><code>superagent</code> HTTP client</a>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.19</div></div>
 
-<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries, callback, retriedCount</span>) </span>{
-  retriedCount = retriedCount || <span class="hljs-number">0</span>;
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries, callback, count</span>) </span>{
+  count = count || <span class="hljs-number">0</span>;
   superagent.get(url).end(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error, res</span>) </span>{
     <span class="hljs-keyword">if</span> (error) {
-      <span class="hljs-keyword">if</span> (retriedCount &gt;= numRetries) { <span class="hljs-keyword">return</span> callback(error); }
-      <span class="hljs-keyword">return</span> getWithRetry(url, numRetries, callback, retriedCount + <span class="hljs-number">1</span>);
+      <span class="hljs-keyword">if</span> (count &gt;= numRetries) { <span class="hljs-keyword">return</span> callback(error); }
+      <span class="hljs-keyword">return</span> getWithRetry(url, numRetries, callback, count + <span class="hljs-number">1</span>);
     }
     <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, res.body);
   });
 }
 </code></pre>
+<div class="example-footer">Example 1.19</div>
+
 <p>Recursion is subtle and tricky to understand relative to a loop.
 Plus, the above code ignores the possibility of sync errors, because the
 <code>try/catch</code> spaghetti highlighted in example 1.13 would make this example
@@ -764,7 +806,7 @@ most junior of engineers.</p>
   <span class="hljs-keyword">let</span> lastError = <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; numRetries; ++i) {
     <span class="hljs-keyword">try</span> {
-      <span class="hljs-comment">// Note that `await superagent.get(url).body` does **not** work</span>
+      <span class="hljs-comment">// Note that `await superagent.get(url).body` doesn't work</span>
       <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> superagent.get(url);
       <span class="hljs-comment">// Early return with async functions works as you'd expect</span>
       <span class="hljs-keyword">return</span> res.body;
@@ -775,6 +817,8 @@ most junior of engineers.</p>
   <span class="hljs-keyword">throw</span> lastError;
 }
 </code></pre>
+<div class="example-footer">Example 1.20</div>
+
 <p>More generally, async/await makes executing async operations in series trivial.
 For example, let&#39;s say you had to load a list of blog posts from an HTTP API
 and then execute a separate HTTP request to load the comments for each blog
@@ -791,6 +835,8 @@ post. This example uses the excellent <a href="https://jsonplaceholder.typicode.
   }
 }
 </code></pre>
+<div class="example-footer">Example 1.21</div>
+
 <p>If this example seems trivial, that&#39;s good, because that&#39;s how programming
 should be. The JavaScript community has created an incredible hodge-podge of
 tools for executing asynchronous tasks in series, from <a href="https://caolan.github.io/async/docs.html#waterfall"><code>async.waterfall()</code></a> to <a href="https://www.npmjs.com/package/redux-saga">Redux sagas</a> to <a href="https://github.com/domenic/zones">zones</a> to <a href="https://www.npmjs.com/package/co">co</a>. Async/await makes all of these libraries
@@ -867,14 +913,14 @@ url: <a href="http://bit.ly/async-await-exercise-2">http://bit.ly/async-await-ex
 <span class="hljs-comment">// Correct answer for exercise 1.1 below</span>
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
-    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net'</span>;
+    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net/post'</span>;
   <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>, <span class="hljs-number">3</span>);
 
-  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> post <span class="hljs-keyword">of</span> posts) {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${post.id}</span>`</span>);
-    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/post?id=<span class="hljs-subst">${post.id}</span>`</span>, <span class="hljs-number">3</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> posts) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${p.id}</span>`</span>);
+    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>?id=<span class="hljs-subst">${p.id}</span>`</span>, <span class="hljs-number">3</span>);
     <span class="hljs-keyword">if</span> (content.content.includes(<span class="hljs-string">'async/await hell'</span>)) {
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${post.id}</span>`</span>);
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${p.id}</span>`</span>);
       <span class="hljs-keyword">break</span>;
     }
   }

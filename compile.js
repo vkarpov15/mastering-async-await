@@ -35,7 +35,6 @@ async function run() {
     map((c, i) => transform(c, examples[i]));
 
   await compileEpub(chapters.map(ch => marked(ch)));
-  return;
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -131,6 +130,7 @@ async function compileEpub(chapters) {
     title: 'Mastering Async/Await',
     author: 'Valeri Karpov',
     output: `${process.cwd()}/bin/mastering-async-await.epub`,
+    cover: `${process.cwd()}/images/cover.jpg`,
     content: [{ title: 'Chapter 1', data: chapters[0] }],
     css: fs.readFileSync('./content/epub.css', 'utf8')
   };
