@@ -72,16 +72,14 @@ describe('Chapter 2 Examples', function() {
       // Constructor is the same as before, omitted for brevity
       // acquit:ignore:start
       constructor(executor) {
-        assert(typeof executor === 'function', 'Executor not a function');
-
+        assert(executor instanceof Function);
         // Internal state.
         this.state = 'PENDING';
         this.chained = [];
         this.value = undefined;
-
         try {
           // Reject if the executor throws a sync error
-          executor(v => this.resolve(v), err => this.reject(err));
+          executor(v => this.resolve(v), e => this.reject(e));
         } catch (err) {
           this.reject(err);
         }
@@ -89,31 +87,33 @@ describe('Chapter 2 Examples', function() {
       // acquit:ignore:end
       then(onFulfilled, onRejected) {
         const { value, state } = this;
-        // If promise is already settled, enqueue the right handler
-        if (state === 'FULFILLED') return setImmediate(onFulfilled, value);
-        if (state === 'REJECTED') return setImmediate(onRejected, value);
-        // Otherwise, track `onFulfilled` and `onRejected` for later
+        // If promise is already settled, call the right handler
+        if (state === 'FULFILLED')
+          return setImmediate(onFulfilled, value);
+        if (state === 'REJECTED')
+          return setImmediate(onRejected, value);
+        // Otherwise, store handlers so you can call them later
         this.chained.push({ onFulfilled, onRejected });
       }
       resolve(value) {
         if (this.state !== 'PENDING') return;
         this.state = 'FULFILLED';
         this.value = value;
-        // Loop through the `chained` array and find all `onFulfilled()`
-        // functions. Remember that `.then(null, onRejected)` is valid.
+        // Loop over `chained`, find `onFulfilled()` functions.
+        // Remember that `.then(null, onRejected)` is valid.
         this.chained.
-          filter(({ onFulfilled }) => typeof onFulfilled === 'function').
+          filter(obj => obj.onFulfilled instanceof Function).
           // The ES6 spec section 25.4 says `onFulfilled` and
-          // `onRejected` must be called on a separate event loop tick
-          forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
+          // `onRejected` must be called on next event loop tick
+          forEach(obj => setImmediate(obj.onFulfilled, value));
       }
       reject(value) {
         if (this.state !== 'PENDING') return;
         this.state = 'REJECTED';
         this.value = value;
         this.chained.
-          filter(({ onRejected }) => typeof onRejected === 'function').
-          forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
+          filter(obj => obj.onRejected instanceof Function).
+          forEach(obj => setImmediate(obj.onFulfilled, value));
       }
     }
     // acquit:ignore:start
@@ -159,8 +159,8 @@ describe('Chapter 2 Examples', function() {
 
   it('example 2.6', function() {
     async function test() {
-      // Works, even though this is a custom `Promise` class. All you
-      // need is a `then()` function to integrate with `await`.
+      // Works, even though this is a custom `Promise` class. All
+      // you need is a `then()` function to support `await`.
       const res = await new Promise(resolve => {
         setTimeout(() => resolve('Hello'), 50);
       });
@@ -177,8 +177,8 @@ describe('Chapter 2 Examples', function() {
     const p = new Promise((_, reject) => reject(originalError)).
       then(() => console.log('This will not print')).
       then(() => console.log('Nor will this')).
-      // The `onFulfilled()` handlers above get skipped. Each of the
-      // `then()` promises above reject with the original error
+      // The `onFulfilled()` handlers above get skipped. Each of
+      // the then() promises above reject with the original error
       catch(err => assert.ok(err === originalError));
     // acquit:ignore:start
     return p;

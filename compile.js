@@ -34,7 +34,7 @@ async function run() {
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
 
-  await compileEpub(chapters.map(ch => marked(ch)));
+  await compileEpub(intro, chapters);
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -125,14 +125,29 @@ async function run() {
   process.exit(0);
 }
 
-async function compileEpub(chapters) {
+async function compileEpub(intro, chapters) {
+  intro = marked(stripFirstLine(intro));
+  chapters = chapters.map(stripFirstLine).map(ch => marked(ch));
+
   const options = {
     title: 'Mastering Async/Await',
     author: 'Valeri Karpov',
     output: `${process.cwd()}/bin/mastering-async-await.epub`,
     cover: `${process.cwd()}/images/cover.jpg`,
-    content: [{ title: 'Chapter 1', data: chapters[0] }],
+    content: [
+      { title: 'How To Use This Book', data: intro },
+      { title: 'Async/Await: The Good Parts', data: chapters[0] },
+      { title: 'Promises From The Ground Up', data: chapters[1] }
+    ],
     css: fs.readFileSync('./content/epub.css', 'utf8')
   };
   await new Epub(options).promise;
+}
+
+function stripFirstLine(str) {
+  const firstNewLine = str.indexOf('\n');
+  if (firstNewLine === -1) {
+    return '';
+  }
+  return str.substr(firstNewLine + 1);
 }

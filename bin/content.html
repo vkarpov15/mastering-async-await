@@ -1073,31 +1073,33 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
   <span class="hljs-comment">// Constructor is the same as before, omitted for brevity</span>
   then(onFulfilled, onRejected) {
     <span class="hljs-keyword">const</span> { value, state } = <span class="hljs-keyword">this</span>;
-    <span class="hljs-comment">// If promise is already settled, enqueue the right handler</span>
-    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'FULFILLED'</span>) <span class="hljs-keyword">return</span> setImmediate(onFulfilled, value);
-    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'REJECTED'</span>) <span class="hljs-keyword">return</span> setImmediate(onRejected, value);
-    <span class="hljs-comment">// Otherwise, track `onFulfilled` and `onRejected` for later</span>
+    <span class="hljs-comment">// If promise is already settled, call the right handler</span>
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'FULFILLED'</span>)
+      <span class="hljs-keyword">return</span> setImmediate(onFulfilled, value);
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'REJECTED'</span>)
+      <span class="hljs-keyword">return</span> setImmediate(onRejected, value);
+    <span class="hljs-comment">// Otherwise, store handlers so you can call them later</span>
     <span class="hljs-keyword">this</span>.chained.push({ onFulfilled, onRejected });
   }
   resolve(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
     <span class="hljs-keyword">this</span>.value = value;
-    <span class="hljs-comment">// Loop through the `chained` array and find all `onFulfilled()`</span>
-    <span class="hljs-comment">// functions. Remember that `.then(null, onRejected)` is valid.</span>
+    <span class="hljs-comment">// Loop over `chained`, find `onFulfilled()` functions.</span>
+    <span class="hljs-comment">// Remember that `.then(null, onRejected)` is valid.</span>
     <span class="hljs-keyword">this</span>.chained.
-      filter(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> onFulfilled === <span class="hljs-string">'function'</span>).
+      filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onFulfilled <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
       <span class="hljs-comment">// The ES6 spec section 25.4 says `onFulfilled` and</span>
-      <span class="hljs-comment">// `onRejected` must be called on a separate event loop tick</span>
-      forEach(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> setImmediate(onFulfilled, value));
+      <span class="hljs-comment">// `onRejected` must be called on next event loop tick</span>
+      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
   }
   reject(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'REJECTED'</span>;
     <span class="hljs-keyword">this</span>.value = value;
     <span class="hljs-keyword">this</span>.chained.
-      filter(<span class="hljs-function">(<span class="hljs-params">{ onRejected }</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> onRejected === <span class="hljs-string">'function'</span>).
-      forEach(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> setImmediate(onFulfilled, value));
+      filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onRejected <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
+      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
   }
 }
 </code></pre>
@@ -1110,8 +1112,8 @@ custom <code>Promise</code> class with async/await.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.6</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Works, even though this is a custom `Promise` class. All you</span>
-  <span class="hljs-comment">// need is a `then()` function to integrate with `await`.</span>
+  <span class="hljs-comment">// Works, even though this is a custom `Promise` class. All</span>
+  <span class="hljs-comment">// you need is a `then()` function to support `await`.</span>
   <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
     setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-string">'Hello'</span>), <span class="hljs-number">50</span>);
   });
@@ -1329,8 +1331,8 @@ calls that only specify an <code>onFulfilled()</code> handler are skipped.</p>
 <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_, reject</span>) =&gt;</span> reject(originalError)).
   then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'This will not print'</span>)).
   then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Nor will this'</span>)).
-  <span class="hljs-comment">// The `onFulfilled()` handlers above get skipped. Each of the</span>
-  <span class="hljs-comment">// `then()` promises above reject with the original error</span>
+  <span class="hljs-comment">// The `onFulfilled()` handlers above get skipped. Each of</span>
+  <span class="hljs-comment">// the then() promises above reject with the original error</span>
   <span class="hljs-keyword">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> assert.ok(err === originalError));
 </code></pre>
 <p>There are several other helpers in the ES6 promise spec. The <code>Promise.resolve()</code>

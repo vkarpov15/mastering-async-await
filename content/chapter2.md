@@ -27,6 +27,7 @@ class Promise {
   then(onFulfilled, onRejected) {}
 }
 ```
+<div class="example-footer">Example 2.1</div>
 
 A promise is a state machine with 3 states:
 
@@ -47,6 +48,7 @@ if a promise changed state from 'FULFILLED' to 'REJECTED' after an async functio
 ```javascript
 [require:example 2.2$]
 ```
+<div class="example-footer">Example 2.2</div>
 
 Below is a diagram showing the promise state machine.
 
@@ -99,6 +101,7 @@ with a native JavaScript promise.
 ```javascript
 [require:example 2.4$]
 ```
+<div class="example-footer">Example 2.4</div>
 
 The promise constructor manages the promise's state and calls the executor
 function. You also need to implement the `then()` function that
@@ -118,6 +121,7 @@ to run on the next tick of the event loop using `setImmediate()`.
 ```javascript
 [require:example 2.5$]
 ```
+<div class="example-footer">Example 2.5</div>
 
 This `Promise` class, while simple, represents most of the work necessary
 to integrate with async/await. The `await` keyword doesn't explicitly check
@@ -131,6 +135,7 @@ custom `Promise` class with async/await.
 ```javascript
 [require:example 2.6$]
 ```
+<div class="example-footer">Example 2.6</div>
 
 ## Promise Chaining
 
@@ -155,14 +160,15 @@ function getWikipediaHeaders() {
       return res;
     }).
     then(res => {
-      // So whether the above `onFulfilled()` returns a primitive or a
-      // promise, this `onFulfilled()` gets the headers object
+      // So whether the above `onFulfilled()` returns a primitive
+      // or a promise, this `onFulfilled()` gets a headers object
       return writeFile('./headers.txt', JSON.stringify(res.headers));
     }).
     then(() => console.log('Great success!')).
     catch(err => console.err(err.stack));
 }
 ```
+<div class="example-footer">Example 2.7</div>
 
 While async/await is a superior pattern, promise chaining is still useful,
 and still necessary to complete a robust promise implementation. In order
@@ -182,7 +188,7 @@ values, and are wrapped in a try/catch.
 ```javascript
 then(_onFulfilled, _onRejected) {
   // `onFulfilled` is a no-op by default...
-  if (typeof _onFulfilled !== 'function') _onFulfilled = (v => v);
+  if (typeof _onFulfilled !== 'function') _onFulfilled = v => v;
   // and `onRejected` just rethrows the error by default
   if (typeof _onRejected !== 'function') {
     _onRejected = err => { throw err; };
@@ -197,8 +203,8 @@ then(_onFulfilled, _onRejected) {
     });
     const onRejected = err => setImmediate(() => {
       try {
-        // Note this is `resolve()`, **not** `reject()`. The `then()`
-        // promise will be fulfilled if `onRejected` doesn't rethrow
+        // Note this is `resolve()`, not `reject()`. The `then()`
+        // promise is fulfilled if `onRejected` doesn't rethrow
         resolve(_onRejected(err));
       } catch (err) { reject(err); }
     });
@@ -209,6 +215,7 @@ then(_onFulfilled, _onRejected) {
   });
 }
 ```
+<div class="example-footer">Example 2.8</div>
 
 Now `then()` returns a promise. However, there's still work to be done: if
 `onFulfilled()` returns a promise, `resolve()` needs to be able to handle it.
@@ -257,6 +264,7 @@ _getThenProperty(value) {
   }
 }
 ```
+<div class="example-footer">Example 2.9</div>
 
 Finally, the third change, ensuring that a promise doesn't change state
 once `resolve()` is called with a thenable, requires changes to both
