@@ -248,7 +248,7 @@ async function test() {
     await p;
   } catch (error) {
     // "cannot read property 'x' of undefined"
-    console.log(err.message);
+    console.log(error.message);
   }
 }
 ```

@@ -1,6 +1,6 @@
 {
   "name": "async-await-book",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "devDependencies": {
     "acquit": "0.6.3",
     "acquit-ignore": "0.0.3",
@@ -26,7 +26,7 @@
     "react-redux": "5.0.7",
     "redux": "4.0.0",
     "redux-thunk": "2.3.0",
-    "serve": "8.1.1",
+    "serve": "10.0.2",
     "socket.io": "2.1.1",
     "superagent": "3.8.3"
   },
