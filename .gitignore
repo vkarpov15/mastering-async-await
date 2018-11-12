@@ -60,3 +60,5 @@ typings/
 examples/db
 data
 credentials
+
+.DS_Store
