@@ -129,6 +129,9 @@ async function compileEpub(intro, chapters) {
   intro = marked(stripFirstLine(intro));
   chapters = chapters.map(stripFirstLine).map(ch => marked(ch));
 
+  chapters[1] = chapters[1].replace(/<svg[\s\S]+<\/svg>/m,
+    '<img src="https://i.imgur.com/wemS4Ws.png" />');
+
   const options = {
     title: 'Mastering Async/Await',
     author: 'Valeri Karpov',

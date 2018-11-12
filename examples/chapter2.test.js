@@ -186,14 +186,14 @@ describe('Chapter 2 Examples', function() {
   });
 
   it('example 2.16', function() {
-    // Yes, this is actually a thenable. When it comes to promises, the
+    // Yes, this is a thenable. When it comes to promises, the
     // letter of the law overrules the spirit of the law.
-    const thenable = { then: () => { throw new Error('Oops!'); } };
+    const thenable = { then: () => { throw Error('Oops!'); } };
     // acquit:ignore:start
     const console = _console;
     // acquit:ignore:end
-    // But `thenable` doesn't have `catch()`, so use `Promise.resolve()`
-    // to convert it to a promise and use `catch()`
+    // But `thenable` doesn't have `catch()`, so convert it with
+    // `Promise.resolve()` use `catch()`
     const p = Promise.resolve(thenable).
       catch(err => console.log(err.message)); // Prints "Oops!"
     // acquit:ignore:start
