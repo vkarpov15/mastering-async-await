@@ -8,6 +8,7 @@
     "acquit-require": "0.0.2",
     "archiver": "3.0.0",
     "body-parser": "1.18.3",
+    "cheerio": "1.0.0-rc.2",
     "co": "4.6.0",
     "epub-gen": "0.0.20",
     "express": "4.16.3",

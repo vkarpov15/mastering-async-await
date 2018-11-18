@@ -964,8 +964,6 @@ ignore them. Below is a skeleton of a simplified <code>Promise</code> class.</p>
   then(onFulfilled, onRejected) {}
 }
 </code></pre>
-<div class="example-footer">Example 2.1</div>
-
 <p>A promise is a state machine with 3 states:</p>
 <ul>
 <li>pending: the initial state, means that the underlying operation is in progress</li>
@@ -988,8 +986,6 @@ if a promise changed state from &#39;FULFILLED&#39; to &#39;REJECTED&#39; after 
   reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'bar'</span>));
 });
 </code></pre>
-<div class="example-footer">Example 2.2</div>
-
 <p>Below is a diagram showing the promise state machine.</p>
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="390" viewbox="0 0 400 260">
   <line x1="100" y1="150" x2="300" y2="80" style="stroke:#000;stroke-width:5" />
@@ -1060,8 +1056,6 @@ with a native JavaScript promise.</p>
   }
 }
 </code></pre>
-<div class="example-footer">Example 2.4</div>
-
 <p>The promise constructor manages the promise&#39;s state and calls the executor
 function. You also need to implement the <code>then()</code> function that
 let clients define handlers that run when a promise is settled. The <code>then()</code>
@@ -1109,8 +1103,6 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
   }
 }
 </code></pre>
-<div class="example-footer">Example 2.5</div>
-
 <p>This <code>Promise</code> class, while simple, represents most of the work necessary
 to integrate with async/await. The <code>await</code> keyword doesn&#39;t explicitly check
 if the value it operates on is <code>instanceof Promise</code>, it only checks for the
@@ -1128,8 +1120,6 @@ custom <code>Promise</code> class with async/await.</p>
   assert.equal(res, <span class="hljs-string">'Hello'</span>);
 }
 </code></pre>
-<div class="example-footer">Example 2.6</div>
-
 <h2 id="promise-chaining">Promise Chaining</h2>
 <p>One key feature that the promise implementation thus far does not support is
 promise chaining. Promise chaining is a common pattern for keeping async code
@@ -1158,8 +1148,6 @@ from the introduction looks with promise chaining:</p>
     catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.err(err.stack));
 }
 </code></pre>
-<div class="example-footer">Example 2.7</div>
-
 <p>While async/await is a superior pattern, promise chaining is still useful,
 and still necessary to complete a robust promise implementation. In order
 to implement promise chaining, you need to make 3 changes to the promise
@@ -1203,8 +1191,6 @@ values, and are wrapped in a try/catch.</p>
   });
 }
 </code></pre>
-<div class="example-footer">Example 2.8</div>
-
 <p>Now <code>then()</code> returns a promise. However, there&#39;s still work to be done: if
 <code>onFulfilled()</code> returns a promise, <code>resolve()</code> needs to be able to handle it.
 In order to support this, the <code>resolve()</code> function will need to use <code>then()</code>
@@ -1250,8 +1236,6 @@ _getThenProperty(value) {
   }
 }
 </code></pre>
-<div class="example-footer">Example 2.9</div>
-
 <p>Finally, the third change, ensuring that a promise doesn&#39;t change state
 once <code>resolve()</code> is called with a thenable, requires changes to both
 <code>resolve()</code> and the promise constructor. The motivation for this change
@@ -1264,8 +1248,6 @@ is to ensure that <code>p2</code> in the below example is fulfilled, <strong>not
   <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); <span class="hljs-comment">// Ignored, promise already resolved</span>
 });
 </code></pre>
-<div class="example-footer">Example 2.10</div>
-
 <p>One way to achieve this is to create a helper function that wraps
 <code>this.resolve()</code> and <code>this.reject()</code> that ensures <code>resolve()</code> and <code>reject()</code>
 can only be called once.</p>
@@ -1288,8 +1270,6 @@ _wrapResolveReject() {
   <span class="hljs-keyword">return</span> { resolve, reject };
 }
 </code></pre>
-<div class="example-footer">Example 2.11</div>
-
 <p>Once you have this <code>_wrapResolveReject()</code> helper, you need to use it in
 <code>resolve()</code>:</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.12</div></div>
@@ -1307,8 +1287,6 @@ _wrapResolveReject() {
   <span class="hljs-comment">// ...</span>
 }
 </code></pre>
-<div class="example-footer">Example 2.12</div>
-
 <div class="page-break"></div>
 
 <p>Also, you need to use <code>_wrapResolveReject()</code> in the constructor itself:</p>
@@ -1324,8 +1302,6 @@ _wrapResolveReject() {
   } <span class="hljs-keyword">catch</span> (err) { reject(err); }
 }
 </code></pre>
-<div class="example-footer">Example 2.14</div>
-
 <p>With all these changes, the complete promise implementation, which you can
 find at <a href="http://bit.ly/simple-promise">bit.ly/simple-promise</a>, now passes
 all 872 test cases in the <a href="https://promisesaplus.com/">Promises/A+ spec</a>.
@@ -1346,8 +1322,6 @@ Below is the full implementation of <code>catch()</code>.</p>
   <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.then(<span class="hljs-literal">null</span>, onRejected);
 }
 </code></pre>
-<div class="example-footer">Example 2.14</div>
-
 <p>Why does this work? Recall from example 2.8 that <code>then()</code> has a default <code>onRejected()</code>
 argument that rethrows the error. So when a promise is rejected, subsequent <code>then()</code>
 calls that only specify an <code>onFulfilled()</code> handler are skipped.</p>
@@ -1361,8 +1335,6 @@ calls that only specify an <code>onFulfilled()</code> handler are skipped.</p>
   <span class="hljs-comment">// the then() promises above reject with the original error</span>
   <span class="hljs-keyword">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> assert.ok(err === originalError));
 </code></pre>
-<div class="example-footer">Example 2.15</div>
-
 <p>There are several other helpers in the ES6 promise spec. The <code>Promise.resolve()</code>
 and <code>Promise.reject()</code> helpers are both commonly used for testing and examples,
 as well as to convert a thenable into a fully fledged promise.</p>
@@ -1376,8 +1348,6 @@ as well as to convert a thenable into a fully fledged promise.</p>
 <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(thenable).
   catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(err.message)); <span class="hljs-comment">// Prints "Oops!"</span>
 </code></pre>
-<div class="example-footer">Example 2.16</div>
-
 <p>Below is the implementation of <code>resolve()</code> and <code>reject()</code>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.17</div></div>
 
@@ -1388,8 +1358,6 @@ as well as to convert a thenable into a fully fledged promise.</p>
   <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> reject(err));
 }
 </code></pre>
-<div class="example-footer">Example 2.17</div>
-
 <p>The <code>Promise.all()</code> function is another important helper, because it lets you execute multiple promises in
 parallel and <code>await</code> on the result. The below code will run two instances of
 the <code>run()</code> function in parallel, and pause execution until they&#39;re both done.</p>
@@ -1412,8 +1380,6 @@ the <code>run()</code> function in parallel, and pause execution until they&#39;
 <span class="hljs-comment">// run(): done</span>
 <span class="hljs-comment">// Done</span>
 </code></pre>
-<div class="example-footer">Example 2.18</div>
-
 <p><code>Promise.all()</code> is the preferred mechanism for executing async functions in parallel.
 To execute async functions in series, you would use a <code>for</code> loop and <code>await</code> on
 each function call.</p>
@@ -1440,8 +1406,6 @@ of promises and waiting for the result. Below is a simplified implementation of
   });
 }
 </code></pre>
-<div class="example-footer">Example 2.19</div>
-
 <p>There is one more helper function defined in the ES6 spec, <code>Promise.race()</code>,
 that will be an exercise. Other than <code>race()</code> and some minor details like
 support for subclassing, the promise implementation in this chapter is

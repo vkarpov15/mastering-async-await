@@ -27,7 +27,6 @@ class Promise {
   then(onFulfilled, onRejected) {}
 }
 ```
-<div class="example-footer">Example 2.1</div>
 
 A promise is a state machine with 3 states:
 
@@ -48,7 +47,6 @@ if a promise changed state from 'FULFILLED' to 'REJECTED' after an async functio
 ```javascript
 [require:example 2.2$]
 ```
-<div class="example-footer">Example 2.2</div>
 
 Below is a diagram showing the promise state machine.
 
@@ -101,7 +99,6 @@ with a native JavaScript promise.
 ```javascript
 [require:example 2.4$]
 ```
-<div class="example-footer">Example 2.4</div>
 
 The promise constructor manages the promise's state and calls the executor
 function. You also need to implement the `then()` function that
@@ -121,7 +118,6 @@ to run on the next tick of the event loop using `setImmediate()`.
 ```javascript
 [require:example 2.5$]
 ```
-<div class="example-footer">Example 2.5</div>
 
 This `Promise` class, while simple, represents most of the work necessary
 to integrate with async/await. The `await` keyword doesn't explicitly check
@@ -135,7 +131,6 @@ custom `Promise` class with async/await.
 ```javascript
 [require:example 2.6$]
 ```
-<div class="example-footer">Example 2.6</div>
 
 ## Promise Chaining
 
@@ -168,7 +163,6 @@ function getWikipediaHeaders() {
     catch(err => console.err(err.stack));
 }
 ```
-<div class="example-footer">Example 2.7</div>
 
 While async/await is a superior pattern, promise chaining is still useful,
 and still necessary to complete a robust promise implementation. In order
@@ -215,7 +209,6 @@ then(_onFulfilled, _onRejected) {
   });
 }
 ```
-<div class="example-footer">Example 2.8</div>
 
 Now `then()` returns a promise. However, there's still work to be done: if
 `onFulfilled()` returns a promise, `resolve()` needs to be able to handle it.
@@ -264,7 +257,6 @@ _getThenProperty(value) {
   }
 }
 ```
-<div class="example-footer">Example 2.9</div>
 
 Finally, the third change, ensuring that a promise doesn't change state
 once `resolve()` is called with a thenable, requires changes to both
@@ -280,7 +272,6 @@ const p2 = new Promise(resolve => {
   throw new Error('Oops!'); // Ignored, promise already resolved
 });
 ```
-<div class="example-footer">Example 2.10</div>
 
 One way to achieve this is to create a helper function that wraps
 `this.resolve()` and `this.reject()` that ensures `resolve()` and `reject()`
@@ -306,7 +297,6 @@ _wrapResolveReject() {
   return { resolve, reject };
 }
 ```
-<div class="example-footer">Example 2.11</div>
 
 Once you have this `_wrapResolveReject()` helper, you need to use it in
 `resolve()`:
@@ -327,7 +317,6 @@ resolve(value) {
   // ...
 }
 ```
-<div class="example-footer">Example 2.12</div>
 
 <div class="page-break"></div>
 
@@ -346,7 +335,6 @@ constructor(executor) { // Beginning omitted for brevity
   } catch (err) { reject(err); }
 }
 ```
-<div class="example-footer">Example 2.14</div>
 
 With all these changes, the complete promise implementation, which you can
 find at [bit.ly/simple-promise](http://bit.ly/simple-promise), now passes
@@ -373,7 +361,6 @@ catch(onRejected) {
   return this.then(null, onRejected);
 }
 ```
-<div class="example-footer">Example 2.14</div>
 
 Why does this work? Recall from example 2.8 that `then()` has a default `onRejected()`
 argument that rethrows the error. So when a promise is rejected, subsequent `then()`
@@ -384,7 +371,6 @@ calls that only specify an `onFulfilled()` handler are skipped.
 ```javascript
 [require: example 2.15$]
 ```
-<div class="example-footer">Example 2.15</div>
 
 There are several other helpers in the ES6 promise spec. The `Promise.resolve()`
 and `Promise.reject()` helpers are both commonly used for testing and examples,
@@ -395,7 +381,6 @@ as well as to convert a thenable into a fully fledged promise.
 ```javascript
 [require: example 2.16$]
 ```
-<div class="example-footer">Example 2.16</div>
 
 Below is the implementation of `resolve()` and `reject()`.
 
@@ -409,7 +394,6 @@ static reject(err) {
   return new Promise((resolve, reject) => reject(err));
 }
 ```
-<div class="example-footer">Example 2.17</div>
 
 The `Promise.all()` function is another important helper, because it lets you execute multiple promises in
 parallel and `await` on the result. The below code will run two instances of
@@ -420,7 +404,6 @@ the `run()` function in parallel, and pause execution until they're both done.
 ```javascript
 [require: example 2.18$]
 ```
-<div class="example-footer">Example 2.18</div>
 
 `Promise.all()` is the preferred mechanism for executing async functions in parallel.
 To execute async functions in series, you would use a `for` loop and `await` on
@@ -451,7 +434,6 @@ static all(arr) {
   });
 }
 ```
-<div class="example-footer">Example 2.19</div>
 
 There is one more helper function defined in the ES6 spec, `Promise.race()`,
 that will be an exercise. Other than `race()` and some minor details like

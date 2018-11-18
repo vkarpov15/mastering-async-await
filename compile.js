@@ -3,6 +3,7 @@
 const Epub = require('epub-gen');
 const acquit = require('acquit');
 const archiver = require('archiver');
+const cheerio = require('cheerio');
 const highlight = require('highlight.js');
 const fs = require('fs');
 const marked = require('marked');
@@ -127,10 +128,19 @@ async function run() {
 
 async function compileEpub(intro, chapters) {
   intro = marked(stripFirstLine(intro));
-  chapters = chapters.map(stripFirstLine).map(ch => marked(ch));
+  chapters = chapters.
+    map(stripFirstLine).
+    map(ch => marked(ch));
 
   chapters[1] = chapters[1].replace(/<svg[\s\S]+<\/svg>/m,
     '<img src="https://i.imgur.com/wemS4Ws.png" />');
+
+  for (let i = 0; i < chapters.length; ++i) {
+    const $ = cheerio.load(chapters[i]);
+    $('.example-header-wrap').next('pre').children().
+      append(i => `<div class="example-footer">${$('.example-header').eq(i).html()}</div>`);
+    chapters[i] = $.html();
+  }
 
   const options = {
     title: 'Mastering Async/Await',
@@ -140,7 +150,8 @@ async function compileEpub(intro, chapters) {
     content: [
       { title: 'How To Use This Book', data: intro },
       { title: 'Async/Await: The Good Parts', data: chapters[0] },
-      { title: 'Promises From The Ground Up', data: chapters[1] }
+      { title: 'Promises From The Ground Up', data: chapters[1] },
+      { title: 'Async/Await Internals', data: chapters[2] }
     ],
     css: fs.readFileSync('./content/epub.css', 'utf8')
   };
