@@ -107,8 +107,8 @@ function takes 2 function parameters, `onFulfilled()` and `onRejected()`.
 A promise must call the `onFulfilled()` callback if the promise is fulfilled,
 and `onRejected()` if the promise is rejected.
 
-For now, `then()` is simple, it push `onFulfilled()` and
-`onRejected()` onto an array `chained`. Then, `resolve()` and `reject()` will call
+For now, `then()` is simple, it adds `onFulfilled()` and
+`onRejected()` to an array `chained`. Then, `resolve()` and `reject()` will call
 them when the promise is fulfilled or rejected. If the promise is already
 settled, the `then()` function will queue up `onFulfilled()` or `onRejected()`
 to run on the next tick of the event loop using `setImmediate()`.

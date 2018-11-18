@@ -1062,8 +1062,8 @@ let clients define handlers that run when a promise is settled. The <code>then()
 function takes 2 function parameters, <code>onFulfilled()</code> and <code>onRejected()</code>.
 A promise must call the <code>onFulfilled()</code> callback if the promise is fulfilled,
 and <code>onRejected()</code> if the promise is rejected.</p>
-<p>For now, <code>then()</code> is simple, it push <code>onFulfilled()</code> and
-<code>onRejected()</code> onto an array <code>chained</code>. Then, <code>resolve()</code> and <code>reject()</code> will call
+<p>For now, <code>then()</code> is simple, it adds <code>onFulfilled()</code> and
+<code>onRejected()</code> to an array <code>chained</code>. Then, <code>resolve()</code> and <code>reject()</code> will call
 them when the promise is fulfilled or rejected. If the promise is already
 settled, the <code>then()</code> function will queue up <code>onFulfilled()</code> or <code>onRejected()</code>
 to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
@@ -1926,18 +1926,17 @@ does <strong>not</strong> pause <code>test()</code>.</p>
 </code></pre>
 <h3 id="make-sure-you-handle-errors-with-catch-">Make sure you handle errors with <code>.catch()</code></h3>
 <p>Consolidated error handling is one of the most powerful features of async/await.
-Using <code>.catch()</code> on an async function call lets you handle all errors (synchronous and asynchronous) that occur
-in the async function. Use <code>.catch()</code>
-for catch-all error handlers rather than <code>try/catch</code>.</p>
+Using <code>asyncFn().catch()</code> handles all errors (sync and async) that occur
+in <code>asyncFn()</code>. Remember example 3.4: <code>try/catch</code> does <em>not</em> handle async
+errors in <code>return p</code> if <code>p</code> rejects.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.22</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Bad! Doesn't handle returned promise rejections and is clunky</span>
-  <span class="hljs-keyword">try</span> { <span class="hljs-comment">/* Complex function here */</span> } <span class="hljs-keyword">catch</span> (err) { handleError(err); }
+  <span class="hljs-comment">// Bad! Won't handle `return p` if `p` rejects</span>
+  <span class="hljs-keyword">try</span> { <span class="hljs-comment">/* Complex logic */</span> } <span class="hljs-keyword">catch</span> (err) { handleError(err); }
 }
-<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-comment">/* Complex function here */</span> }
-<span class="hljs-comment">// Do this instead. Handles `return` errors and has less boilerplate</span>
-fn2().catch(handleError);
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn2</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-comment">/* Complex logic */</span> }
+fn2().catch(handleError); <span class="hljs-comment">// Better. Less repetition, more robust</span>
 </code></pre>
 <p>In general, any error in an async function should end up in a <code>.catch()</code>
 handler. If you see async/await based code with no <code>.catch()</code> calls, there&#39;s
