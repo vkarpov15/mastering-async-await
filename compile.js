@@ -35,7 +35,7 @@ async function run() {
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
 
-  await compileEpub(intro, chapters);
+  await compileEpub(intro, chapters, outro);
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -126,14 +126,18 @@ async function run() {
   process.exit(0);
 }
 
-async function compileEpub(intro, chapters) {
+async function compileEpub(intro, chapters, conclusion) {
   intro = marked(stripFirstLine(intro));
   chapters = chapters.
     map(stripFirstLine).
     map(ch => marked(ch));
+  conclusion = marked(stripFirstLine(conclusion));
 
   chapters[1] = chapters[1].replace(/<svg[\s\S]+<\/svg>/m,
     '<img src="https://i.imgur.com/wemS4Ws.png" />');
+
+  chapters[2] = chapters[2].replace('../images/flow.png',
+    'https://i.imgur.com/UyRLFTS.jpg');
 
   for (let i = 0; i < chapters.length; ++i) {
     const $ = cheerio.load(chapters[i]);
@@ -151,7 +155,9 @@ async function compileEpub(intro, chapters) {
       { title: 'How To Use This Book', data: intro },
       { title: 'Async/Await: The Good Parts', data: chapters[0] },
       { title: 'Promises From The Ground Up', data: chapters[1] },
-      { title: 'Async/Await Internals', data: chapters[2] }
+      { title: 'Async/Await Internals', data: chapters[2] },
+      { title: 'Async/Await in the Wild', data: chapters[3] },
+      { title: 'Moving On', data: conclusion }
     ],
     css: fs.readFileSync('./content/epub.css', 'utf8')
   };
