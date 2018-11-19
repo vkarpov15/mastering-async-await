@@ -12,7 +12,6 @@ keyword pauses the function's execution for approximately 1 second.
 ```javascript
 [require:example 1.1$]
 ```
-<div class="example-footer">Example 1.1</div>
 
 You can use the `await` keyword anywhere in the body of an async function. This means
 you can use `await` in `if` statements, `for` loops, and `try/catch` blocks. Below
@@ -31,7 +30,6 @@ async function test() {
 
 test();
 ```
-<div class="example-footer">Example 1.2</div>
 
 There is one major restriction for using `await`: you can only use `await`
 within the body of a function that's marked `async`. The following code throws a
@@ -48,7 +46,6 @@ function test() {
 
 test();
 ```
-<div class="example-footer">Example 1.3</div>
 
 In particular, you can't use `await` in a closure embedded in an async function, unless
 the closure is also an async function. The below code also throws a `SyntaxError`.
@@ -67,7 +64,6 @@ async function test() {
   });
 }
 ```
-<div class="example-footer">Example 1.4</div>
 
 As long as you don't create a new function, you can use `await` underneath any
 number of `for` loops and `if` statements.
@@ -88,7 +84,6 @@ async function test() {
   }
 }
 ```
-<div class="example-footer">Example 1.5</div>
 
 <div class="page-break"></div>
 
@@ -120,7 +115,6 @@ async function test() {
   console.log(await promise);
 }
 ```
-<div class="example-footer">Example 1.6</div>
 
 An async function **always** returns a promise. When you `return` from an async
 function, JavaScript resolves the promise to the value you returned. This means
@@ -141,7 +135,6 @@ async function test() {
   console.log(await computeValue());
 }
 ```
-<div class="example-footer">Example 1.7</div>
 
 This book will refer to the value you `return` from an async function as the
 _resolved value_. In `computeValue` above, "Hello, World!" is the resolved
@@ -165,7 +158,6 @@ async function computeValue() {
   }, 1000);
 }
 ```
-<div class="example-footer">Example 1.8</div>
 
 If you `return` a promise from an async function, the resolved value will
 still not equal the return value. The below example demonstrates that the
@@ -185,7 +177,6 @@ async function test() {
   console.log(returnValue === resolvedValue);
 }
 ```
-<div class="example-footer">Example 1.9</div>
 
 Async/await beginners often mistakenly think they need to `return` a promise
 from an async function. They likely read that an async function always returns
@@ -203,7 +194,6 @@ async function computeValue() {
   return Promise.resolve('Hello, World!');
 }
 ```
-<div class="example-footer">Example 1.10</div>
 
 <div class="page-break"></div>
 
@@ -227,7 +217,6 @@ async function test() {
   }
 }
 ```
-<div class="example-footer">Example 1.11</div>
 
 If `p` is rejected, `await p` throws an error that you can catch with a
 normal JavaScript `try/catch`. Note that the `await` statement is what throws
@@ -252,7 +241,6 @@ async function test() {
   }
 }
 ```
-<div class="example-footer">Example 1.12</div>
 
 In callback-based code, you had to watch out for synchronous errors like `TypeError`
 separately from asynchronous errors. This lead to a lot of server crashes and
@@ -287,7 +275,6 @@ function testWrapper(callback) {
   }
 }
 ```
-<div class="example-footer">Example 1.13</div>
 
 When there's this much boilerplate for error handling, even the most rigorous
 and disciplined developers end up missing a spot. The result is uncaught errors,
@@ -309,7 +296,6 @@ async function testWrapper() {
   }
 }
 ```
-<div class="example-footer">Example 1.14</div>
 
 Let's take a look at how the `throw` keyword works with async functions now that
 you've seen how `try/catch` works. When you `throw` in an async function,
@@ -337,7 +323,6 @@ async function test() {
   }
 }
 ```
-<div class="example-footer">Example 1.15</div>
 
 Remember that the `computeValue()` function call itself does **not** throw an
 error in the `test()` function. The `await` keyword is what throws an error that
@@ -362,7 +347,6 @@ async function test() {
   }
 }
 ```
-<div class="example-footer">Example 1.16</div>
 
 <div class="page-break"></div>
 
@@ -382,7 +366,6 @@ async function test() {
   console.log(err.message);
 }
 ```
-<div class="example-footer">Example 1.17</div>
 
 Both `try/catch` and `catch()` have their place. In particular, `catch()`
 makes it easier to centralize your error handling. A common async/await
@@ -409,7 +392,6 @@ async function fn2() {
 
 fn2().catch(handleError);
 ```
-<div class="example-footer">Example 1.18</div>
 
 <div class="page-break"></div>
 
@@ -438,7 +420,6 @@ function getWithRetry(url, numRetries, callback, count) {
   });
 }
 ```
-<div class="example-footer">Example 1.19</div>
 
 Recursion is subtle and tricky to understand relative to a loop.
 Plus, the above code ignores the possibility of sync errors, because the
@@ -468,7 +449,6 @@ async function getWithRetry(url, numRetries) {
   throw lastError;
 }
 ```
-<div class="example-footer">Example 1.20</div>
 
 More generally, async/await makes executing async operations in series trivial.
 For example, let's say you had to load a list of blog posts from an HTTP API
@@ -488,7 +468,6 @@ async function run() {
   }
 }
 ```
-<div class="example-footer">Example 1.21</div>
 
 If this example seems trivial, that's good, because that's how programming
 should be. The JavaScript community has created an incredible hodge-podge of
