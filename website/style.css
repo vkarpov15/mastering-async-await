@@ -86,6 +86,11 @@ img#cover {
   text-align: center;
 }
 
+.price-info {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 .tagline {
   color: #368BC1;
 }
