@@ -144,7 +144,7 @@ from the introduction looks with promise chaining:
 
 ```javascript
 function getWikipediaHeaders() {
-  return stat('./headers.txt').
+  return stat('./headers').
     then(res => {
       if (res == null) {
         // If you return a promise from `onFulfilled()`, the next
@@ -155,9 +155,9 @@ function getWikipediaHeaders() {
       return res;
     }).
     then(res => {
-      // So whether the above `onFulfilled()` returns a primitive or a
-      // promise, this `onFulfilled()` gets the headers object
-      return writeFile('./headers.txt', JSON.stringify(res.headers));
+      // So whether the above `onFulfilled()` returns a primitive
+      // or a promise, this `onFulfilled()` gets a headers object
+      return writeFile('./headers', JSON.stringify(res.headers));
     }).
     then(() => console.log('Great success!')).
     catch(err => console.err(err.stack));
@@ -182,7 +182,7 @@ values, and are wrapped in a try/catch.
 ```javascript
 then(_onFulfilled, _onRejected) {
   // `onFulfilled` is a no-op by default...
-  if (typeof _onFulfilled !== 'function') _onFulfilled = (v => v);
+  if (typeof _onFulfilled !== 'function') _onFulfilled = v => v;
   // and `onRejected` just rethrows the error by default
   if (typeof _onRejected !== 'function') {
     _onRejected = err => { throw err; };
@@ -197,14 +197,14 @@ then(_onFulfilled, _onRejected) {
     });
     const onRejected = err => setImmediate(() => {
       try {
-        // Note this is `resolve()`, **not** `reject()`. The `then()`
-        // promise will be fulfilled if `onRejected` doesn't rethrow
+        // Note this is resolve, not reject. The `then()`
+        // promise is fulfilled if onRejected doesn't rethrow
         resolve(_onRejected(err));
       } catch (err) { reject(err); }
     });
-
-    if (this.state === 'FULFILLED') return onFulfilled(this.value);
-    if (this.state === 'REJECTED') return onRejected(this.value);
+    const { state } = this;
+    if (state === 'FULFILLED') return onFulfilled(this.value);
+    if (state === 'REJECTED') return onRejected(this.value);
     this.chained.push({ onFulfilled, onRejected });
   });
 }
@@ -222,11 +222,11 @@ that shows the 2nd necessary change.
 resolve(value) {
   if (this.state !== 'PENDING') return;
   if (value === this) {
-    return this.reject(TypeError(`Can't resolve promise with itself`));
+    return this.reject(TypeError(`Promise resolved to itself`));
   }
-  // Is `value` a thenable? If so, fulfill/reject this promise when
+  // Is `value` thenable? If so, fulfill/reject this promise when
   // `value` fulfills or rejects. The Promises/A+ spec calls this
-  // process "assimilating" the other promise (resistance is futile).
+  // "assimilating" the other promise (resistance is futile).
   const then = this._getThenProperty(value);
   if (typeof then === 'function') {
     try {
@@ -241,18 +241,18 @@ resolve(value) {
   this.state = 'FULFILLED';
   this.value = value;
   this.chained.
-    forEach(({ onFulfilled }) => setImmediate(onFulfilled, value));
+    forEach(obj => setImmediate(obj.onFulfilled, value));
 }
-// Helper to wrap getting the `then()` property because the Promises/A+
-// spec has 2 tricky details: you can only access the `then` property
-// once, and if getting `value.then` throws the promise should reject
+// Helper to wrap getting the `then` property. Promises/A+ has
+// 2 tricky details: you can only access `then` once, and if
+// getting `value.then` throws the promise should reject
 _getThenProperty(value) {
   if (value == null) return null;
   if (!['object', 'function'].includes(typeof value)) return null;
   try {
     return value.then;
   } catch (error) {
-    // Unlikely edge case, Promises/A+ section 2.3.3.2 enforces this
+    // Unlikely, but enforced by Promises/A+ section 2.3.3.2
     this.reject(error);
   }
 }
@@ -269,7 +269,7 @@ is to ensure that `p2` in the below example is fulfilled, **not** rejected.
 const p1 = new Promise(resolve => setTimeout(resolve, 50));
 const p2 = new Promise(resolve => {
   resolve(p1);
-  throw new Error('Oops!'); // Ignored because `resolve()` was called
+  throw new Error('Oops!'); // Ignored, promise already resolved
 });
 ```
 
@@ -280,8 +280,8 @@ can only be called once.
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
 
 ```javascript
-// After you call `resolve()` with a promise, extra `resolve()` and
-// `reject()` calls will be ignored despite the 'PENDING' state
+// If you call `resolve()` with a promise, future `resolve` and
+// `reject` calls will be ignored despite the 'PENDING' state
 _wrapResolveReject() {
   let called = false;
   const resolve = v => {
@@ -307,8 +307,8 @@ Once you have this `_wrapResolveReject()` helper, you need to use it in
 resolve(value) {
   // ...
   if (typeof then === 'function') {
-    // If `then()` calls `resolve()` with a 'PENDING' promise and then
-    // throws, the `then()` promise will be fulfilled like example 2.10
+    // If `then()` calls `resolve()` with a PENDING promise and
+    // throws, the `then()` promise will be fulfilled like 2.10
     const { resolve, reject } = this._wrapResolveReject();
     try {
       return then.call(value, resolve, reject);
@@ -326,7 +326,7 @@ Also, you need to use `_wrapResolveReject()` in the constructor itself:
 
 ```javascript
 constructor(executor) { // Beginning omitted for brevity
-  // This makes the promise class handle example 2.10 correctly...
+  // This makes the promise class handle example 2.10...
   const { resolve, reject } = this._wrapResolveReject();
   try {
     executor(resolve, reject);
@@ -419,12 +419,12 @@ of promises and waiting for the result. Below is a simplified implementation of
 static all(arr) {
   let remaining = arr.length;
   if (remaining === 0) return Promise.resolve([]);
-  // `result` stores the value that each promise is fulfilled with
+  // `result` stores the value each promise is fulfilled with
   let result = [];
   return new Promise((resolve, reject) => {
-    // Loop through every promise in the array and call `then()`. If
-    // the promise fulfills, store the fulfilled value in `result`.
-    // If any promise rejects, the `all()` promise rejects immediately.
+    // Call `then()` on every promise in the array. When a
+    // promise fulfills, store the value in `result`. If any
+    // promise rejects, the `all()` promise rejects immediately
     arr.forEach((p, i) => p.then(
       res => {
         result[i] = res;
@@ -510,8 +510,8 @@ Like `Promise.all()`, `Promise.race()` takes in an array of promises, but
 that the first promise to settle resolves or rejects to. For example:
 
 ```javascript
-const p1 = new Promise(resolve => setTimeout(() => resolve(1), 50));
-const p2 = new Promise(resolve => setTimeout(() => resolve(2), 250));
+const p1 = new Promise(r => setTimeout(() => r(1), 50));
+const p2 = new Promise(r => setTimeout(() => r(2), 250));
 // Prints "1", because `p1` resolves first
 Promise.race([p1, p2]).then(res => console.log(res));
 ```
@@ -532,22 +532,22 @@ function race(arr) {
   return Promise.reject(new Error('Implement this function'));
 }
 
-// The below are tests to help you check your `race()` implementation
+// The below tests help you check your `race()` implementation
 test1().then(test2).then(() => console.log('Done!')).
   catch(error => console.error(error.stack));
 function test1() {
-  const p1 = new Promise(resolve => setTimeout(() => resolve(1), 10));
-  const p2 = new Promise(resolve => setTimeout(() => resolve(2), 100));
+  const p1 = new Promise(r => setTimeout(() => r(1), 10));
+  const p2 = new Promise(r => setTimeout(() => r(2), 100));
   const f = v => { if (v !== 1) throw Error('test1 failed!'); };
   return race([p1, p2]).then(f);
 }
 function test2() {
   const error = new Error('Expected error');
-  const p1 = new Promise(resolve => setTimeout(() => resolve(1), 100));
-  const p2 = new Promise(resolve => setTimeout(() => resolve(2), 100));
+  const p1 = new Promise(r => setTimeout(() => r(1), 100));
+  const p2 = new Promise(r => setTimeout(() => r(2), 100));
   const p3 = new Promise((resolve, reject) => reject(error));
   return race([p1, p2, p3]).then(
-    () => { throw Error('test2: `race()` promise must reject'); },
-    e => { if (e !== error) throw Error('test2: wrong error'); });
+    () => { throw Error('test2: race() promise must reject'); },
+    e => { if (e !== error) throw Error('test2: wrong err'); });
 }
 ```

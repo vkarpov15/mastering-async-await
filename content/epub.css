@@ -1,125 +1,47 @@
-html {
-  font-family: 'Roboto';
-  font-size: 18pt;
-  margin: 0px;
+body {
+  font-family: sans-serif;
+  font-size: 0.75em;
 }
 
-a {
-  text-decoration: none;
-  color: #6699cc;
+body {
+  line-height: 1.5;
 }
 
-h1 {
-  padding-top: 3px;
-  margin-top: 0px;
-  font-size: 2em;
+body * {
+  line-height: inherit;
 }
 
-h2 {
-  font-size: 1.5em;
-}
-
-.chapter {
-  margin-top: 1px;
-  page-break-before: always;
-  line-height: 1.5em;
-  width: 1042px;
-}
-
-.chapter img {
-  width: 1042px;
-}
-
-.page-break {
-  page-break-before: always;
-}
-
-pre {
-  border: 1px solid #dfdfdf;
-  padding: 15px;
+code, pre {
+  white-space: pre-wrap;
+  page-break-inside: avoid;
 }
 
 code {
-  font-family: 'Droid Sans Mono';
-}
-
-p code {
-  color: #232323;
-  font-size: 0.9em;
-  padding: 1px 2px 2px 2px;
-  color: #c7254e;
+  font-family: "Courier New", Courier, monospace;
   background-color: #f6f6f6;
 }
 
-li code {
-  color: #232323;
-  font-size: 0.9em;
-  padding: 1px 2px 2px 2px;
-  color: #c7254e;
+pre {
+  padding-top: 0.5em;
+  padding-bottom: 0em;
+  top: -10px;
+  font-size: 0.65em;
   background-color: #f6f6f6;
-}
-
-h3 code {
-  color: #232323;
-  font-size: 0.9em;
-  padding: 1px 2px 2px 2px;
-  color: #c7254e;
-  background-color: #f6f6f6;
-}
-
-.example-footer {
-  display: none;
 }
 
 .example-header-wrap {
-  position: relative;
-  height: 0px;
+  display: none;
 }
 
-.space-example-header {
-  font-size: 0.25em;
-}
-
-.example-header {
-  border: 1px solid #dfdfdf;
-  top: -15px;
-  padding-top: 0px;
-  height: 1em;
-  padding: 1px;
-  position: absolute;
-  width: 7em;
-  text-align: center;
-  color: #666;
-  font-size: 0.5em;
-  line-height: 1em;
-}
-
-.toc a {
-  font-size: 18pt;
-  color: #232323;
-  float: right;
-  font-weight: bold;
-}
-
-.toc ol {
-  padding-left: 2.5em;
-}
-
-.toc li {
-  margin-left: 0px;
-  line-height: 1.5em;
-}
-
-.toc a::after {
-  content: '';
-  clear: both;
-  display: table;
-}
-
-svg {
-  width: 800px;
-  margin-left: 100px;
-  margin-bottom: 15px;
+.example-footer {
+  background-color: #f6f6f6;
+  font-size: 0.1em;
+  width: 14em;
+  padding: 0px;
+  margin: 0px;
+  margin-top: 0.5em;
+  border-top: 1px solid #666;
+  border-right: 1px solid #666;
 }
 
 /*

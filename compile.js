@@ -1,6 +1,9 @@
 'use strict';
 
+const Epub = require('epub-gen');
 const acquit = require('acquit');
+const archiver = require('archiver');
+const cheerio = require('cheerio');
 const highlight = require('highlight.js');
 const fs = require('fs');
 const marked = require('marked');
@@ -31,6 +34,8 @@ async function run() {
   const chapters = [1, 2, 3, 4].
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
+
+  await compileEpub(intro, chapters, outro);
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -119,4 +124,50 @@ async function run() {
 
   console.log('Done');
   process.exit(0);
+}
+
+async function compileEpub(intro, chapters, conclusion) {
+  intro = marked(stripFirstLine(intro));
+  chapters = chapters.
+    map(stripFirstLine).
+    map(ch => marked(ch));
+  conclusion = marked(stripFirstLine(conclusion));
+
+  chapters[1] = chapters[1].replace(/<svg[\s\S]+<\/svg>/m,
+    '<img src="https://i.imgur.com/wemS4Ws.png" />');
+
+  chapters[2] = chapters[2].replace('../images/flow.png',
+    'https://i.imgur.com/UyRLFTS.jpg');
+
+  for (let i = 0; i < chapters.length; ++i) {
+    const $ = cheerio.load(chapters[i]);
+    $('.example-header-wrap').next('pre').children().
+      append(i => `<div class="example-footer">${$('.example-header').eq(i).html()}</div>`);
+    chapters[i] = $.html();
+  }
+
+  const options = {
+    title: 'Mastering Async/Await',
+    author: 'Valeri Karpov',
+    output: `${process.cwd()}/bin/mastering-async-await.epub`,
+    cover: `${process.cwd()}/images/cover.jpg`,
+    content: [
+      { title: 'How To Use This Book', data: intro },
+      { title: 'Async/Await: The Good Parts', data: chapters[0] },
+      { title: 'Promises From The Ground Up', data: chapters[1] },
+      { title: 'Async/Await Internals', data: chapters[2] },
+      { title: 'Async/Await in the Wild', data: chapters[3] },
+      { title: 'Moving On', data: conclusion }
+    ],
+    css: fs.readFileSync('./content/epub.css', 'utf8')
+  };
+  await new Epub(options).promise;
+}
+
+function stripFirstLine(str) {
+  const firstNewLine = str.indexOf('\n');
+  if (firstNewLine === -1) {
+    return '';
+  }
+  return str.substr(firstNewLine + 1);
 }

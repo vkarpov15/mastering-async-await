@@ -21,9 +21,9 @@ is another way to pause an async function's execution for about 1 second.
 
 ```javascript
 async function test() {
-  // Wait for 100ms 10 times. This function also prints after 1 second.
+  // Wait 100ms 10 times. This function also prints after 1 sec.
   for (let i = 0; i < 10; ++i) {
-    await new Promise(resolve => setTimeout(() => resolve(), 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
   console.log('Hello, World!');
 }
@@ -39,7 +39,7 @@ within the body of a function that's marked `async`. The following code throws a
 
 ```javascript
 function test() {
-  const p = new Promise(resolve => setTimeout(() => resolve(), 1000));
+  const p = new Promise(resolve => setTimeout(resolve, 1000));
   // SyntaxError: Unexpected identifier
   await p;
 }
@@ -58,8 +58,8 @@ const assert = require('assert');
 async function test() {
   const p = Promise.resolve('test');
   assert.doesNotThrow(function() {
-    // "SyntaxError: Unexpected identifier" because the above function
-    // is **not** marked async. "Closure" = function inside a function
+    // "SyntaxError: Unexpected identifier" because the above
+    // function isn't async. Closure = function inside a function
     await p;
   });
 }
@@ -73,11 +73,11 @@ number of `for` loops and `if` statements.
 ```javascript
 async function test() {
   while (true) {
-    // Convoluted way to print out "Hello, World!" once per second by
-    // pausing execution for 200ms 5 times
+    // Convoluted way to print out "Hello, World!" once per
+    // second by pausing execution for 200ms 5 times
     for (let i = 0; i < 10; ++i) {
       if (i % 2 === 0) {
-        await new Promise(resolve => setTimeout(() => resolve(), 200));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
     }
     console.log('Hello, World!');
@@ -111,7 +111,7 @@ async function test() {
   // promise resolved to.
   console.log(res);
 
-  // Prints "Hello, World!". You can use `await` in function params!
+  // Prints "Hello, World!". You can `await` in function params!
   console.log(await promise);
 }
 ```
@@ -125,13 +125,13 @@ calling async functions from other async functions is very natural. You can
 
 ```javascript
 async function computeValue() {
-  await new Promise(resolve => setTimeout(() => resolve(), 1000));
-  // "Hello, World" is the _resolved value_ for this function call
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // "Hello, World" is the resolved value for this function call
   return 'Hello, World!';
 }
 
 async function test() {
-  // Prints "Hello, World!" after 1s. `computeValue` returns a promise!
+  // Prints after 1 second. `computeValue` returns a promise!
   console.log(await computeValue());
 }
 ```
@@ -173,7 +173,7 @@ const computeValue = async () => resolvedValue;
 async function test() {
   // No `await` below, so `returnValue` will be a promise
   const returnValue = computeValue();
-  // `false`. The return value and resolved value are always different
+  // `false`. Return value never strictly equals resolved value.
   console.log(returnValue === resolvedValue);
 }
 ```
@@ -188,9 +188,9 @@ always returns a promise, but, like in example 1.9, JavaScript creates the retur
 ```javascript
 async function computeValue() {
   // Adding `Promise.resolve()` below is unnecessary. It adds
-  // perf overhead because you're creating an unnecessary promise.
-  // "Unnecessary code is not as harmless as I used to think. It
-  // sends the misleading signal that it's necessary." - Paul Graham
+  // perf overhead because you're creating an unnecessary promise
+  // "Unnecessary code is not as harmless as I thought. It sends
+  // the misleading signal that it's necessary" - Paul Graham
   return Promise.resolve('Hello, World!');
 }
 ```
@@ -264,8 +264,8 @@ function testWrapper(callback) {
       if (error) {
         return callback(error);
       }
-      // And you also need to be careful that accessing `res.x` doesn't
-      // throw **and** calling `callback()` doesn't throw.
+      // And you also need to be careful that both accessing
+      // `res.x` and calling `callback()` don't throw.
       try {
         return callback(null, res.x);
       } catch (error) {
@@ -287,8 +287,8 @@ a single pattern.
 ```javascript
 async function testWrapper() {
   try {
-    // `try/catch` will catch sync errors in `test()`, async promise
-    // rejections, and errors with accessing `res.x`.
+    // `try/catch` will catch sync errors in `test()`, async
+    // promise rejections, and errors with accessing `res.x`.
     const res = await test();
     return res.x;
   } catch (error) {
@@ -409,12 +409,12 @@ using callbacks and the [`superagent` HTTP client](https://www.npmjs.com/package
 <div class="example-header-wrap"><div class="example-header">Example 1.19</div></div>
 
 ```javascript
-function getWithRetry(url, numRetries, callback, retriedCount) {
-  retriedCount = retriedCount || 0;
+function getWithRetry(url, numRetries, callback, count) {
+  count = count || 0;
   superagent.get(url).end(function(error, res) {
     if (error) {
-      if (retriedCount >= numRetries) { return callback(error); }
-      return getWithRetry(url, numRetries, callback, retriedCount + 1);
+      if (count >= numRetries) { return callback(error); }
+      return getWithRetry(url, numRetries, callback, count + 1);
     }
     return callback(null, res.body);
   });
@@ -438,7 +438,7 @@ async function getWithRetry(url, numRetries) {
   let lastError = null;
   for (let i = 0; i < numRetries; ++i) {
     try {
-      // Note that `await superagent.get(url).body` does **not** work
+      // Note that `await superagent.get(url).body` doesn't work
       const res = await superagent.get(url);
       // Early return with async functions works as you'd expect
       return res.body;
@@ -562,14 +562,14 @@ async function getWithRetry(url, numRetries) {
 // Correct answer for exercise 1.1 below
 async function run() {
   const root = 'https://' +
-    'us-central1-mastering-async-await.cloudfunctions.net';
+    'us-central1-mastering-async-await.cloudfunctions.net/post';
   const posts = await getWithRetry(`${root}/posts`, 3);
 
-  for (const post of posts) {
-    console.log(`Fetch post ${post.id}`);
-    const content = await getWithRetry(`${root}/post?id=${post.id}`, 3);
+  for (const p of posts) {
+    console.log(`Fetch post ${p.id}`);
+    const content = await getWithRetry(`${root}?id=${p.id}`, 3);
     if (content.content.includes('async/await hell')) {
-      console.log(`Correct answer: ${post.id}`);
+      console.log(`Correct answer: ${p.id}`);
       break;
     }
   }

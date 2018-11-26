@@ -78,6 +78,10 @@ h3 code {
   background-color: #f6f6f6;
 }
 
+.example-footer {
+  display: none;
+}
+
 .example-header-wrap {
   position: relative;
   height: 0px;
@@ -409,9 +413,9 @@ is another way to pause an async function&#39;s execution for about 1 second.</p
 <div class="example-header-wrap"><div class="example-header">Example 1.2</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Wait for 100ms 10 times. This function also prints after 1 second.</span>
+  <span class="hljs-comment">// Wait 100ms 10 times. This function also prints after 1 sec.</span>
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
-    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">100</span>));
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">100</span>));
   }
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
 }
@@ -424,7 +428,7 @@ within the body of a function that&#39;s marked <code>async</code>. The followin
 <div class="example-header-wrap"><div class="example-header">Example 1.3</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
+  <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">1000</span>));
   <span class="hljs-comment">// SyntaxError: Unexpected identifier</span>
   <span class="hljs-keyword">await</span> p;
 }
@@ -440,8 +444,8 @@ the closure is also an async function. The below code also throws a <code>Syntax
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'test'</span>);
   assert.doesNotThrow(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-    <span class="hljs-comment">// "SyntaxError: Unexpected identifier" because the above function</span>
-    <span class="hljs-comment">// is **not** marked async. "Closure" = function inside a function</span>
+    <span class="hljs-comment">// "SyntaxError: Unexpected identifier" because the above</span>
+    <span class="hljs-comment">// function isn't async. Closure = function inside a function</span>
     <span class="hljs-keyword">await</span> p;
   });
 }
@@ -452,11 +456,11 @@ number of <code>for</code> loops and <code>if</code> statements.</p>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
-    <span class="hljs-comment">// Convoluted way to print out "Hello, World!" once per second by</span>
-    <span class="hljs-comment">// pausing execution for 200ms 5 times</span>
+    <span class="hljs-comment">// Convoluted way to print out "Hello, World!" once per</span>
+    <span class="hljs-comment">// second by pausing execution for 200ms 5 times</span>
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
       <span class="hljs-keyword">if</span> (i % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>) {
-        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">200</span>));
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">200</span>));
       }
     }
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Hello, World!'</span>);
@@ -486,7 +490,7 @@ synchronous.</p>
   <span class="hljs-comment">// promise resolved to.</span>
   <span class="hljs-built_in">console</span>.log(res);
 
-  <span class="hljs-comment">// Prints "Hello, World!". You can use `await` in function params!</span>
+  <span class="hljs-comment">// Prints "Hello, World!". You can `await` in function params!</span>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> promise);
 }
 </code></pre>
@@ -497,13 +501,13 @@ calling async functions from other async functions is very natural. You can
 <div class="example-header-wrap"><div class="example-header">Example 1.7</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(), <span class="hljs-number">1000</span>));
-  <span class="hljs-comment">// "Hello, World" is the _resolved value_ for this function call</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">1000</span>));
+  <span class="hljs-comment">// "Hello, World" is the resolved value for this function call</span>
   <span class="hljs-keyword">return</span> <span class="hljs-string">'Hello, World!'</span>;
 }
 
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Prints "Hello, World!" after 1s. `computeValue` returns a promise!</span>
+  <span class="hljs-comment">// Prints after 1 second. `computeValue` returns a promise!</span>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> computeValue());
 }
 </code></pre>
@@ -538,7 +542,7 @@ the return value from <code>computeValue()</code>.</p>
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// No `await` below, so `returnValue` will be a promise</span>
   <span class="hljs-keyword">const</span> returnValue = computeValue();
-  <span class="hljs-comment">// `false`. The return value and resolved value are always different</span>
+  <span class="hljs-comment">// `false`. Return value never strictly equals resolved value.</span>
   <span class="hljs-built_in">console</span>.log(returnValue === resolvedValue);
 }
 </code></pre>
@@ -550,9 +554,9 @@ always returns a promise, but, like in example 1.9, JavaScript creates the retur
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">computeValue</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// Adding `Promise.resolve()` below is unnecessary. It adds</span>
-  <span class="hljs-comment">// perf overhead because you're creating an unnecessary promise.</span>
-  <span class="hljs-comment">// "Unnecessary code is not as harmless as I used to think. It</span>
-  <span class="hljs-comment">// sends the misleading signal that it's necessary." - Paul Graham</span>
+  <span class="hljs-comment">// perf overhead because you're creating an unnecessary promise</span>
+  <span class="hljs-comment">// "Unnecessary code is not as harmless as I thought. It sends</span>
+  <span class="hljs-comment">// the misleading signal that it's necessary" - Paul Graham</span>
   <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve(<span class="hljs-string">'Hello, World!'</span>);
 }
 </code></pre>
@@ -614,8 +618,8 @@ single async operation needs 3 distinct error handling patterns!</p>
       <span class="hljs-keyword">if</span> (error) {
         <span class="hljs-keyword">return</span> callback(error);
       }
-      <span class="hljs-comment">// And you also need to be careful that accessing `res.x` doesn't</span>
-      <span class="hljs-comment">// throw **and** calling `callback()` doesn't throw.</span>
+      <span class="hljs-comment">// And you also need to be careful that both accessing</span>
+      <span class="hljs-comment">// `res.x` and calling `callback()` don't throw.</span>
       <span class="hljs-keyword">try</span> {
         <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, res.x);
       } <span class="hljs-keyword">catch</span> (error) {
@@ -634,8 +638,8 @@ a single pattern.</p>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testWrapper</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">try</span> {
-    <span class="hljs-comment">// `try/catch` will catch sync errors in `test()`, async promise</span>
-    <span class="hljs-comment">// rejections, and errors with accessing `res.x`.</span>
+    <span class="hljs-comment">// `try/catch` will catch sync errors in `test()`, async</span>
+    <span class="hljs-comment">// promise rejections, and errors with accessing `res.x`.</span>
     <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> test();
     <span class="hljs-keyword">return</span> res.x;
   } <span class="hljs-keyword">catch</span> (error) {
@@ -739,12 +743,12 @@ a <code>for</code> loop. Below is a simplified implementation of a <code>getWith
 using callbacks and the <a href="https://www.npmjs.com/package/superagent"><code>superagent</code> HTTP client</a>.</p>
 <div class="example-header-wrap"><div class="example-header">Example 1.19</div></div>
 
-<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries, callback, retriedCount</span>) </span>{
-  retriedCount = retriedCount || <span class="hljs-number">0</span>;
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries, callback, count</span>) </span>{
+  count = count || <span class="hljs-number">0</span>;
   superagent.get(url).end(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error, res</span>) </span>{
     <span class="hljs-keyword">if</span> (error) {
-      <span class="hljs-keyword">if</span> (retriedCount &gt;= numRetries) { <span class="hljs-keyword">return</span> callback(error); }
-      <span class="hljs-keyword">return</span> getWithRetry(url, numRetries, callback, retriedCount + <span class="hljs-number">1</span>);
+      <span class="hljs-keyword">if</span> (count &gt;= numRetries) { <span class="hljs-keyword">return</span> callback(error); }
+      <span class="hljs-keyword">return</span> getWithRetry(url, numRetries, callback, count + <span class="hljs-number">1</span>);
     }
     <span class="hljs-keyword">return</span> callback(<span class="hljs-literal">null</span>, res.body);
   });
@@ -764,7 +768,7 @@ most junior of engineers.</p>
   <span class="hljs-keyword">let</span> lastError = <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; numRetries; ++i) {
     <span class="hljs-keyword">try</span> {
-      <span class="hljs-comment">// Note that `await superagent.get(url).body` does **not** work</span>
+      <span class="hljs-comment">// Note that `await superagent.get(url).body` doesn't work</span>
       <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> superagent.get(url);
       <span class="hljs-comment">// Early return with async functions works as you'd expect</span>
       <span class="hljs-keyword">return</span> res.body;
@@ -867,14 +871,14 @@ url: <a href="http://bit.ly/async-await-exercise-2">http://bit.ly/async-await-ex
 <span class="hljs-comment">// Correct answer for exercise 1.1 below</span>
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
-    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net'</span>;
+    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net/post'</span>;
   <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>, <span class="hljs-number">3</span>);
 
-  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> post <span class="hljs-keyword">of</span> posts) {
-    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${post.id}</span>`</span>);
-    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/post?id=<span class="hljs-subst">${post.id}</span>`</span>, <span class="hljs-number">3</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> posts) {
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${p.id}</span>`</span>);
+    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>?id=<span class="hljs-subst">${p.id}</span>`</span>, <span class="hljs-number">3</span>);
     <span class="hljs-keyword">if</span> (content.content.includes(<span class="hljs-string">'async/await hell'</span>)) {
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${post.id}</span>`</span>);
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${p.id}</span>`</span>);
       <span class="hljs-keyword">break</span>;
     }
   }
@@ -1027,31 +1031,33 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
   <span class="hljs-comment">// Constructor is the same as before, omitted for brevity</span>
   then(onFulfilled, onRejected) {
     <span class="hljs-keyword">const</span> { value, state } = <span class="hljs-keyword">this</span>;
-    <span class="hljs-comment">// If promise is already settled, enqueue the right handler</span>
-    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'FULFILLED'</span>) <span class="hljs-keyword">return</span> setImmediate(onFulfilled, value);
-    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'REJECTED'</span>) <span class="hljs-keyword">return</span> setImmediate(onRejected, value);
-    <span class="hljs-comment">// Otherwise, track `onFulfilled` and `onRejected` for later</span>
+    <span class="hljs-comment">// If promise is already settled, call the right handler</span>
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'FULFILLED'</span>)
+      <span class="hljs-keyword">return</span> setImmediate(onFulfilled, value);
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'REJECTED'</span>)
+      <span class="hljs-keyword">return</span> setImmediate(onRejected, value);
+    <span class="hljs-comment">// Otherwise, store handlers so you can call them later</span>
     <span class="hljs-keyword">this</span>.chained.push({ onFulfilled, onRejected });
   }
   resolve(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
     <span class="hljs-keyword">this</span>.value = value;
-    <span class="hljs-comment">// Loop through the `chained` array and find all `onFulfilled()`</span>
-    <span class="hljs-comment">// functions. Remember that `.then(null, onRejected)` is valid.</span>
+    <span class="hljs-comment">// Loop over `chained`, find `onFulfilled()` functions.</span>
+    <span class="hljs-comment">// Remember that `.then(null, onRejected)` is valid.</span>
     <span class="hljs-keyword">this</span>.chained.
-      filter(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> onFulfilled === <span class="hljs-string">'function'</span>).
+      filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onFulfilled <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
       <span class="hljs-comment">// The ES6 spec section 25.4 says `onFulfilled` and</span>
-      <span class="hljs-comment">// `onRejected` must be called on a separate event loop tick</span>
-      forEach(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> setImmediate(onFulfilled, value));
+      <span class="hljs-comment">// `onRejected` must be called on next event loop tick</span>
+      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
   }
   reject(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'REJECTED'</span>;
     <span class="hljs-keyword">this</span>.value = value;
     <span class="hljs-keyword">this</span>.chained.
-      filter(<span class="hljs-function">(<span class="hljs-params">{ onRejected }</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> onRejected === <span class="hljs-string">'function'</span>).
-      forEach(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> setImmediate(onFulfilled, value));
+      filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onRejected <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
+      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
   }
 }
 </code></pre>
@@ -1064,8 +1070,8 @@ custom <code>Promise</code> class with async/await.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.6</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-comment">// Works, even though this is a custom `Promise` class. All you</span>
-  <span class="hljs-comment">// need is a `then()` function to integrate with `await`.</span>
+  <span class="hljs-comment">// Works, even though this is a custom `Promise` class. All</span>
+  <span class="hljs-comment">// you need is a `then()` function to support `await`.</span>
   <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
     setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-string">'Hello'</span>), <span class="hljs-number">50</span>);
   });
@@ -1081,7 +1087,7 @@ from the introduction looks with promise chaining:</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.7</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWikipediaHeaders</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">return</span> stat(<span class="hljs-string">'./headers.txt'</span>).
+  <span class="hljs-keyword">return</span> stat(<span class="hljs-string">'./headers'</span>).
     then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> {
       <span class="hljs-keyword">if</span> (res == <span class="hljs-literal">null</span>) {
         <span class="hljs-comment">// If you return a promise from `onFulfilled()`, the next</span>
@@ -1092,9 +1098,9 @@ from the introduction looks with promise chaining:</p>
       <span class="hljs-keyword">return</span> res;
     }).
     then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> {
-      <span class="hljs-comment">// So whether the above `onFulfilled()` returns a primitive or a</span>
-      <span class="hljs-comment">// promise, this `onFulfilled()` gets the headers object</span>
-      <span class="hljs-keyword">return</span> writeFile(<span class="hljs-string">'./headers.txt'</span>, <span class="hljs-built_in">JSON</span>.stringify(res.headers));
+      <span class="hljs-comment">// So whether the above `onFulfilled()` returns a primitive</span>
+      <span class="hljs-comment">// or a promise, this `onFulfilled()` gets a headers object</span>
+      <span class="hljs-keyword">return</span> writeFile(<span class="hljs-string">'./headers'</span>, <span class="hljs-built_in">JSON</span>.stringify(res.headers));
     }).
     then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Great success!'</span>)).
     catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.err(err.stack));
@@ -1116,7 +1122,7 @@ values, and are wrapped in a try/catch.</p>
 
 <pre><code class="lang-javascript">then(_onFulfilled, _onRejected) {
   <span class="hljs-comment">// `onFulfilled` is a no-op by default...</span>
-  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> _onFulfilled !== <span class="hljs-string">'function'</span>) _onFulfilled = (<span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> v);
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> _onFulfilled !== <span class="hljs-string">'function'</span>) _onFulfilled = <span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> v;
   <span class="hljs-comment">// and `onRejected` just rethrows the error by default</span>
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> _onRejected !== <span class="hljs-string">'function'</span>) {
     _onRejected = <span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> { <span class="hljs-keyword">throw</span> err; };
@@ -1131,14 +1137,14 @@ values, and are wrapped in a try/catch.</p>
     });
     <span class="hljs-keyword">const</span> onRejected = <span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> setImmediate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
       <span class="hljs-keyword">try</span> {
-        <span class="hljs-comment">// Note this is `resolve()`, **not** `reject()`. The `then()`</span>
-        <span class="hljs-comment">// promise will be fulfilled if `onRejected` doesn't rethrow</span>
+        <span class="hljs-comment">// Note this is resolve, not reject. The `then()`</span>
+        <span class="hljs-comment">// promise is fulfilled if onRejected doesn't rethrow</span>
         resolve(_onRejected(err));
       } <span class="hljs-keyword">catch</span> (err) { reject(err); }
     });
-
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state === <span class="hljs-string">'FULFILLED'</span>) <span class="hljs-keyword">return</span> onFulfilled(<span class="hljs-keyword">this</span>.value);
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state === <span class="hljs-string">'REJECTED'</span>) <span class="hljs-keyword">return</span> onRejected(<span class="hljs-keyword">this</span>.value);
+    <span class="hljs-keyword">const</span> { state } = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'FULFILLED'</span>) <span class="hljs-keyword">return</span> onFulfilled(<span class="hljs-keyword">this</span>.value);
+    <span class="hljs-keyword">if</span> (state === <span class="hljs-string">'REJECTED'</span>) <span class="hljs-keyword">return</span> onRejected(<span class="hljs-keyword">this</span>.value);
     <span class="hljs-keyword">this</span>.chained.push({ onFulfilled, onRejected });
   });
 }
@@ -1153,11 +1159,11 @@ that shows the 2nd necessary change.</p>
 <pre><code class="lang-javascript">resolve(value) {
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
   <span class="hljs-keyword">if</span> (value === <span class="hljs-keyword">this</span>) {
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.reject(<span class="hljs-built_in">TypeError</span>(<span class="hljs-string">`Can't resolve promise with itself`</span>));
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.reject(<span class="hljs-built_in">TypeError</span>(<span class="hljs-string">`Promise resolved to itself`</span>));
   }
-  <span class="hljs-comment">// Is `value` a thenable? If so, fulfill/reject this promise when</span>
+  <span class="hljs-comment">// Is `value` thenable? If so, fulfill/reject this promise when</span>
   <span class="hljs-comment">// `value` fulfills or rejects. The Promises/A+ spec calls this</span>
-  <span class="hljs-comment">// process "assimilating" the other promise (resistance is futile).</span>
+  <span class="hljs-comment">// "assimilating" the other promise (resistance is futile).</span>
   <span class="hljs-keyword">const</span> then = <span class="hljs-keyword">this</span>._getThenProperty(value);
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> then === <span class="hljs-string">'function'</span>) {
     <span class="hljs-keyword">try</span> {
@@ -1172,18 +1178,18 @@ that shows the 2nd necessary change.</p>
   <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
   <span class="hljs-keyword">this</span>.value = value;
   <span class="hljs-keyword">this</span>.chained.
-    forEach(<span class="hljs-function">(<span class="hljs-params">{ onFulfilled }</span>) =&gt;</span> setImmediate(onFulfilled, value));
+    forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
 }
-<span class="hljs-comment">// Helper to wrap getting the `then()` property because the Promises/A+</span>
-<span class="hljs-comment">// spec has 2 tricky details: you can only access the `then` property</span>
-<span class="hljs-comment">// once, and if getting `value.then` throws the promise should reject</span>
+<span class="hljs-comment">// Helper to wrap getting the `then` property. Promises/A+ has</span>
+<span class="hljs-comment">// 2 tricky details: you can only access `then` once, and if</span>
+<span class="hljs-comment">// getting `value.then` throws the promise should reject</span>
 _getThenProperty(value) {
   <span class="hljs-keyword">if</span> (value == <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">if</span> (![<span class="hljs-string">'object'</span>, <span class="hljs-string">'function'</span>].includes(<span class="hljs-keyword">typeof</span> value)) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">try</span> {
     <span class="hljs-keyword">return</span> value.then;
   } <span class="hljs-keyword">catch</span> (error) {
-    <span class="hljs-comment">// Unlikely edge case, Promises/A+ section 2.3.3.2 enforces this</span>
+    <span class="hljs-comment">// Unlikely, but enforced by Promises/A+ section 2.3.3.2</span>
     <span class="hljs-keyword">this</span>.reject(error);
   }
 }
@@ -1197,7 +1203,7 @@ is to ensure that <code>p2</code> in the below example is fulfilled, <strong>not
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">50</span>));
 <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> {
   resolve(p1);
-  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); <span class="hljs-comment">// Ignored because `resolve()` was called</span>
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); <span class="hljs-comment">// Ignored, promise already resolved</span>
 });
 </code></pre>
 <p>One way to achieve this is to create a helper function that wraps
@@ -1205,8 +1211,8 @@ is to ensure that <code>p2</code> in the below example is fulfilled, <strong>not
 can only be called once.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
 
-<pre><code class="lang-javascript"><span class="hljs-comment">// After you call `resolve()` with a promise, extra `resolve()` and</span>
-<span class="hljs-comment">// `reject()` calls will be ignored despite the 'PENDING' state</span>
+<pre><code class="lang-javascript"><span class="hljs-comment">// If you call `resolve()` with a promise, future `resolve` and</span>
+<span class="hljs-comment">// `reject` calls will be ignored despite the 'PENDING' state</span>
 _wrapResolveReject() {
   <span class="hljs-keyword">let</span> called = <span class="hljs-literal">false</span>;
   <span class="hljs-keyword">const</span> resolve = <span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> {
@@ -1229,8 +1235,8 @@ _wrapResolveReject() {
 <pre><code class="lang-javascript">resolve(value) {
   <span class="hljs-comment">// ...</span>
   <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> then === <span class="hljs-string">'function'</span>) {
-    <span class="hljs-comment">// If `then()` calls `resolve()` with a 'PENDING' promise and then</span>
-    <span class="hljs-comment">// throws, the `then()` promise will be fulfilled like example 2.10</span>
+    <span class="hljs-comment">// If `then()` calls `resolve()` with a PENDING promise and</span>
+    <span class="hljs-comment">// throws, the `then()` promise will be fulfilled like 2.10</span>
     <span class="hljs-keyword">const</span> { resolve, reject } = <span class="hljs-keyword">this</span>._wrapResolveReject();
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">return</span> then.call(value, resolve, reject);
@@ -1245,7 +1251,7 @@ _wrapResolveReject() {
 <div class="example-header-wrap"><div class="example-header">Example 2.13</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">constructor</span>(executor) { <span class="hljs-comment">// Beginning omitted for brevity</span>
-  <span class="hljs-comment">// This makes the promise class handle example 2.10 correctly...</span>
+  <span class="hljs-comment">// This makes the promise class handle example 2.10...</span>
   <span class="hljs-keyword">const</span> { resolve, reject } = <span class="hljs-keyword">this</span>._wrapResolveReject();
   <span class="hljs-keyword">try</span> {
     executor(resolve, reject);
@@ -1283,8 +1289,8 @@ calls that only specify an <code>onFulfilled()</code> handler are skipped.</p>
 <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_, reject</span>) =&gt;</span> reject(originalError)).
   then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'This will not print'</span>)).
   then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Nor will this'</span>)).
-  <span class="hljs-comment">// The `onFulfilled()` handlers above get skipped. Each of the</span>
-  <span class="hljs-comment">// `then()` promises above reject with the original error</span>
+  <span class="hljs-comment">// The `onFulfilled()` handlers above get skipped. Each of</span>
+  <span class="hljs-comment">// the then() promises above reject with the original error</span>
   <span class="hljs-keyword">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> assert.ok(err === originalError));
 </code></pre>
 <p>There are several other helpers in the ES6 promise spec. The <code>Promise.resolve()</code>
@@ -1292,11 +1298,11 @@ and <code>Promise.reject()</code> helpers are both commonly used for testing and
 as well as to convert a thenable into a fully fledged promise.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.16</div></div>
 
-<pre><code class="lang-javascript"><span class="hljs-comment">// Yes, this is actually a thenable. When it comes to promises, the</span>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Yes, this is a thenable. When it comes to promises, the</span>
 <span class="hljs-comment">// letter of the law overrules the spirit of the law.</span>
-<span class="hljs-keyword">const</span> thenable = { <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); } };
-<span class="hljs-comment">// But `thenable` doesn't have `catch()`, so use `Promise.resolve()`</span>
-<span class="hljs-comment">// to convert it to a promise and use `catch()`</span>
+<span class="hljs-keyword">const</span> thenable = { <span class="hljs-attr">then</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); } };
+<span class="hljs-comment">// But `thenable` doesn't have `catch()`, so convert it with</span>
+<span class="hljs-comment">// `Promise.resolve()` use `catch()`</span>
 <span class="hljs-keyword">const</span> p = <span class="hljs-built_in">Promise</span>.resolve(thenable).
   catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(err.message)); <span class="hljs-comment">// Prints "Oops!"</span>
 </code></pre>
@@ -1343,12 +1349,12 @@ of promises and waiting for the result. Below is a simplified implementation of
 <pre><code class="lang-javascript"><span class="hljs-keyword">static</span> all(arr) {
   <span class="hljs-keyword">let</span> remaining = arr.length;
   <span class="hljs-keyword">if</span> (remaining === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.resolve([]);
-  <span class="hljs-comment">// `result` stores the value that each promise is fulfilled with</span>
+  <span class="hljs-comment">// `result` stores the value each promise is fulfilled with</span>
   <span class="hljs-keyword">let</span> result = [];
   <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
-    <span class="hljs-comment">// Loop through every promise in the array and call `then()`. If</span>
-    <span class="hljs-comment">// the promise fulfills, store the fulfilled value in `result`.</span>
-    <span class="hljs-comment">// If any promise rejects, the `all()` promise rejects immediately.</span>
+    <span class="hljs-comment">// Call `then()` on every promise in the array. When a</span>
+    <span class="hljs-comment">// promise fulfills, store the value in `result`. If any</span>
+    <span class="hljs-comment">// promise rejects, the `all()` promise rejects immediately</span>
     arr.forEach(<span class="hljs-function">(<span class="hljs-params">p, i</span>) =&gt;</span> p.then(
       <span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> {
         result[i] = res;
@@ -1417,8 +1423,8 @@ run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =
 Like <code>Promise.all()</code>, <code>Promise.race()</code> takes in an array of promises, but
 <code>Promise.race()</code> returns a promise that resolves or rejects to the same value
 that the first promise to settle resolves or rejects to. For example:</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">50</span>));
-<span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">250</span>));
+<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">1</span>), <span class="hljs-number">50</span>));
+<span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">2</span>), <span class="hljs-number">250</span>));
 <span class="hljs-comment">// Prints "1", because `p1` resolves first</span>
 <span class="hljs-built_in">Promise</span>.race([p1, p2]).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(res));
 </code></pre>
@@ -1434,23 +1440,23 @@ on CodePen at <a href="http://bit.ly/async-await-exercise-22"><code>http://bit.l
   <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Implement this function'</span>));
 }
 
-<span class="hljs-comment">// The below are tests to help you check your `race()` implementation</span>
+<span class="hljs-comment">// The below tests help you check your `race()` implementation</span>
 test1().then(test2).then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Done!'</span>)).
   catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test1</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">10</span>));
-  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">1</span>), <span class="hljs-number">10</span>));
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
   <span class="hljs-keyword">const</span> f = <span class="hljs-function"><span class="hljs-params">v</span> =&gt;</span> { <span class="hljs-keyword">if</span> (v !== <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test1 failed!'</span>); };
   <span class="hljs-keyword">return</span> race([p1, p2]).then(f);
 }
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test2</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> error = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Expected error'</span>);
-  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">1</span>), <span class="hljs-number">100</span>));
-  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> resolve(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> p1 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">1</span>), <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">const</span> p2 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> r(<span class="hljs-number">2</span>), <span class="hljs-number">100</span>));
   <span class="hljs-keyword">const</span> p3 = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> reject(error));
   <span class="hljs-keyword">return</span> race([p1, p2, p3]).then(
-    <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: `race()` promise must reject'</span>); },
-    e =&gt; { <span class="hljs-keyword">if</span> (e !== error) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: wrong error'</span>); });
+    <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: race() promise must reject'</span>); },
+    e =&gt; { <span class="hljs-keyword">if</span> (e !== error) <span class="hljs-keyword">throw</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'test2: wrong err'</span>); });
 }
 </code></pre>
 
