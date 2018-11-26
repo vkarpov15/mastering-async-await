@@ -54,7 +54,10 @@ async function run() {
       subject: 'Your Copy of Mastering Async/Await',
       text,
       html: await html,
-      attachment: './bin/mastering-async-await.pdf'
+      attachment: [
+        './bin/mastering-async-await.pdf',
+        './bin/mastering-async-await.epub'
+      ]
     });
 
     keen.addEvent('track', { type: 'purchase', to }, () => {});
