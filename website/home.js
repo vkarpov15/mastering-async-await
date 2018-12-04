@@ -7,9 +7,15 @@ const defaultBuyButton = `
 </form>
 `;
 
-const defaultPrice = '$24.99';
+// const defaultPrice = '$24.99';
 
-module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
+const reverseSalePrice = `
+<del>&nbsp;$27.95&nbsp;</del>
+$24.99<br>
+<small>Hurry, price goes up January 1!</small>
+`;
+
+module.exports = ({ price = reverseSalePrice, buyButton = defaultBuyButton }) => `
 <div class="left">
   <img id="cover" src="/content/mock_lite.jpeg" />
 </div>
