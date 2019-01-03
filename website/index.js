@@ -7,7 +7,8 @@ const pages = [
   { url: '/wyncode.html', path: './wyncode.html', template: './wyncode.js' },
   { url: '/alex.html', path: './alex.html', template: './alex.js' },
   { url: '/jsjabber.html', path: './jsjabber.html', template: './jsjabber.js' },
-  { url: '/jsweekly.html', path: './jsweekly.html', template: './jsweekly.js' }
+  { url: '/jsweekly.html', path: './jsweekly.html', template: './jsweekly.js' },
+  { url: '/tidelift.html', path: './tidelift.html', template: './tidelift.js' }
 ].map(p => Object.assign(p, { content: require(p.template)(p) }));
 
 for (const page of pages) {
