@@ -75,6 +75,11 @@ module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
     <a href="https://snipcart.com/blog/javascript-podcasts">top JavaScript podcasts</a>.
   </p>
 
+  <p>
+    Check out <a href="https://javascriptweekly.com/issues/413">Valeri Karpov on JavaScript Weekly</a>,
+    the <a href="https://usersnap.com/blog/web-development-newsletters/">#1 JavaScript newsletter</a>.
+  </p>
+
   <h3>Preview</h3>
 
   <ul>
