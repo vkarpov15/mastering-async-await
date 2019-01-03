@@ -2,8 +2,8 @@ const home = require('./home');
 
 module.exports = props => home(Object.assign({}, props, {
   price: `
-    <del>&nbsp;$24.99&nbsp;</del>
-    $14.99<br>
+    <del>&nbsp;$27.95&nbsp;</del>
+    $19.99<br>
     <small>for Wyncode students</small>
   `,
   buyButton: `

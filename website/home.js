@@ -1,21 +1,15 @@
 const defaultBuyButton = `
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 <input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="JWETZFLXVWQPY">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" onclick="client.addEvent('track', { type: 'clickthrough' });">
+<input type="hidden" name="hosted_button_id" value="PBVTAMSMYXTZN">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
 </form>
 `;
 
-// const defaultPrice = '$24.99';
+const defaultPrice = '$27.95';
 
-const reverseSalePrice = `
-<del>&nbsp;$27.95&nbsp;</del>
-$24.99<br>
-<small>Hurry, price goes up January 1!</small>
-`;
-
-module.exports = ({ price = reverseSalePrice, buyButton = defaultBuyButton }) => `
+module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
 <div class="left">
   <img id="cover" src="/content/mock_lite.jpeg" />
 </div>
