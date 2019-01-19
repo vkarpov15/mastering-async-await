@@ -154,8 +154,8 @@ async function computeValue() {
   // The resolved value is a promise. The promise returned from
   // `computeValue()` will be fulfilled with 'Hello, World!'
   return new Promise(resolve => {
-    setTimeout(() => resolve('Hello, World!'));
-  }, 1000);
+    setTimeout(() => resolve('Hello, World!'), 1000);
+  });
 }
 ```
 
