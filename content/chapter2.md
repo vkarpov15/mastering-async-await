@@ -144,8 +144,7 @@ from the introduction looks with promise chaining:
 
 ```javascript
 function getWikipediaHeaders() {
-  return stat('./headers').
-    then(res => {
+  return stat('./headers').then(res => {
       if (res == null) {
         // If you return a promise from `onFulfilled()`, the next
         // `then()` call's `onFulfilled()` will get called when
@@ -153,14 +152,11 @@ function getWikipediaHeaders() {
         return get({ host: 'www.wikipedia.org', port: 80 });
       }
       return res;
-    }).
-    then(res => {
+    }).then(res => {
       // So whether the above `onFulfilled()` returns a primitive
       // or a promise, this `onFulfilled()` gets a headers object
       return writeFile('./headers', JSON.stringify(res.headers));
-    }).
-    then(() => console.log('Great success!')).
-    catch(err => console.err(err.stack));
+    }).then(() => console.log('Great success!')).catch(err => console.err(err.stack));
 }
 ```
 
