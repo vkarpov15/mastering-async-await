@@ -213,7 +213,7 @@ async function test() {
     // The below `await` throws
     await p;
   } catch (error) {
-    console.log(err.message); // "Oops!"
+    console.log(error.message); // "Oops!"
   }
 }
 ```
