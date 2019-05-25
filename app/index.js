@@ -24,11 +24,17 @@ run().catch(error => console.error(error.stack));
 async function run() {
   const app = express();
 
+  app.use((req, res, next) => {
+    console.log(req.url);
+    next();
+  });
+
   app.use(require('body-parser').text({
     type: () => true
   }));
 
   app.post('/paypal-ipn', wrap(async function(req) {
+    console.log(new Date(), req.body);
     const body = (req.body || '').toString();
     const params = body.split('&').reduce((cur, kv) => {
       const [key, value] = kv.split('=');
@@ -43,7 +49,7 @@ async function run() {
     const to = params['payer_email'] != null ?
       decodeURIComponent(params['payer_email']) :
       'val@karpov.io';
-    await mailgun.messages().send({
+    const mailgunRes = await mailgun.messages().send({
       from: 'noreply@asyncawait.net',
       to,
       subject: 'Your Copy of Mastering Async/Await',
@@ -54,6 +60,8 @@ async function run() {
         './bin/mastering-async-await.epub'
       ]
     });
+
+    console.log(mailgunRes);
 
     await superagent.post('http://api.meanit.cc/track', {
       hostname: 'asyncawait.net',
@@ -71,6 +79,7 @@ async function run() {
 
 function wrap(fn) {
   return function(req, res) {
+    console.log(`${new Date()} ${req.method} ${req.url}`);
     fn(req).then(
       v => res.status(200).send(v),
       e => {
