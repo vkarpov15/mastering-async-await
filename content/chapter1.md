@@ -508,7 +508,7 @@ gets a list of blog posts. Below is an example post:
 
 - `/post?id=${id}`
 gets the markdown content of a blog post by its `id` property.
-The above blog post has `id` = 0, so you can get its content from
+The above blog post has `id` = 51, so you can get its content from
 this endpoint: [`https://us-central1-mastering-async-await.cloudfunctions.net/post?id=51`](https://us-central1-mastering-async-await.cloudfunctions.net/post?id=51). Try opening this URL in your browser, the output looks
 like this:
 
