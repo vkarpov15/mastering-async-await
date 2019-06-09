@@ -1,6 +1,6 @@
 {
   "name": "async-await-book",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "devDependencies": {
     "acquit": "0.6.3",
     "acquit-ignore": "0.0.3",
