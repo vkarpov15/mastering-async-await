@@ -232,11 +232,8 @@ resolve(value) {
     try {
       return then.call(value, v => this.resolve(v),
         err => this.reject(err));
-    } catch (error) {
-      return reject(error);
-    }
+    } catch (error) { return reject(error); }
   }
-
   // If `value` is **not** a thenable, transition to fulfilled
   this.state = 'FULFILLED';
   this.value = value;
@@ -273,8 +270,8 @@ const p2 = new Promise(resolve => {
 });
 ```
 
-One way to achieve this is to create a helper function that wraps
-`this.resolve()` and `this.reject()` that ensures `resolve()` and `reject()`
+To do this, create a helper function that wraps
+`this.resolve()` and `this.reject()` so `resolve()` and `reject()`
 can only be called once.
 
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>

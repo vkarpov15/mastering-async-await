@@ -829,7 +829,7 @@ gets a list of blog posts. Below is an example post:</li>
 </code></pre><ul>
 <li><code>/post?id=${id}</code>
 gets the markdown content of a blog post by its <code>id</code> property.
-The above blog post has <code>id</code> = 0, so you can get its content from
+The above blog post has <code>id</code> = 51, so you can get its content from
 this endpoint: <a href="https://us-central1-mastering-async-await.cloudfunctions.net/post?id=51"><code>https://us-central1-mastering-async-await.cloudfunctions.net/post?id=51</code></a>. Try opening this URL in your browser, the output looks
 like this:</li>
 </ul>
@@ -1041,8 +1041,7 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
   }
   resolve(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
-    <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
-    <span class="hljs-keyword">this</span>.value = value;
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>, { value, <span class="hljs-attr">state</span>: <span class="hljs-string">'FULFILLED'</span> });
     <span class="hljs-comment">// Loop over `chained`, find `onFulfilled()` functions.</span>
     <span class="hljs-comment">// Remember that `.then(null, onRejected)` is valid.</span>
     <span class="hljs-keyword">this</span>.chained.
@@ -1053,8 +1052,7 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
   }
   reject(value) {
     <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.state !== <span class="hljs-string">'PENDING'</span>) <span class="hljs-keyword">return</span>;
-    <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'REJECTED'</span>;
-    <span class="hljs-keyword">this</span>.value = value;
+    <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>, { value, <span class="hljs-attr">state</span>: <span class="hljs-string">'REJECTED'</span> });
     <span class="hljs-keyword">this</span>.chained.
       filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onRejected <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
       forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
@@ -1169,11 +1167,8 @@ that shows the 2nd necessary change.</p>
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">return</span> then.call(value, v =&gt; <span class="hljs-keyword">this</span>.resolve(v),
         err =&gt; <span class="hljs-keyword">this</span>.reject(err));
-    } <span class="hljs-keyword">catch</span> (error) {
-      <span class="hljs-keyword">return</span> reject(error);
-    }
+    } <span class="hljs-keyword">catch</span> (error) { <span class="hljs-keyword">return</span> reject(error); }
   }
-
   <span class="hljs-comment">// If `value` is **not** a thenable, transition to fulfilled</span>
   <span class="hljs-keyword">this</span>.state = <span class="hljs-string">'FULFILLED'</span>;
   <span class="hljs-keyword">this</span>.value = value;
@@ -1206,8 +1201,8 @@ is to ensure that <code>p2</code> in the below example is fulfilled, <strong>not
   <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); <span class="hljs-comment">// Ignored, promise already resolved</span>
 });
 </code></pre>
-<p>One way to achieve this is to create a helper function that wraps
-<code>this.resolve()</code> and <code>this.reject()</code> that ensures <code>resolve()</code> and <code>reject()</code>
+<p>To do this, create a helper function that wraps
+<code>this.resolve()</code> and <code>this.reject()</code> so <code>resolve()</code> and <code>reject()</code>
 can only be called once.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
 

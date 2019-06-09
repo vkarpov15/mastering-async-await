@@ -97,8 +97,7 @@ describe('Chapter 2 Examples', function() {
       }
       resolve(value) {
         if (this.state !== 'PENDING') return;
-        this.state = 'FULFILLED';
-        this.value = value;
+        Object.assign(this, { value, state: 'FULFILLED' });
         // Loop over `chained`, find `onFulfilled()` functions.
         // Remember that `.then(null, onRejected)` is valid.
         this.chained.
@@ -109,8 +108,7 @@ describe('Chapter 2 Examples', function() {
       }
       reject(value) {
         if (this.state !== 'PENDING') return;
-        this.state = 'REJECTED';
-        this.value = value;
+        Object.assign(this, { value, state: 'REJECTED' });
         this.chained.
           filter(obj => obj.onRejected instanceof Function).
           forEach(obj => setImmediate(obj.onFulfilled, value));
