@@ -40,7 +40,7 @@ async function run() {
       const [key, value] = kv.split('=');
       cur[key] = value;
       return cur;
-    }, {})
+    }, {});
 
     if (!['X123', '0001'].includes(params['item_number'])) {
       return 'IGNORED';
