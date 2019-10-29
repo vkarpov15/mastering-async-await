@@ -567,7 +567,7 @@ async function run() {
 
   for (const p of posts) {
     console.log(`Fetch post ${p.id}`);
-    const content = await getWithRetry(`${root}?id=${p.id}`, 3);
+    const content = await getWithRetry(`${root}/post?id=${p.id}`, 3);
     if (content.content.includes('async/await hell')) {
       console.log(`Correct answer: ${p.id}`);
       break;
