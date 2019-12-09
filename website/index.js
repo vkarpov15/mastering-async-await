@@ -8,7 +8,8 @@ const pages = [
   { url: '/alex.html', path: './alex.html', template: './alex.js' },
   { url: '/jsjabber.html', path: './jsjabber.html', template: './jsjabber.js' },
   { url: '/jsweekly.html', path: './jsweekly.html', template: './jsweekly.js' },
-  { url: '/tidelift.html', path: './tidelift.html', template: './tidelift.js' }
+  { url: '/tidelift.html', path: './tidelift.html', template: './tidelift.js' },
+  { url: '/christmas.html', path: './christmas.html', template: './christmas.js' }
 ].map(p => Object.assign(p, { content: require(p.template)(p) }));
 
 for (const page of pages) {
