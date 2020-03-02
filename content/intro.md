@@ -32,8 +32,8 @@ function getWikipediaHeaders() {
     if (stats == undefined) {
       // ii. fetch the HTTP headers
       var options = { host: 'www.wikipedia.org', port: 80 };
-      http.get(options, function(err, res) {
-        if (err != null) { throw err; }
+      http.get(options, function(res) {
+        // Get the response. `http.get()` has a non-standard cb.
         var headers = JSON.stringify(res.headers);
         // iii. write the headers to headers.txt
         fs.writeFile('./headers.txt', headers, function(err) {
