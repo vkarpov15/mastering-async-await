@@ -1201,9 +1201,8 @@ is to ensure that <code>p2</code> in the below example is fulfilled, <strong>not
   <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>); <span class="hljs-comment">// Ignored, promise already resolved</span>
 });
 </code></pre>
-<p>To do this, create a helper function that wraps
-<code>this.resolve()</code> and <code>this.reject()</code> so <code>resolve()</code> and <code>reject()</code>
-can only be called once.</p>
+<p>To do this, wrap <code>this.resolve()</code> and <code>this.reject()</code> 
+so they can only be called once.</p>
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-comment">// If you call `resolve()` with a promise, future `resolve` and</span>
@@ -1404,8 +1403,7 @@ on CodePen at <a href="http://bit.ly/async-await-exercise-21"><code>http://bit.l
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// Example of using `fetch()` API</span>
-  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>).
-    then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json()).
+  <span class="hljs-keyword">return</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json()).
     then(<span class="hljs-function"><span class="hljs-params">posts</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(posts[<span class="hljs-number">0</span>]));
 }
 run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));

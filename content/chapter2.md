@@ -270,9 +270,8 @@ const p2 = new Promise(resolve => {
 });
 ```
 
-To do this, create a helper function that wraps
-`this.resolve()` and `this.reject()` so `resolve()` and `reject()`
-can only be called once.
+To do this, wrap `this.resolve()` and `this.reject()` 
+so they can only be called once.
 
 <div class="example-header-wrap"><div class="example-header">Example 2.11</div></div>
 
@@ -489,8 +488,7 @@ const root = 'https://' +
 
 function run() {
   // Example of using `fetch()` API
-  return fetch(`${root}/posts`).
-    then(res => res.json()).
+  return fetch(`${root}/posts`).then(res => res.json()).
     then(posts => console.log(posts[0]));
 }
 run().catch(error => console.error(error.stack));
