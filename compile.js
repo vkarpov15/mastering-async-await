@@ -1,8 +1,7 @@
 'use strict';
 
 const Epub = require('epub-gen');
-const acquit = require('acquit');
-const archiver = require('archiver');
+const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const cheerio = require('cheerio');
 const highlight = require('highlight.js');
 const fs = require('fs');
@@ -122,9 +121,60 @@ async function run() {
   await browser.goto(`file://${__dirname}/bin/dedication.html`).
     pdf('./bin/dedication.pdf', { marginsType: 0 });
 
+  await addPageNumbers();
+  await mergePDFs();
+
   console.log('Done');
   process.exit(0);
 }
+
+async function addPageNumbers() {
+  const content = await PDFDocument.load(fs.readFileSync('./bin/content.pdf'));
+
+  // Add a font to the doc
+  const helveticaFont = await content.embedFont(StandardFonts.Helvetica);
+
+  // Draw a number at the bottom of each page.
+  // Note that the bottom of the page is `y = 0`, not the top
+  const pages = await content.getPages();
+  for (const [i, page] of Object.entries(pages).slice(1)) {
+    page.drawText(`${i}`, {
+      x: page.getWidth() / 2 - (i >= 10 ? 2 : 0),
+      y: 8,
+      size: 12,
+      font: helveticaFont,
+      color: rgb(0, 0, 0)
+    });
+  }
+
+  // Write the PDF to a file
+  fs.writeFileSync('./bin/content-with-numbers.pdf', await content.save());
+}
+
+async function mergePDFs() {
+  const doc = await PDFDocument.create();
+
+  const cover = await PDFDocument.load(fs.readFileSync('./bin/cover.pdf'));
+  const dedication = await PDFDocument.load(fs.readFileSync('./bin/dedication.pdf'));
+  const content = await PDFDocument.load(fs.readFileSync('./bin/content-with-numbers.pdf'));
+
+  const coverPages = await doc.copyPages(cover, cover.getPageIndices());
+  for (const page of coverPages) {
+    doc.addPage(page);
+  }
+
+  const dedicationPages = await doc.copyPages(dedication, dedication.getPageIndices());
+  for (const page of dedicationPages) {
+    doc.addPage(page);
+  }
+
+  const contentPages = await doc.copyPages(content, content.getPageIndices());
+  for (const page of contentPages) {
+    doc.addPage(page);
+  }
+
+  fs.writeFileSync('./bin/mastering-async-await.pdf', await doc.save());
+};
 
 async function compileEpub(intro, chapters, conclusion) {
   intro = marked(stripFirstLine(intro));
