@@ -328,8 +328,8 @@ callback.</p>
     <span class="hljs-keyword">if</span> (stats == <span class="hljs-literal">undefined</span>) {
       <span class="hljs-comment">// ii. fetch the HTTP headers</span>
       <span class="hljs-keyword">var</span> options = { <span class="hljs-attr">host</span>: <span class="hljs-string">'www.wikipedia.org'</span>, <span class="hljs-attr">port</span>: <span class="hljs-number">80</span> };
-      http.get(options, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, res</span>) </span>{
-        <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">null</span>) { <span class="hljs-keyword">throw</span> err; }
+      http.get(options, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">res</span>) </span>{
+        <span class="hljs-comment">// Get the response. `http.get()` has a non-standard cb.</span>
         <span class="hljs-keyword">var</span> headers = <span class="hljs-built_in">JSON</span>.stringify(res.headers);
         <span class="hljs-comment">// iii. write the headers to headers.txt</span>
         fs.writeFile(<span class="hljs-string">'./headers.txt'</span>, headers, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err</span>) </span>{
@@ -876,7 +876,7 @@ url: <a href="http://bit.ly/async-await-exercise-2">http://bit.ly/async-await-ex
 
   <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> posts) {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Fetch post <span class="hljs-subst">${p.id}</span>`</span>);
-    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>?id=<span class="hljs-subst">${p.id}</span>`</span>, <span class="hljs-number">3</span>);
+    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> getWithRetry(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/post?id=<span class="hljs-subst">${p.id}</span>`</span>, <span class="hljs-number">3</span>);
     <span class="hljs-keyword">if</span> (content.content.includes(<span class="hljs-string">'async/await hell'</span>)) {
       <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${p.id}</span>`</span>);
       <span class="hljs-keyword">break</span>;
@@ -1055,7 +1055,7 @@ to run on the next tick of the event loop using <code>setImmediate()</code>.</p>
     <span class="hljs-built_in">Object</span>.assign(<span class="hljs-keyword">this</span>, { value, <span class="hljs-attr">state</span>: <span class="hljs-string">'REJECTED'</span> });
     <span class="hljs-keyword">this</span>.chained.
       filter(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> obj.onRejected <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Function</span>).
-      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onFulfilled, value));
+      forEach(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> setImmediate(obj.onRejected, value));
   }
 }
 </code></pre>

@@ -111,7 +111,7 @@ describe('Chapter 2 Examples', function() {
         Object.assign(this, { value, state: 'REJECTED' });
         this.chained.
           filter(obj => obj.onRejected instanceof Function).
-          forEach(obj => setImmediate(obj.onFulfilled, value));
+          forEach(obj => setImmediate(obj.onRejected, value));
       }
     }
     // acquit:ignore:start
