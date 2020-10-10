@@ -26,6 +26,7 @@ async function run() {
   const intro = fs.readFileSync('./content/intro.md', 'utf8');
   const outro = fs.readFileSync('./content/outro.md', 'utf8');
   const toc = fs.readFileSync('./content/toc.md', 'utf8');
+  const solutions = fs.readFileSync('./content/solutions.md', 'utf8');
 
   const examples = [1, 2, 3, 4].
     map(c => fs.readFileSync(`./examples/chapter${c}.test.js`, 'utf8').toString());
@@ -34,7 +35,7 @@ async function run() {
     map(c => fs.readFileSync(`./content/chapter${c}.md`, 'utf8').toString()).
     map((c, i) => transform(c, examples[i]));
 
-  await compileEpub(intro, chapters, outro);
+  await compileEpub(intro, chapters, outro, solutions);
 
   const css = {
     content: fs.readFileSync('./content/content.css', 'utf8'),
@@ -89,6 +90,9 @@ async function run() {
         </div>
         <div class="chapter">
           ${marked(outro)}
+        </div>
+        <div class="chapter">
+          ${marked(solutions)}
         </div>
       </body>
     </html>
@@ -176,7 +180,7 @@ async function mergePDFs() {
   fs.writeFileSync('./bin/mastering-async-await.pdf', await doc.save());
 };
 
-async function compileEpub(intro, chapters, conclusion) {
+async function compileEpub(intro, chapters, conclusion, solutions) {
   intro = marked(stripFirstLine(intro));
   chapters = chapters.
     map(stripFirstLine).
@@ -207,7 +211,8 @@ async function compileEpub(intro, chapters, conclusion) {
       { title: 'Promises From The Ground Up', data: chapters[1] },
       { title: 'Async/Await Internals', data: chapters[2] },
       { title: 'Async/Await in the Wild', data: chapters[3] },
-      { title: 'Moving On', data: conclusion }
+      { title: 'Moving On', data: conclusion },
+      { title: 'Answers in the Back of the Book', data: solutions }
     ],
     css: fs.readFileSync('./content/epub.css', 'utf8')
   };

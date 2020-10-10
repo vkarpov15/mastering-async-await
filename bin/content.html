@@ -2483,6 +2483,54 @@ at <a href="http://bit.ly/asyncawait-blog"><code>bit.ly/asyncawait-blog</code></
 coding adventures!</p>
 
         </div>
+        <div class="chapter">
+          <h1 id="answers-in-the-back-of-the-book">Answers in the Back of the Book</h1>
+<h2 id="1-1-http-request-loops">1.1: HTTP Request Loops</h2>
+<p>The answer is to first <code>fetch()</code> the list of blog posts, and then loop through
+each blog post and <code>fetch()</code> the blog post&#39;s contents. Async/await makes this
+easy because you can <code>await</code> in a <code>for/of</code> loop. Just make sure you use
+async/await in an async function!</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> root = <span class="hljs-string">'https://'</span> +
+    <span class="hljs-string">'us-central1-mastering-async-await.cloudfunctions.net/post'</span>;
+  <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/posts`</span>).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json());
+
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> posts) {
+    <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`<span class="hljs-subst">${root}</span>/post?id=<span class="hljs-subst">${p.id}</span>`</span>).
+      then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json());
+    <span class="hljs-keyword">if</span> (content.content.includes(<span class="hljs-string">'async/await hell'</span>)) {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Correct answer: <span class="hljs-subst">${p.id}</span>`</span>);
+      <span class="hljs-keyword">break</span>;
+    }
+  }
+}
+
+run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.error(error.stack));
+</code></pre>
+<p>One more detail to note: you can use <code>break</code> in a <code>for/of</code> loop that uses async/await.
+There&#39;s nothing special about a <code>for/of</code> loop with an <code>await</code> statement, it&#39;s a normal
+loop! You can use <code>break</code>, <code>continue</code>, and <code>return</code>.</p>
+<h2 id="1-2-retrying-failed-requests">1.2: Retrying Failed Requests</h2>
+<p>The answer is to use <code>try/catch</code> to handle any async errors and continue retrying up to
+<code>numRetries</code> times. Use a <code>for</code> loop to execute requests, and <code>return</code> when a request
+succeeds. Otherwise, try again until you run out of retries, and <code>throw</code> an error.</p>
+<div class="page-break"></div>
+
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWithRetry</span>(<span class="hljs-params">url, numRetries</span>) </span>{
+  <span class="hljs-keyword">let</span> error = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; numRetries; ++i) {
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> fetch(url).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json());
+      <span class="hljs-keyword">return</span> res;
+    } <span class="hljs-keyword">catch</span>(err) {
+      error = err;
+    }
+  }
+  <span class="hljs-keyword">throw</span> error;
+}
+</code></pre>
+
+        </div>
       </body>
     </html>
   
