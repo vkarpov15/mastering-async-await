@@ -562,7 +562,7 @@ async function getWithRetry(url, numRetries) {
 // Correct answer for exercise 1.1 below
 async function run() {
   const root = 'https://' +
-    'us-central1-mastering-async-await.cloudfunctions.net/post';
+    'us-central1-mastering-async-await.cloudfunctions.net';
   const posts = await getWithRetry(`${root}/posts`, 3);
 
   for (const p of posts) {
