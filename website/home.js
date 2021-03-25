@@ -54,7 +54,7 @@ module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
   <h3>About the Author</h3>
 
   <p id="author">
-    <img src="https://pbs.twimg.com/profile_images/891062607053860864/rDX7vHYT_400x400.jpg" style="float: right; width: 145px; margin-left: 10px">
+    <img src="/images/val.jpg" style="float: right; width: 145px; margin-left: 10px">
 
     Valeri Karpov is the lead maintainer of <a href="https://www.npmjs.com/package/mongoose">Mongoose</a>.
     He's a core contributor to
