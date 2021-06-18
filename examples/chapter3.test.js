@@ -247,27 +247,6 @@ describe('Chapter 3 Examples', function() {
     // acquit:ignore:end
   });
 
-  it('example 3.15', function(done) {
-    const runCo = co.wrap(function*() {
-      yield new Promise(resolve => setImmediate(resolve));
-      throw new Error('Oops!');
-    });
-    // Error: Oops!
-    //    at /test.js:3:9
-    //    at Generator.next (<anonymous>)
-    //    at onFulfilled (/node_modules/co/index.js:65:19)
-    //    at <anonymous>
-    runCo().catch(error => console.log(error.stack));
-    // acquit:ignore:start
-    setTimeout(() => {
-      assert.equal(console.logged.length, 1);
-      const expected = 'Error: Oops!';
-      assert.ok(console.logged[0][0].includes(expected));
-      done();
-    }, 50);
-    // acquit:ignore:end
-  });
-
   it('example 3.16', function(done) {
     async function runAsync() {
       await new Promise(resolve => setImmediate(resolve));

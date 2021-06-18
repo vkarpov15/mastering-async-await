@@ -191,10 +191,9 @@ run.
 
 ## Async/Await vs Generators
 
-Async/await has a lot in common with [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator), a feature that JavaScript introduced in the 2015 edition of the
-language spec. Like async functions, generator functions can be paused and
-later resumed. There
-are two major differences between generator functions and async functions:
+Async/await has a lot in common with [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator), a feature that JavaScript introduced in the 2015 edition of the language spec.
+Like async functions, generator functions can be paused and later resumed.
+There are two major differences between generator functions and async functions:
 
 1. The keyword you use to pause a generator function is `yield`, not `await`.
 2. When you pause a generator function, control goes back to your JavaScript code, rather than the JS interpreter. You resume the generator function by calling `next()` on a generator object.
@@ -207,8 +206,8 @@ The below example demonstrates using `yield` to pause the generator and `next()`
 [require:example 3.11$]
 ```
 
-With the help of a library, generators support a pattern virtually identical
-to async/await. The most popular generator concurrency library is [co](https://www.npmjs.com/package/co). Here's example 1.1 with co instead of async/await.
+With the help of a library, generators support a pattern virtually identical to async/await. The most popular generator concurrency library is [co](https://www.npmjs.com/package/co).
+Here's example 1.1 with co instead of async/await.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.12</div></div>
 
@@ -216,10 +215,8 @@ to async/await. The most popular generator concurrency library is [co](https://w
 [require:example 3.12$]
 ```
 
-Co offers several neat features that async/await does not natively support. By
-virtue of being a userland library, co can be more extensible.
-For example, co can handle when you `yield` an array of promises or a
-map of promises.
+Co offers several neat features that async/await does not natively support. By virtue of being a userland library, co can be more extensible.
+For example, co can handle when you `yield` an array of promises or a map of promises.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.13</div></div>
 
@@ -227,8 +224,7 @@ map of promises.
 [require:example 3.13$]
 ```
 
-The flip-side of co's implicit promise conversion is that co throws an error if
-you `yield` something that it can't convert to a promise.
+The flip-side of co's implicit promise conversion is that co throws an error if you `yield` something that it can't convert to a promise.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.14</div></div>
 
@@ -242,29 +238,28 @@ valid and evaluates to `1`, which is more robust.
 
 Async/await has a few other advantages over co and generators. The biggest advantage
 is that async/await is built-in to Node.js and modern browsers, so you don't
-need an external library like co. Async/await also has cleaner stack traces.
-Co stack traces often have a lot of `generator.next()` and `onFulfilled` lines
-that obscure the actual error.
+need an external library like co.
+In general, async/await is the better paradigm because it is built in to JavaScript, throws fewer unnecessary errors, and has most of the functionality you need.
+
+In 2018, JavaScript introduced _async generator functions_.
+An async generator function allows using both `yield` and `await`, and returns an _async generator object_.
+An async generator object is similar to a generator object, except the `next()` function always returns a promise.
 
 <div class="example-header-wrap"><div class="example-header">Example 3.15</div></div>
 
 ```javascript
-[require:example 3.15$]
+async function* myAsyncGeneratorFn() {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  yield 'Hello';
+  return 'World';
+}
+const asyncGeneratorObject = myAsyncGeneratorFn();
+console.log(await asyncGeneratorObject.next()); // 'Hello'
+console.log(await asyncGeneratorObject.next()); // 'World'
 ```
 
-The equivalent async/await stack trace has the function name and omits `generator.next()` and `onFulfilled`. Async/await's `onFulfilled`
-runs in the JavaScript interpreter, not userland.
-
-<div class="example-header-wrap"><div class="example-header">Example 3.16</div></div>
-
-```javascript
-[require:example 3.16$]
-```
-
-In general, async/await is the better paradigm because it is built in to
-JavaScript, throws fewer unnecessary errors, and has most of the functionality
-you need. Co has some neat syntactic sugar and works in older browsers, but
-that is not enough to justify including an external library.
+Async generator functions are rarely used in practice.
+Generators are sufficient for many async generator use cases, and generators are already a niche feature: the only framework we know of that makes heavy use of generators is Redux-Saga.
 
 ## Core Principles
 
@@ -460,6 +455,8 @@ async function run() {
 
 As shown in example 3.21, the `forEach()` array function has several quirks
 when it comes to async/await:
+
+<div class="page-break"></div>
 
 ```javascript
 async function fn1() {

@@ -1680,10 +1680,9 @@ functions can&#39;t be running at the same time, but you can pause your async
 function using <code>await</code> to give the event loop and other functions a chance to
 run.</p>
 <h2 id="async-await-vs-generators">Async/Await vs Generators</h2>
-<p>Async/await has a lot in common with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator">generators</a>, a feature that JavaScript introduced in the 2015 edition of the
-language spec. Like async functions, generator functions can be paused and
-later resumed. There
-are two major differences between generator functions and async functions:</p>
+<p>Async/await has a lot in common with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator">generators</a>, a feature that JavaScript introduced in the 2015 edition of the language spec.
+Like async functions, generator functions can be paused and later resumed.
+There are two major differences between generator functions and async functions:</p>
 <ol>
 <li>The keyword you use to pause a generator function is <code>yield</code>, not <code>await</code>.</li>
 <li>When you pause a generator function, control goes back to your JavaScript code, rather than the JS interpreter. You resume the generator function by calling <code>next()</code> on a generator object.</li>
@@ -1710,8 +1709,8 @@ yielded = generatorObject.next(); <span class="hljs-comment">// Prints "Step 2"<
 <span class="hljs-built_in">console</span>.log(yielded.value); <span class="hljs-comment">// Prints "2"</span>
 generatorObject.next(); <span class="hljs-comment">// Prints "Done"</span>
 </code></pre>
-<p>With the help of a library, generators support a pattern virtually identical
-to async/await. The most popular generator concurrency library is <a href="https://www.npmjs.com/package/co">co</a>. Here&#39;s example 1.1 with co instead of async/await.</p>
+<p>With the help of a library, generators support a pattern virtually identical to async/await. The most popular generator concurrency library is <a href="https://www.npmjs.com/package/co">co</a>.
+Here&#39;s example 1.1 with co instead of async/await.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.12</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> co = <span class="hljs-built_in">require</span>(<span class="hljs-string">'co'</span>);
@@ -1724,10 +1723,8 @@ to async/await. The most popular generator concurrency library is <a href="https
 <span class="hljs-comment">// In particular, wrapped functions return a promise</span>
 runCo().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
 </code></pre>
-<p>Co offers several neat features that async/await does not natively support. By
-virtue of being a userland library, co can be more extensible.
-For example, co can handle when you <code>yield</code> an array of promises or a
-map of promises.</p>
+<p>Co offers several neat features that async/await does not natively support. By virtue of being a userland library, co can be more extensible.
+For example, co can handle when you <code>yield</code> an array of promises or a map of promises.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.13</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
@@ -1740,8 +1737,7 @@ map of promises.</p>
   <span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">yield</span> { p1, p2 }); <span class="hljs-comment">// { p1: 'Hello', p2: 'World' }</span>
 });
 </code></pre>
-<p>The flip-side of co&#39;s implicit promise conversion is that co throws an error if
-you <code>yield</code> something that it can&#39;t convert to a promise.</p>
+<p>The flip-side of co&#39;s implicit promise conversion is that co throws an error if you <code>yield</code> something that it can&#39;t convert to a promise.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.14</div></div>
 
 <pre><code class="lang-javascript"><span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
@@ -1755,39 +1751,24 @@ also causes a lot of unnecessary errors. With async/await, <code>await 1</code> 
 valid and evaluates to <code>1</code>, which is more robust.</p>
 <p>Async/await has a few other advantages over co and generators. The biggest advantage
 is that async/await is built-in to Node.js and modern browsers, so you don&#39;t
-need an external library like co. Async/await also has cleaner stack traces.
-Co stack traces often have a lot of <code>generator.next()</code> and <code>onFulfilled</code> lines
-that obscure the actual error.</p>
+need an external library like co.
+In general, async/await is the better paradigm because it is built in to JavaScript, throws fewer unnecessary errors, and has most of the functionality you need.</p>
+<p>In 2018, JavaScript introduced <em>async generator functions</em>.
+An async generator function allows using both <code>yield</code> and <code>await</code>, and returns an <em>async generator object</em>.
+An async generator object is similar to a generator object, except the <code>next()</code> function always returns a promise.</p>
 <div class="example-header-wrap"><div class="example-header">Example 3.15</div></div>
 
-<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> runCo = co.wrap(<span class="hljs-function"><span class="hljs-keyword">function</span>*(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">yield</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
-  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>);
-});
-<span class="hljs-comment">// Error: Oops!</span>
-<span class="hljs-comment">//    at /test.js:3:9</span>
-<span class="hljs-comment">//    at Generator.next (&lt;anonymous&gt;)</span>
-<span class="hljs-comment">//    at onFulfilled (/node_modules/co/index.js:65:19)</span>
-<span class="hljs-comment">//    at &lt;anonymous&gt;</span>
-runCo().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
-</code></pre>
-<p>The equivalent async/await stack trace has the function name and omits <code>generator.next()</code> and <code>onFulfilled</code>. Async/await&#39;s <code>onFulfilled</code>
-runs in the JavaScript interpreter, not userland.</p>
-<div class="example-header-wrap"><div class="example-header">Example 3.16</div></div>
-
-<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">runAsync</span>(<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setImmediate(resolve));
-  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'Oops!'</span>);
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>* <span class="hljs-title">myAsyncGeneratorFn</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="hljs-number">100</span>));
+  <span class="hljs-keyword">yield</span> <span class="hljs-string">'Hello'</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-string">'World'</span>;
 }
-<span class="hljs-comment">// Error: Oops!</span>
-<span class="hljs-comment">//    at runAsync (/home/val/test.js:5:9)</span>
-<span class="hljs-comment">//    at &lt;anonymous&gt;</span>
-runAsync().catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error.stack));
+<span class="hljs-keyword">const</span> asyncGeneratorObject = myAsyncGeneratorFn();
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> asyncGeneratorObject.next()); <span class="hljs-comment">// 'Hello'</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> asyncGeneratorObject.next()); <span class="hljs-comment">// 'World'</span>
 </code></pre>
-<p>In general, async/await is the better paradigm because it is built in to
-JavaScript, throws fewer unnecessary errors, and has most of the functionality
-you need. Co has some neat syntactic sugar and works in older browsers, but
-that is not enough to justify including an external library.</p>
+<p>Async generator functions are rarely used in practice.
+Generators are sufficient for many async generator use cases, and generators are already a niche feature: the only framework we know of that makes heavy use of generators is Redux-Saga.</p>
 <h2 id="core-principles">Core Principles</h2>
 <p>So far, this chapter has covered the technical details of what it means for
 an async function to be paused. What does all this mean for a developer looking
@@ -1952,6 +1933,8 @@ run().catch(<span class="hljs-function"><span class="hljs-params">error</span> =
 <h1 id="exercise-2-async-foreach-">Exercise 2: Async <code>forEach()</code></h1>
 <p>As shown in example 3.21, the <code>forEach()</code> array function has several quirks
 when it comes to async/await:</p>
+<div class="page-break"></div>
+
 <pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fn1</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// SyntaxError because `await` is not in an async function</span>
   [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>].forEach(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> { <span class="hljs-keyword">await</span> p; });
