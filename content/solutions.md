@@ -158,3 +158,21 @@ async function forEachAsync(arr, fn) {
   return arr.reduce((promise, i) => promise.then(() => fn(arr[i])), Promise.resolve());
 }
 ```
+
+### 4.1: Does X Support Async/Await?
+
+As written, the documentation indicates that Agenda's `schedule()` function does **not** support async/await.
+The `schedule()` function returns a job or array of jobs, not a promise, so you can't use `await schedule()`.
+
+### 4.2: WebSocket Integration
+
+You need to implement a function that returns a function.
+The `wrap()` function needs to return a sync function which calls `onmessage()`, and uses `catch()` to handle any errors that `onmessage()` threw.
+
+```javascript
+function wrap(onmessage) {
+  return function(message) {
+    return onmessage(message).catch(err => console.log(err));
+  }
+}
+```

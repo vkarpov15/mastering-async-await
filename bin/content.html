@@ -2613,6 +2613,18 @@ The key insight is that you need to use <code>reduce()</code> to chain the <code
   <span class="hljs-keyword">return</span> arr.reduce(<span class="hljs-function">(<span class="hljs-params">promise, i</span>) =&gt;</span> promise.then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> fn(arr[i])), <span class="hljs-built_in">Promise</span>.resolve());
 }
 </code></pre>
+<h3 id="4-1-does-x-support-async-await-">4.1: Does X Support Async/Await?</h3>
+<p>As written, the documentation indicates that Agenda&#39;s <code>schedule()</code> function does <strong>not</strong> support async/await.
+The <code>schedule()</code> function returns a job or array of jobs, not a promise, so you can&#39;t use <code>await schedule()</code>.</p>
+<h3 id="4-2-websocket-integration">4.2: WebSocket Integration</h3>
+<p>You need to implement a function that returns a function.
+The <code>wrap()</code> function needs to return a sync function which calls <code>onmessage()</code>, and uses <code>catch()</code> to handle any errors that <code>onmessage()</code> threw.</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">wrap</span>(<span class="hljs-params">onmessage</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) </span>{
+    <span class="hljs-keyword">return</span> onmessage(message).catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(err));
+  }
+}
+</code></pre>
 
         </div>
       </body>
