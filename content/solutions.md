@@ -107,3 +107,54 @@ function race(arr) {
   });
 }
 ```
+
+### 3.1: Implementing Custom Thenables
+
+Remember that `then()` needs to execute the `HTTPRequest`, return a promise, and call `onFulfilled()` or `onRejected()` dependong on whether the request succeeded or failed.
+The easiest way to do this is to create a promise that represents a call to `this.exec()`, and use that promise's `then()` function.
+
+```javascript
+class HTTPRequest {
+  static create() { return new HTTPRequest(); }
+  get(url) { /* ... */ }
+  exec(callback) {
+    fetch(this.url, this).then(res => res.json()).
+      then(res => callback(null, res)).catch(callback);
+  }
+  then(onFulfilled, onRejected) {
+    // Create a new promise that wraps calling `exec()`, and use
+    // its `then()` function.
+    const p = new Promise((resolve, reject) => {
+      this.exec((err, res) => {
+        if (err != null) return reject(err);
+        resolve(res);
+      });
+    });
+    return p.then(onFulfilled, onRejected);
+  }
+}
+```
+
+<div class="page-break"></div>
+
+### 3.2: Async `forEach()`
+
+The most common sticking point with this exercise is trying to use JavaScript's functional programming methods, like `map()` and `reduce()`, to write an async `forEach()`.
+The easiest way is an old fashioned `for` loop as shown below.
+
+```javascript
+async function forEachAsync(arr, fn) {
+  for (const el of arr) {
+    await fn(el);
+  }
+}
+```
+
+It is possible to implement `forEachAsync()` using `reduce()`, just trickier.
+The key insight is that you need to use `reduce()` to chain the `fn()` calls, so your accumulator needs to return a promise as shown below.
+
+```javascript
+async function forEachAsync(arr, fn) {
+  return arr.reduce((promise, i) => promise.then(() => fn(arr[i])), Promise.resolve());
+}
+```

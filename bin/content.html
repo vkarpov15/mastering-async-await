@@ -2573,6 +2573,46 @@ that promise is fulfilled, or <code>reject()</code> when that promise is rejecte
   });
 }
 </code></pre>
+<h3 id="3-1-implementing-custom-thenables">3.1: Implementing Custom Thenables</h3>
+<p>Remember that <code>then()</code> needs to execute the <code>HTTPRequest</code>, return a promise, and call <code>onFulfilled()</code> or <code>onRejected()</code> dependong on whether the request succeeded or failed.
+The easiest way to do this is to create a promise that represents a call to <code>this.exec()</code>, and use that promise&#39;s <code>then()</code> function.</p>
+<pre><code class="lang-javascript"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HTTPRequest</span> </span>{
+  <span class="hljs-keyword">static</span> create() { <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> HTTPRequest(); }
+  get(url) { <span class="hljs-comment">/* ... */</span> }
+  exec(callback) {
+    fetch(<span class="hljs-keyword">this</span>.url, <span class="hljs-keyword">this</span>).then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> res.json()).
+      then(<span class="hljs-function"><span class="hljs-params">res</span> =&gt;</span> callback(<span class="hljs-literal">null</span>, res)).catch(callback);
+  }
+  then(onFulfilled, onRejected) {
+    <span class="hljs-comment">// Create a new promise that wraps calling `exec()`, and use</span>
+    <span class="hljs-comment">// its `then()` function.</span>
+    <span class="hljs-keyword">const</span> p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+      <span class="hljs-keyword">this</span>.exec(<span class="hljs-function">(<span class="hljs-params">err, res</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">null</span>) <span class="hljs-keyword">return</span> reject(err);
+        resolve(res);
+      });
+    });
+    <span class="hljs-keyword">return</span> p.then(onFulfilled, onRejected);
+  }
+}
+</code></pre>
+<div class="page-break"></div>
+
+<h3 id="3-2-async-foreach-">3.2: Async <code>forEach()</code></h3>
+<p>The most common sticking point with this exercise is trying to use JavaScript&#39;s functional programming methods, like <code>map()</code> and <code>reduce()</code>, to write an async <code>forEach()</code>.
+The easiest way is an old fashioned <code>for</code> loop as shown below.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forEachAsync</span>(<span class="hljs-params">arr, fn</span>) </span>{
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> el <span class="hljs-keyword">of</span> arr) {
+    <span class="hljs-keyword">await</span> fn(el);
+  }
+}
+</code></pre>
+<p>It is possible to implement <code>forEachAsync()</code> using <code>reduce()</code>, just trickier.
+The key insight is that you need to use <code>reduce()</code> to chain the <code>fn()</code> calls, so your accumulator needs to return a promise as shown below.</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">forEachAsync</span>(<span class="hljs-params">arr, fn</span>) </span>{
+  <span class="hljs-keyword">return</span> arr.reduce(<span class="hljs-function">(<span class="hljs-params">promise, i</span>) =&gt;</span> promise.then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> fn(arr[i])), <span class="hljs-built_in">Promise</span>.resolve());
+}
+</code></pre>
 
         </div>
       </body>
