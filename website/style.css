@@ -21,6 +21,11 @@ li {
   margin-top: 0.5em;
 }
 
+small {
+  font-size: 0.5em;
+  color: #666;
+}
+
 #container {
   width: 1200px;
   margin-left: auto;
@@ -93,6 +98,12 @@ img#cover {
 
 .tagline {
   color: #368BC1;
+}
+
+.update {
+  background-color: #A3D7CB;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 @media (max-width: 768px) {

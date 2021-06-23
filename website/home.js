@@ -14,7 +14,7 @@ module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
   <img id="cover" src="/content/mock_lite.jpeg" />
 </div>
 <div class="right">
-  <h1 class="title">Mastering Async/Await</h1>
+  <h1 class="title">Mastering Async/Await <small>v1.1.0</small></h1>
 
   <h3 class="tagline">
     Become your team's expert on escaping callback hell.
@@ -49,7 +49,9 @@ module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
     StackOverflow and become the expert your team goes to for all things async.
   </p>
 
-  <h3>
+  <p class="update">
+    Updated for 2021, including answers to the exercises and a new section on <a href="https://thecodebarbarian.com/async-generator-functions-in-javascript.html">async generator functions</a>.
+  </p>
 
   <h3>About the Author</h3>
 
@@ -66,6 +68,7 @@ module.exports = ({ price = defaultPrice, buyButton = defaultBuyButton }) => `
     is the top result on Google for "async await design patterns".
 
     <div class="clear"></div>
+
   </p>
 
   <p>
